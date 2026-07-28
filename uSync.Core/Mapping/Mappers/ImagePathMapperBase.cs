@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -10,7 +12,6 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
-using uSync.Core.Extensions;
 
 namespace uSync.Core.Mapping;
 
@@ -44,7 +45,6 @@ public abstract class ImagePathMapperBase : SyncValueMapperBase
 
     }
 
-
     protected string StripSitePath(string filePath)
     {
         var path = filePath;
@@ -62,7 +62,6 @@ public abstract class ImagePathMapperBase : SyncValueMapperBase
 
         return ReplacePath(path, _genericMediaPath, _mediaFolder);
     }
-
 
     /// <summary>
     ///  makes a specific media path generic. 
@@ -150,7 +149,6 @@ public abstract class ImagePathMapperBase : SyncValueMapperBase
     {
         if (stringValue.TryParseToJsonObject(out var json) is false || json is null)
             return StripSitePath(stringValue);
-
 
         if (json.TryGetPropertyValue("src", out var srcNode) is true)
         {

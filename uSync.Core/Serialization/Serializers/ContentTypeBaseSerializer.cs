@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using System.Reflection;
 using System.Xml.Linq;
@@ -10,7 +12,6 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
-using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -166,12 +167,10 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         }
     }
 
-
     protected virtual void SerializeExtraProperties(XElement node, TObject item, IPropertyType property)
     {
         // when something has extra properties that the others don't (memberTypes at the moment)
     }
-
 
     protected XElement SerializeStructure(TObject item)
         => SerializeStructureAsync(item).Result;
@@ -218,7 +217,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     #region De-serialization
 
-
     protected async Task<IEnumerable<uSyncChange>> DeserializeBaseAsync(TObject item, XElement node)
     {
         if (node == null) return [];
@@ -234,7 +232,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             changes.AddUpdate(uSyncConstants.Xml.Key, item.Key, key, "");
             item.Key = key;
         }
-
 
         var alias = SetSafeAliasValue(item, node, true);
 
@@ -359,7 +356,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("Structure: {key}", key);
-
 
             var itemSortOrder = baseNode.Attribute(uSyncConstants.Xml.SortOrder).ValueOrDefault(sortOrder);
             
@@ -617,7 +613,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return name.ToSafeAlias(shortStringHelper, true);
     }
 
-
     /// <summary>
     ///  sets the alias to a 'safe' value so it there is a clash 
     ///  (because of a rename) it will still work
@@ -649,7 +644,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return nodeAlias;
     }
 
-
     /// <summary>
     ///  method checks that the alias we want to set something too doesn't already exist. 
     /// </summary>
@@ -672,7 +666,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     }
 
     protected virtual void EnsureAliasCache() { }
-
 
     protected void ClearAliases()
     {
@@ -709,8 +702,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (logger.IsEnabled(LogLevel.Debug))
             logger.LogDebug("Add [{alias}] - {cache}", alias, string.Join(",", aliasCache ?? []));
     }
-
-
 
     /// <summary>
     ///  De-serialize properties added in later versions of Umbraco.
@@ -753,7 +744,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         return value.TryGetValueAs<TValue>(out var result) ? result : default;
     }
-
 
     virtual protected IEnumerable<uSyncChange> DeserializeExtraProperties(TObject item, IPropertyType property, XElement node)
     {
@@ -962,7 +952,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return PropertyGroupType.Group;
     }
 
-
     /// <summary>
     ///  Returns either the alias or an alias made from the name of the tab. 
     /// </summary>
@@ -1096,7 +1085,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return [];
     }
 
-
     private async Task SetFolderFromElementAsync(IContentTypeBase item, XElement? folderNode)
     {
         if (folderNode is null) return;
@@ -1118,7 +1106,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             }
         }
     }
-
 
     private bool SetMasterFromElement(IContentTypeBase item, XElement? masterNode)
     {
@@ -1146,7 +1133,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         public bool IsNew { get; set; }
         public IPropertyType? Property { get; set; }
     }
-
 
     private async Task<PropertyTypeResult> GetOrCreatePropertyAsync(TObject item,
         Guid key,
@@ -1213,7 +1199,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             }
         }
 
-
         // thing that could break if they where blank. 
         // update, only set this if its not already set (because we don't want to break things!)
         // also update it if its not the same as the DataType, (because that has to match)
@@ -1230,7 +1215,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         return result;
     }
-
 
     private static IEnumerable<uSyncChange> MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
     {
@@ -1253,7 +1237,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     Alias = x.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty)
                 })
             .ToDictionary(k => k.Key, a => a.Alias);
-
 
         foreach (var property in item.PropertyTypes)
         {
@@ -1347,7 +1330,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         return compositeProperties.Any(existing => existing == alias);
     }
-
 
     #region Finders
 

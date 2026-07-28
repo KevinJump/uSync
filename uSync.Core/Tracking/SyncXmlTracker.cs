@@ -1,11 +1,12 @@
-﻿using System.Text.Json.Nodes;
+﻿using Jumoo.Json;
+
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
 using Umbraco.Extensions;
 
-using uSync.Core.Extensions;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 
@@ -227,7 +228,6 @@ public class SyncXmlTracker<TObject>
 
         return "concat('" + value.Replace("'", "',\"'\",'") + "')";
     }
-
 
     private static string MakeSelectionName(XElement node, string? keys)
     {

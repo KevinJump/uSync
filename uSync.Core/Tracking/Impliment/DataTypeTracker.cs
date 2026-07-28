@@ -1,8 +1,9 @@
-﻿using System.Xml.Linq;
+﻿using Jumoo.Json;
+
+using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Models;
 
-using uSync.Core.Extensions;
 using uSync.Core.Roots.Configs;
 using uSync.Core.Serialization;
 
@@ -95,12 +96,10 @@ public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<ID
     private string GetEditorAlias(XElement node)
         => node.Element(uSyncConstants.Xml.Info)?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
 
-
     private ISyncConfigMerger? GetConfigMerger(string editorAlias)
         => _configMergers?.GetConfigMerger(editorAlias) ?? null;
 
     private static string SerializeConfig(object config)
-        => config.SerializeJsonString();
-
+        => config.SerializeJsonString() ?? string.Empty;
 
 }

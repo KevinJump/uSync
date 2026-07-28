@@ -1,8 +1,8 @@
-﻿using System.Text.Json.Nodes;
+﻿using Jumoo.Json;
+
+using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
-
-using uSync.Core.Extensions;
 
 using static Umbraco.Cms.Core.PropertyEditors.ColorPickerConfiguration;
 
@@ -21,7 +21,6 @@ internal class ColourPickerMigratingConfigSerializer : ConfigurationSerializerBa
 
         var convertedItems = new List<ColorPickerItem>();
 
-
         foreach (var item in element)
         {
             var obj = item?.ConvertToJsonObject();
@@ -35,8 +34,8 @@ internal class ColourPickerMigratingConfigSerializer : ConfigurationSerializerBa
 
             convertedItems.Add(new ColorPickerItem
             {
-                Label = itemValues.GetPropertyAsString("label"),
-                Value = itemValues.GetPropertyAsString("value")
+                Label = itemValues.GetPropertyAsString("label") ?? string.Empty,
+                Value = itemValues.GetPropertyAsString("value") ?? string.Empty
             });
         }
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using System;
 using System.Collections.Generic;
@@ -22,7 +24,6 @@ using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
-using uSync.Core.Extensions;
 using uSync.Core.Notifications;
 using uSync.Core.Serialization;
 
@@ -106,8 +107,6 @@ public partial class SyncService : ISyncService
     /// <inheritdoc/>>
     public bool HasRootFiles(string[] folders)
         => folders[..^1].Any(x => _syncFileService.DirectoryHasChildren(x));
-
-
 
     #region Importing
     static readonly SemaphoreSlim _importSemaphoreLock = new SemaphoreSlim(1, 1);
@@ -241,8 +240,6 @@ public partial class SyncService : ISyncService
         }
     }
 
-
-
     private static async Task<List<uSyncAction>> PerformPostImportAsync(IEnumerable<HandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
     {
         var postImportActions = actions.Where(x => x.Success && x.Change > Core.ChangeType.NoChange && x.RequiresPostProcessing).ToList();
@@ -311,7 +308,6 @@ public partial class SyncService : ISyncService
         return true;
     }
 
-
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> StartupExportAsync(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
     {
@@ -324,7 +320,6 @@ public partial class SyncService : ISyncService
 
         return await ExportAsync(folder, handlers, callbacks);
     }
-
 
     /// <inheritdoc/>>
     public async Task<bool> CheckVersionFileAsync(string[] folders)
@@ -373,7 +368,6 @@ public partial class SyncService : ISyncService
         return true;
     }
 
-
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ExportAsync(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
     {
@@ -402,7 +396,6 @@ public partial class SyncService : ISyncService
                 handlerActions.CountChanges(),
                 handlerActions.ContainsErrors());
         }
-
 
         summary.UpdateMessage("Export Completed");
         callbacks?.Callback?.Invoke(summary);

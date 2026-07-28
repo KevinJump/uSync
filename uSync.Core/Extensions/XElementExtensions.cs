@@ -1,4 +1,6 @@
-﻿using Org.BouncyCastle.Bcpg.Sig;
+﻿using Jumoo.Json;
+
+using Org.BouncyCastle.Bcpg.Sig;
 
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
@@ -6,8 +8,6 @@ using System.Xml;
 using System.Xml.Linq;
 
 using Umbraco.Extensions;
-
-using uSync.Core.Extensions;
 
 namespace uSync.Core;
 
@@ -72,7 +72,6 @@ public static class XElementExtensions
         => node
             .Element(uSyncConstants.Xml.Info)?
             .Element(uSyncConstants.Xml.NodeName);
-
 
     public static string? GetDefaultName(this XElement node)
         => node.Attribute(uSyncConstants.Xml.Default).ValueOrDefault<string?>(null);
@@ -144,7 +143,6 @@ public static class XElementExtensions
     public static bool IsBlueprint(this XElement node)
         => node.Element(uSyncConstants.Xml.Info)?.Element("IsBlueprint").ValueOrDefault(false) is true;
 
-
     /// <summary>
     ///  Get the value of the XML Node or return a default value
     /// </summary>
@@ -193,7 +191,6 @@ public static class XElementExtensions
 
         return value.TryGetValueAs<TObject>(out var result) ? result : defaultValue;
     }
-
 
     /// <summary>
     ///  Find a node in the XML or create it if it doesn't exist

@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using Jumoo.Json;
+
+using NUnit.Framework;
 
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +10,8 @@ using System.Text.Json.Nodes;
 using Umbraco.Extensions;
 
 using uSync.Core.DataTypes;
-using uSync.Core.Extensions;
+
+using static uSync.Core.Extensions.DictionaryExtensions;
 
 namespace uSync.Tests.Migrations;
 internal class MigrationTestBase
@@ -26,9 +29,9 @@ internal class MigrationTestBase
         var targetDictionary =
             JsonSerializer.Serialize(
                 JsonSerializer.Deserialize<JsonObject>(target).ToDictionary(),
-                JsonTextExtensions._defaultOptions
+                JsonTextOptions.GetOptions()
             );
-        var resultJson = JsonSerializer.Serialize(result, JsonTextExtensions._defaultOptions);
+        var resultJson = JsonSerializer.Serialize(result, JsonTextOptions.GetOptions());
 
         Assert.That(resultJson, Is.EqualTo(targetDictionary));
     }

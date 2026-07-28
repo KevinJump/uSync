@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using System.Xml.Linq;
 
@@ -11,8 +13,9 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.DataTypes;
-using uSync.Core.Extensions;
 using uSync.Core.Models;
+
+using static uSync.Core.Extensions.DictionaryExtensions;
 
 namespace uSync.Core.Serialization.Serializers;
 
@@ -349,7 +352,6 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         return null;
 
-
     }
     protected override string GetItemBaseType(XElement node)
         => node.Element(uSyncConstants.Xml.Info)?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
@@ -383,8 +385,6 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
     public override string ItemAlias(IDataType item)
         => item.Name ?? item.Id.ToString();
-
-
 
     /// <summary>
     ///  Checks the config to see if we should be deserializing the config element of a data type.

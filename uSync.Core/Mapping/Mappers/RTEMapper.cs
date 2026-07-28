@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -8,7 +10,6 @@ using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Dependency;
-using uSync.Core.Extensions;
 using uSync.Core.Serialization;
 using uSync.Core.Versions;
 using uSync.Core.Versions._18._0;

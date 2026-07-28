@@ -1,9 +1,9 @@
+using Jumoo.Json;
+
 using System;
 using System.Text.Json;
 
 using NUnit.Framework;
-
-using uSync.Core.Extensions;
 
 namespace uSync.Tests.Extensions;
 

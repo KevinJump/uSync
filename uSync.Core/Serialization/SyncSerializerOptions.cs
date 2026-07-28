@@ -1,8 +1,8 @@
-﻿using System.Xml.Linq;
+﻿using Jumoo.Json;
+
+using System.Xml.Linq;
 
 using Umbraco.Extensions;
-
-using uSync.Core.Extensions;
 
 namespace uSync.Core.Serialization;
 
@@ -91,7 +91,6 @@ public class SyncSerializerOptions
     ///  fail import if for some reasons we have warnings. 
     /// </summary>
     public bool FailOnWarnings() => GetSetting<bool>("FailOnWarnings", false);
-
 
     /// <summary>
     ///  Gets the cultures that can be de-serialized from this node.

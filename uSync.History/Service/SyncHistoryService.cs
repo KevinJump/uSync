@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Jumoo.Json;
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,7 +9,6 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
-using uSync.Core.Extensions;
 
 namespace uSync.History.Service;
 
@@ -26,7 +27,6 @@ internal class SyncHistoryService : ISyncHistoryService
 
     public bool IsEnabled()
         => _syncConfigService.Settings.EnableHistory;   
-
 
     public async Task<IEnumerable<HistoryInfo>> GetHistoryAsync()
     {

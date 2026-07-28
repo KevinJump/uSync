@@ -16,6 +16,10 @@
     <PackageVersion Include="Umbraco.Cms.Web.Website" Version="18.0.0" />
     <PackageVersion Include="Umbraco.Cms.Api.Management" Version="18.0.0" />
   </ItemGroup>
+  <!-- jumoo libraries -->
+  <ItemGroup>
+    <PackageVersion Include="Jumoo.Json" Version="18.0.3" />
+  </ItemGroup>
   <!-- source link -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.300" />

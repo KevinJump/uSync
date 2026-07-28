@@ -1,608 +1,241 @@
-using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 
-using Umbraco.Cms.Infrastructure.Serialization;
-using Umbraco.Extensions;
-
-using uSync.Core.Json;
+using Jumoo.Json;
 
 namespace uSync.Core.Extensions;
 
 /// <summary>
 ///  extensions for System.Text.Json manipulation
 /// </summary>
+/// <remarks>
+/// <para>
+///  These have moved to the <c>Jumoo.Json</c> package, so there is one implementation shared
+///  across the Jumoo packages. What is left here forwards to it, and keeps the exact behaviour
+///  these methods had before the move - including the places where <c>Jumoo.Json</c> returns
+///  null and this returned <c>string.Empty</c>.
+/// </para>
+/// <para>
+///  To move over, replace <c>using uSync.Core.Extensions;</c> with <c>using Jumoo.Json;</c>.
+///  Both cannot be in scope in the same file: they declare the same extension method
+///  signatures, so a call that matches both is ambiguous (CS0121).
+/// </para>
+/// </remarks>
+[Obsolete("Use the equivalent extension in Jumoo.Json - will be removed in v20")]
 public static class JsonTextExtensions
 {
-    internal static readonly JsonSerializerOptions _defaultOptions = new()
-    {
-        WriteIndented = true,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-        TypeInfoResolver = new OrderedPropertiesJsonResolver(),
-        Converters =
-        {
-            new JsonStringEnumConverter(),
-            new JsonUdiConverter(),
-            new JsonUdiRangeConverter(),
-            new JsonObjectConverter(),
-            new JsonBlockValueConverter(),
-
-            new JsonBooleanConverter(),
-            new JsonXElementConverter(),
-            // new JsonBlockListLayoutItemConverter(),
-            // new JsonBlockGridLayoutItemConverter()
-        }
-    };
-
-    internal static readonly JsonSerializerOptions _flatOptions = new(_defaultOptions)
-    {
-        WriteIndented = false,
-    };
-
-    private static JsonNodeOptions _nodeOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-    };
-
-    #region JsonNode 
+    #region JsonNode
 
     /// <summary>
-    ///  is the string valid json. 
+    ///  is the string valid json.
     /// </summary>
     public static bool IsValidJsonString(this string? value)
-        => value.TryParseToJsonNode(out _);
+        => JsonNodeExtensions.IsValidJsonString(value);
 
     /// <summary>
-    ///  will try and parse a string value into a JsonNode, 
+    ///  will try and parse a string value into a JsonNode,
     /// </summary>
     /// <remarks>
-    ///  if the value isn't json then this will return false. 
+    ///  if the value isn't json then this will return false.
     /// </remarks>
     public static bool TryParseToJsonNode(this string? value, [MaybeNullWhen(false)] out JsonNode node)
-    {
-        node = default;
-        if (string.IsNullOrEmpty(value) || value.DetectIsJson() is false) return false;
-
-        try
-        {
-            node = JsonNode.Parse(value, _nodeOptions);
-            return node is not null;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
+        => JsonNodeExtensions.TryParseToJsonNode(value, out node);
 
     /// <summary>
-    ///  try to get a json representation of an object, 
+    ///  try to get a json representation of an object,
     /// </summary>
     public static bool TryParseToJsonNode(this object value, [MaybeNullWhen(false)] out JsonNode node)
-    {
-        node = default;
-
-        if (value.TryGetValueAs<string>(out var stringValue) is false
-            || stringValue == null) return false;
-
-        return stringValue.TryParseToJsonNode(out node);
-    }
-
+        => JsonNodeExtensions.TryParseToJsonNode(value, out node);
 
     public static JsonNode? ToJsonNode(this string? value)
-        => TryParseToJsonNode(value, out JsonNode? node) ? node : default;
+        => JsonNodeExtensions.ToJsonNode(value);
 
     public static bool TrySerializeJsonNode(this JsonNode node, [MaybeNullWhen(false)] out string result,
         bool indent = true)
-    {
-        try
-        {
-            result = node.ToJsonString(new JsonSerializerOptions
-            {
-                WriteIndented = indent,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
-
-            return true;
-        }
-        catch
-        {
-            result = default;
-            return false;
-        }
-    }
+        => JsonNodeExtensions.TrySerializeJsonNode(node, out result, indent);
 
     public static string SerializeJsonNode(this JsonNode node, bool indent = true)
-    {
-        node.TrySerializeJsonNode(out var jsonString, indent);
-        return jsonString ?? node.ToJsonString();
-    }
-
+        => JsonSerialization.SerializeJsonNode(node, indent) ?? node.ToJsonString();
 
     /// <summary>
     ///  will attempt to turn the string value into a JsonNode
     /// </summary>
     /// <remarks>
     ///  unlike TryParseJsonNode() if the value isn't json, we will
-    ///  attempt to make it a string json node. 
+    ///  attempt to make it a string json node.
     /// </remarks>
     public static bool TryConvertToJsonNode(this string value, [MaybeNullWhen(false)] out JsonNode? node)
-    {
-        if (value.TryParseToJsonNode(out node))
-            return true;
-
-        // else - didn't parse , we can try as a string.
-        try
-        {
-            node = JsonNode.Parse($"\"{value}\"");
-            return true;
-        }
-        catch
-        {
-            return default;
-        }
-    }
+        => JsonNodeExtensions.TryConvertToJsonNode(value, out node);
 
     public static bool TryConvertToJsonNode(this object value, [MaybeNullWhen(false)] out JsonNode node)
-    {
-        node = default;
-
-        if (value.TryGetValueAs<string>(out var stringValue) is false
-            || stringValue == null) return false;
-
-        return stringValue.TryConvertToJsonNode(out node);
-    }
-
+        => JsonNodeExtensions.TryConvertToJsonNode(value, out node);
 
     public static JsonNode? ConvertToJsonNode(this string value)
-        => value.TryConvertToJsonNode(out var node) ? node : default;
+        => JsonNodeExtensions.ConvertToJsonNode(value);
 
     public static JsonNode? ConvertToJsonNode(this object value)
-        => TryConvertToJsonNode(value, out JsonNode? node) ? node : default;
-
+        => JsonNodeExtensions.ConvertToJsonNode(value);
 
     #endregion
 
-    #region JsonObject 
+    #region JsonObject
 
     public static bool TryParseToJsonObject(this string? value, [MaybeNullWhen(false)] out JsonObject node)
-    {
-        node = default;
-        if (value.TryParseToJsonNode(out var jsonNode) is false) return false;
-        if (jsonNode.GetValueKind() != JsonValueKind.Object) return false;
-
-        node = jsonNode.AsObject();
-        if (node == null) return false;
-        return true;
-    }
+        => JsonObjectExtensions.TryParseToJsonObject(value, out node);
 
     public static JsonObject? ToJsonObject(this string? value)
-        => value.TryParseToJsonObject(out var jsonObject) ? jsonObject : default;
+        => JsonObjectExtensions.ToJsonObject(value);
 
     public static bool TryConvertToJsonObject(this object value, [MaybeNullWhen(false)] out JsonObject result)
-    {
-        result = default;
-        if (value.TryConvertToJsonNode(out var node) is false || node is null)
-            return false;
-
-        try
-        {
-            result = node.AsObject();
-        }
-        catch
-        {
-
-        }
-
-        return result != default;
-    }
+        => JsonObjectExtensions.TryConvertToJsonObject(value, out result);
 
     public static JsonObject? ConvertToJsonObject(this object value)
-        => value.TryConvertToJsonObject(out JsonObject? result) ? result : default;
+        => JsonObjectExtensions.ConvertToJsonObject(value);
 
     public static void AddOrRemoveIfNull<T>(this JsonObject? jsonObject, string property, T? value)
         where T : JsonNode
-    {
-        if (jsonObject == null)
-            return;
-        if (value is not null)
-            jsonObject[property] = value;
-        else
-            jsonObject.Remove(property);
-    }
+        => JsonObjectExtensions.AddOrRemoveIfNull(jsonObject, property, value);
 
     #endregion
 
     #region JsonArray
 
     public static bool TryParseToJsonArray(this string? value, [MaybeNullWhen(false)] out JsonArray node)
-    {
-        node = default;
-        if (value.TryParseToJsonNode(out var jsonNode) is false || jsonNode is null) return false;
-        if (jsonNode.GetValueKind() != JsonValueKind.Array) return false;
-
-        node = jsonNode.AsArray();
-        if (node == null) return false;
-        return true;
-    }
+        => JsonArrayExtensions.TryParseToJsonArray(value, out node);
 
     /// <summary>
-    ///  convert a string to a json array 
+    ///  convert a string to a json array
     /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
     public static JsonArray? ToJsonArray(this string? value)
-        => value.TryParseToJsonArray(out var jsonArray) ? jsonArray : default;
-
+        => JsonArrayExtensions.TryParseToJsonArray(value, out var jsonArray) ? jsonArray : default;
 
     /// <summary>
     ///  enumerates a JsonArray as a list of JsonObjects
     /// </summary>
     public static IEnumerable<JsonObject?> AsListOfJsonObjects(this JsonArray array)
-        => array.Select(x => x?.AsObject());
+        => JsonArrayExtensions.AsListOfJsonObjects(array);
 
     #endregion
 
-    #region JsonExpansion 
+    #region JsonExpansion
 
     /// <summary>
-    ///  will fully expand any json elements inside any json string. 
+    ///  will fully expand any json elements inside any json string.
     /// </summary>
     public static JsonNode ExpandAllJsonInToken(this JsonNode node)
-        => TryExpandJsonNodeValue(node, out var jsonNode) ? jsonNode ?? node : node;
+        => JsonExpansions.ExpandAllJsonInToken(node);
 
     /// <summary>
-    ///  will take a json object, that might have embedded json strings in values and turn it into a 
-    ///  truly nested json object. 
+    ///  will take a json object, that might have embedded json strings in values and turn it into a
+    ///  truly nested json object.
     /// </summary>
     public static bool TryExpandJsonNodeValue(this JsonNode value, [MaybeNullWhen(false)] out JsonNode node)
-    {
-        try
-        {
-            node = value?.DeepClone() ?? null;
-            if (node == null) return false;
-
-            switch (node.GetValueKind())
-            {
-                case JsonValueKind.String:
-                    return node.ToString().TryConvertToJsonNode(out node);
-                case JsonValueKind.Object:
-                    var jsonObject = node.AsObject();
-                    foreach (var property in jsonObject.ToList())
-                    {
-                        if (property.Value?.TryExpandJsonNodeValue(out var innerNode) is true)
-                        {
-                            jsonObject[property.Key] = innerNode;
-                        }
-                    }
-                    node = jsonObject;
-                    return true;
-                case JsonValueKind.Array:
-                    var jsonArray = node.AsArray();
-                    for (int n = 0; n < jsonArray.Count; n++)
-                    {
-                        if (jsonArray[n]?.TryExpandJsonNodeValue(out var innerNode) is true)
-                        {
-                            jsonArray[n] = innerNode;
-                        }
-                    }
-                    node = jsonArray;
-                    return true;
-                default:
-                    return true;
-            }
-        }
-        catch
-        {
-            node = null;
-            return false;
-        }
-    }
+        => JsonExpansions.TryExpandJsonNodeValue(value, out node);
 
     /// <summary>
-    ///  convert a string value into a fully expanded JsonNode object 
+    ///  convert a string value into a fully expanded JsonNode object
     /// </summary>
     public static JsonNode? ConvertStringToExpandedJson(this string value)
-    {
-        // try parse this into json (if its a string we make a string jsonNode)
-        if (value.TryConvertToJsonNode(out var jsonNode) is false || jsonNode == null)
-            return default;
-
-
-        // expand the json to within an inch of its life.
-        if (jsonNode.TryExpandJsonNodeValue(out var expandedJson) is false || expandedJson is null)
-            return jsonNode;
-
-        return expandedJson;
-    }
+        => JsonExpansions.ConvertStringToExpandedJson(value);
 
     /// <summary>
     ///  takes a string of mixed json, explodes and encoded json and returns it as a string.
     /// </summary>
     public static string ConvertStringToExpandedJsonString(this string value, bool indented = true)
-    {
-        var json = value.ConvertStringToExpandedJson();
-        if (json == null) return value;
-
-        return json.SerializeJsonNode(indented);
-    }
-
+        => JsonExpansions.ConvertStringToExpandedJsonString(value, indented);
 
     #endregion
 
-    #region serialize / deserialzie 
+    #region serialize / deserialzie
+
     public static bool TryDeserialize<TObject>(this string? value, [MaybeNull] out TObject result)
-    {
-        result = default;
-
-        if (string.IsNullOrEmpty(value))
-            return false;
-
-        try
-        {
-            result = JsonSerializer.Deserialize<TObject>(value, _defaultOptions);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
+        => JsonSerialization.TryDeserialize(value, out result);
 
     public static bool TryDeserialize(this string value, Type type, [MaybeNull] out object result)
-    {
-        try
-        {
-            result = JsonSerializer.Deserialize(value, type, _defaultOptions);
-            return true;
-        }
-        catch
-        {
-            result = default;
-            return false;
-        }
-    }
+        => JsonSerialization.TryDeserialize(value, type, out result);
 
+    /// <remarks>
+    ///  the Jumoo.Json version returns the default value where this used to throw.
+    /// </remarks>
     public static object? DeserializeJson(this string value, Type type)
-        => JsonSerializer.Deserialize(value, type, _defaultOptions);
+        => JsonSerialization.DeserializeJson(value, type);
 
+    /// <remarks>
+    ///  the Jumoo.Json version returns the default value where this used to throw.
+    /// </remarks>
     public static TObject? DeserializeJson<TObject>(this string value)
-        => JsonSerializer.Deserialize<TObject>(value, _defaultOptions);
+        => JsonSerialization.DeserializeJson<TObject>(value);
 
     public static bool TrySerializeJsonString(this object value, [MaybeNull] out string result)
-    {
-        try
-        {
-            result = JsonSerializer.Serialize(value, _defaultOptions);
-            return true;
-        }
-        catch
-        {
-            result = default;
-            return false;
-        }
-    }
+        => JsonSerialization.TrySerializeJsonString(value, out result);
 
     public static string SerializeJsonString(this object value, bool indent = true)
-        => value is null ? string.Empty : JsonSerializer.Serialize(value, indent ? _defaultOptions : _flatOptions);
+        => value is null ? string.Empty : JsonSerialization.SerializeJsonString(value, indent) ?? string.Empty;
 
     /// <summary>
     ///  Convert a value to the requested type.
     /// </summary>
-    /// <remarks>
-    ///  Pre-empts the first-chance InvalidCastException that Umbraco's TryConvertTo
-    ///  throws when converting a JsonElement to a value type (see uSync.Complete
-    ///  issue #304). Settings/config values often arrive as JsonElement (bound from
-    ///  appsettings.json); doing that conversion with System.Text.Json first means the
-    ///  common path never throws. String conversions (which TryConvertTo already
-    ///  handles cleanly) and anything STJ can't handle still fall back to TryConvertTo.
-    /// </remarks>
     public static bool TryGetValueAs<TObject>(this object? value, [MaybeNullWhen(false)] out TObject result)
-    {
-        result = default;
-        if (value is null) return false;
-
-        // Umbraco's TryConvertTo turns a JsonElement into a string cleanly, but throws
-        // (and swallows) an InvalidCastException for JsonElement -> value type. Do the
-        // value-type conversion with System.Text.Json first to avoid that noise; string
-        // and anything STJ can't handle fall through to TryConvertTo below.
-        if (value is JsonElement element && typeof(TObject) != typeof(string))
-        {
-            try
-            {
-                result = element.Deserialize<TObject>(_defaultOptions);
-                if (result is not null) return true;
-            }
-            catch
-            {
-                // not something STJ could convert directly - fall back to TryConvertTo below.
-            }
-        }
-
-        var attempt = value.TryConvertTo<TObject>();
-        if (attempt.Success is false || attempt.Result is null) return false;
-
-        result = attempt.Result;
-        return true;
-    }
+        => JsonSerialization.TryGetValueAs(value, out result);
 
     /// <summary>
     ///  Convert a value to the requested runtime type.
     /// </summary>
-    /// <remarks>
-    ///  Non-generic companion to the generic TryGetValueAs for callers that only
-    ///  have a runtime Type. Same JsonElement pre-check.
-    /// </remarks>
     public static bool TryGetValueAs(this object? value, Type targetType, [MaybeNullWhen(false)] out object result)
-    {
-        result = default;
-        if (value is null) return false;
-
-        if (value is JsonElement element && targetType != typeof(string))
-        {
-            try
-            {
-                result = element.Deserialize(targetType, _defaultOptions);
-                if (result is not null) return true;
-            }
-            catch
-            {
-                // not something STJ could convert directly - fall back to TryConvertTo below.
-            }
-        }
-
-        var attempt = value.TryConvertTo(targetType);
-        if (attempt.Success is false || attempt.Result is null) return false;
-
-        result = attempt.Result;
-        return true;
-    }
+        => JsonSerialization.TryGetValueAs(value, targetType, out result);
 
     #endregion
 
-    #region property getters 
+    #region property getters
 
     /// <summary>
     ///  attempt to find a property on a JsonObject and return it as JsonObject
     /// </summary>
     public static bool TryGetPropertyAsObject(this JsonObject jsonObject, string propertyName, [MaybeNullWhen(false)] out JsonObject result)
-    {
-        result = default;
-
-        if (jsonObject.TryGetPropertyValue(propertyName, out var propertyNode) is false || propertyNode is null)
-            return false;
-
-        try
-        {
-            result = propertyNode.GetValueKind() switch
-            {
-                JsonValueKind.String => new JsonObject 
-                {
-                    { propertyName, propertyNode.ToString() }
-                },
-                _ => propertyNode.AsObject(),
-            };
-        }
-        catch
-        {
-            return false;
-        }
-        return result != default;
-    }
+        => JsonPropertyExtensions.TryGetPropertyAsJsonObject(jsonObject, propertyName, out result);
 
     /// <summary>
     ///  Gets the json property as a string, or returns string.empty
     /// </summary>
     public static string GetPropertyAsString(this JsonObject obj, string propertyName)
-    {
-        if (obj.TryGetPropertyValue(propertyName, out var value))
-            return value?.ToString() ?? string.Empty;
-
-        return string.Empty;
-    }
+        => JsonPropertyExtensions.GetPropertyAsString(obj, propertyName) ?? string.Empty;
 
     public static bool GetPropertyAsBool(this JsonObject obj, string propertyName, bool defaultValue)
-    {
-        if (obj.TryGetPropertyValue(propertyName, out var value))
-        {
-            if (bool.TryParse(value?.ToString() ?? string.Empty, out var result) is false)
-                return defaultValue;
-
-            return result;
-        }
-
-        return defaultValue;
-    }
+        => JsonPropertyExtensions.GetPropertyAsBool(obj, propertyName, defaultValue);
 
     public static TResult GetPropertyValueOrDefault<TResult>(this JsonObject obj, string propertyName, TResult defaultValue)
-    {
-        if (obj.TryGetPropertyValue(propertyName, out var value) is false || value is null)
-            return defaultValue;
-
-        return value.TryGetValueAs<TResult>(out var result) ? result : defaultValue;
-    }
+        => JsonPropertyExtensions.GetPropertyValueOrDefault(obj, propertyName, defaultValue);
 
     public static bool TryGetPropertyAsArray(this JsonObject jsonObject, string propertyName, [MaybeNullWhen(false)] out JsonArray result)
-    {
-        result = default;
-
-        if (jsonObject.TryGetPropertyValue(propertyName, out var propertyNode) is false || propertyNode is null)
-            return false;
-
-        if (propertyNode.GetValueKind() != JsonValueKind.Array)
-            return false;
-
-        try
-        {
-            result = propertyNode.AsArray();
-        }
-        catch
-        {
-            return false;
-        }
-
-        return result != default;
-    }
-
+        => JsonPropertyExtensions.TryGetPropertyAsArray(jsonObject, propertyName, out result);
 
     public static JsonArray GetPropertyAsArray(this JsonObject obj, string propertyName)
-    {
-        if (obj.TryGetPropertyAsArray(propertyName, out var value))
-            return value;
-
-        return [];
-    }
+        => JsonPropertyExtensions.GetPropertyAsArray(obj, propertyName);
 
     public static JsonObject? GetPropertyAsObject(this JsonObject obj, string propertyName)
-    {
-        if (obj.TryGetPropertyAsObject(propertyName, out var value))
-            return value;
+        => JsonPropertyExtensions.GetPropertyAsJsonObject(obj, propertyName);
 
-        return default;
-    }
     #endregion
 
-    #region Comparasions 
-
+    #region Comparasions
 
     /// <summary>
     ///  tells us if the json for an object is equal, helps when the config objects don't have their
     ///  own Equals functions
     /// </summary>
     public static bool IsJsonEqual(this object? currentObject, object? newObject)
-    {
-        if (currentObject is null && newObject is null)
-            return true;
-        if (currentObject is null)
-            return false;
-        if (newObject is null)
-            return false;
-
-        ArrayBufferWriter<byte> currentObjectBufferWriter = new(); 
-        using Utf8JsonWriter currentObjectUtf8JsonWriter = new(currentObjectBufferWriter);
-        JsonSerializer.Serialize(currentObjectUtf8JsonWriter, currentObject, _flatOptions);
-
-        ArrayBufferWriter<byte> newObjectBufferWriter = new();
-        using Utf8JsonWriter newObjectUtf8JsonWriter = new(newObjectBufferWriter);
-        JsonSerializer.Serialize(newObjectUtf8JsonWriter, newObject, _flatOptions);
-
-        return currentObjectBufferWriter.WrittenSpan.SequenceEqual(newObjectBufferWriter.WrittenSpan);
-    }
+        => JsonComparisons.IsJsonEqual(currentObject, newObject);
 
     #endregion
 
-    #region Type Checks 
+    #region Type Checks
 
     /// <summary>
     ///  checks if the value is a non-string JSON value (array, object, number, boolean).
     /// </summary>
     public static bool IsNonStringJsonValue(this object? value)
-        => value is JsonElement { ValueKind: not JsonValueKind.String and not JsonValueKind.Undefined }
-           || value is JsonArray or JsonObject;
+        => JsonNodeExtensions.IsNonStringJsonValue(value);
 
     #endregion
 

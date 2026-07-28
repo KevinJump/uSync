@@ -1,3 +1,5 @@
+using Jumoo.Json;
+
 using Microsoft.Extensions.Logging;
 
 using System.Globalization;
@@ -12,12 +14,12 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.Core.Cache;
-using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
 using uSync.Core.Serialization.Models;
 using uSync.Core.Serialization.Extensions;
 
+using static uSync.Core.Extensions.ObjectPropertyExtensions;
 
 namespace uSync.Core.Serialization.Serializers;
 
@@ -28,7 +30,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected UmbracoObjectTypes containerType = UmbracoObjectTypes.Unknown;
 
     protected SyncValueMapperCollection syncMappers;
-
 
     protected readonly IShortStringHelper shortStringHelper;
 
@@ -249,14 +250,12 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                     && string.IsNullOrWhiteSpace(value.Segment)
                     && includeDefaults;
 
-
                 // or b) it is a valid culture/segment. 
                 if (!string.IsNullOrWhiteSpace(value.Culture) && cultures.IsValid(value.Culture))
                 {
                     valueNode.Add(new XAttribute("Culture", value.Culture ?? string.Empty));
                     validNode = true;
                 }
-
 
                 if (!string.IsNullOrWhiteSpace(value.Segment) && segments.IsValid(value.Segment))
                 {
@@ -270,7 +269,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                     elements.Add(valueNode);
                 }
             }
-
 
             if (includeDefaults)
             {
@@ -670,7 +668,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return details;
     }
 
-
     /// <summary>
     ///  compares to object values to see if they are the same. 
     /// </summary>
@@ -696,7 +693,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         return true;
     }
-
 
     protected uSyncChange? HandleSortOrder(TObject item, int sortOrder)
     {
@@ -779,7 +775,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     }
 
-
     protected async Task<string> GetExportValueAsync(object? value, IPropertyType propertyType, string culture, string segment)
     {
         if (value is null) return string.Empty;
@@ -797,7 +792,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // to not be escaped so we would need to do proper testing. 
         if (exportValue.TryParseToJsonNode(out var jsonNode) is true && jsonNode is not null)
         {
-            return jsonNode.SerializeJsonNode();
+            return jsonNode.SerializeJsonNode() ?? string.Empty;
         }
 
         if (logger.IsEnabled(LogLevel.Trace))
@@ -805,7 +800,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         return exportValue ?? string.Empty;
     }
-
 
     protected async Task<object?> GetImportValueAsync(string value, IPropertyType propertyType, string culture, string segment, SyncSerializerOptions options)
     {
@@ -830,8 +824,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
          => node != null
             && node.GetAlias() != null
             && node.Element(uSyncConstants.Xml.Info) != null;
-
-
 
     // these are the functions using the simple 'getItem(alias)' 
     // that we cannot use for content/media trees.
@@ -1153,8 +1145,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return item;
     }
 
-
-
     #endregion
 
     /// <summary>
@@ -1194,8 +1184,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     protected void AddToNameCache(int id, Guid key, string name)
         => syncMappers.EntityCache.AddName(id, key, name);
-
-
 
     /// <summary>
     ///  Remove relations from the 'OnDelete' relation tables. 
@@ -1257,7 +1245,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return -1;
 
     }
-
 
     private List<string> GetExcludedProperties(SyncSerializerOptions options)
     {

@@ -1,6 +1,6 @@
-﻿using Umbraco.Extensions;
+﻿using Jumoo.Json;
 
-using uSync.Core.Extensions;
+using Umbraco.Extensions;
 
 namespace uSync.Core;
 

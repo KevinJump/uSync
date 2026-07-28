@@ -1,6 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using Jumoo.Json;
 
-using uSync.Core.Extensions;
+using System.Linq.Expressions;
+
 using uSync.Core.Models;
 
 namespace uSync.Core;
@@ -51,7 +52,6 @@ public static class ChangeListExtensions
 
     public static bool HasWarning(this List<uSyncChange> changes)
         => changes.Any(x => x.Change == ChangeDetailType.Warning);
-
 
     /// <summary>
     /// If <paramref name="newValue"/> differs from the current property value,

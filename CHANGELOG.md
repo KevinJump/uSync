@@ -41,11 +41,38 @@ History is backfilled from the v18 release history starting at `v18.0.0`.
   v18 into uSync's own code, since uSync still needs to detect un-migrated
   links. No behavioural changes. (#1002, #1003, #1004)
 
+- **JSON helpers now come from the `Jumoo.Json` package.** uSync's
+  `JsonTextExtensions` was a copy of that library, and had drifted behind it.
+  uSync's own code now calls `Jumoo.Json` directly, so it picks up the
+  correctness and allocation work done there.
+
+  `uSync.Core.Extensions.JsonTextExtensions` is **still there and still
+  behaves the same**, so nothing downstream needs to change — but every method
+  on it is now `[Obsolete]` and forwards to `Jumoo.Json`. They will be removed
+  in v20. To move over, replace `using uSync.Core.Extensions;` with
+  `using Jumoo.Json;`; note that a file can't have both, because they declare
+  the same extension method signatures (CS0121). A few names differ:
+  `TryGetPropertyAsObject` → `TryGetPropertyAsJsonObject` and
+  `GetPropertyAsObject` → `GetPropertyAsJsonObject`, and the methods that
+  returned `string.Empty` for a missing or null value now return `null`.
+
+  `uSync.Core.Json.JsonXElementConverter` is obsolete for the same reason
+  (use `Jumoo.Json.Converters.JsonXElementConverter`).
+
 ### Fixed
 
 - `HandlerSettings.Clone()` no longer drops the `CreateClean` and
   `FullFileOnDifference` properties. Handlers that set either value in their own
   block were previously resolved as `false` regardless; they are now honoured.
+
+- Property values containing a quote, backslash or control character were not
+  converted to JSON at all — the string fallback was built by quoting the value
+  into a JSON literal, which is invalid JSON for those inputs. Inherited with
+  the move to `Jumoo.Json`.
+
+- Serializing, comparing and expanding large property values allocated far more
+  than they needed to, several of them on the large object heap. Also inherited
+  with the move to `Jumoo.Json` — see that package's benchmarks for the numbers.
 
 ## [18.0.3] - 2026-07-22
 

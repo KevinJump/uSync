@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using System.Xml.Linq;
 
@@ -8,7 +10,6 @@ using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
-using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -33,7 +34,6 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         this._languageService = localizationService;
         _capabilityChecker = capabilityChecker;
     }
-
 
     protected override async Task<SyncAttempt<IDomain>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
@@ -206,7 +206,6 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         return base.CleanseNode(node);
     }
 
-
     public override async Task<IDomain?> FindItemAsync(Guid key)
         => (await _domainService.GetAllAsync(true)).FirstOrDefault(x => x.Key == key);
 
@@ -319,8 +318,6 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
                 SortOrder = x.SortOrder,
             });
 
-
-
         // create a new model for the item we are saving, and add it to the list of existing models.
         var updatedModel = new DomainSyncModel
         {
@@ -329,7 +326,6 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
             IsoCode = isoCode,
             SortOrder = item.SortOrder
         };
-
 
         List<DomainSyncModel> newDomains = [.. existingModels, updatedModel];
 
@@ -368,7 +364,6 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
 
         await _domainService.UpdateDomainsAsync(contentKey.Result, new DomainsUpdateModel { Domains = remaining });
     }
-
 
     public override string ItemAlias(IDomain item)
         => item.DomainName;

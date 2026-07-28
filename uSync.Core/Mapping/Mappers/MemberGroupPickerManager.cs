@@ -1,9 +1,10 @@
-﻿using Umbraco.Cms.Core;
+﻿using Jumoo.Json;
+
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
-using uSync.Core.Extensions;
 using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
