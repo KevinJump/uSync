@@ -55,7 +55,7 @@
 		"make": "npm run build && npm run client:make"
 	},
 	"devDependencies": {
-		"@hey-api/openapi-ts": "^0.95.0",
+		"@hey-api/openapi-ts": "^0.97.0",
 		"@microsoft/signalr": "^10.0.0",
 		"@umbraco-cms/backoffice": "^17.3.0",
 		"eslint": "^10.2.0",
