@@ -81,6 +81,35 @@ public class ContentHandler : PublishableContentHandlerBase<IContent>, ISyncHand
     protected override IEnumerable<IEntity> GetRootItems()
         => _contentService.GetRootContent();
 
+    /// <inheritdoc />
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)
+    {
+        if (parent != null)
+        {
+            var items = new List<IContent>();
+            const int pageSize = 5000;
+            var page = 0;
+            var total = long.MaxValue;
+            while (page * pageSize < total)
+            {
+                items.AddRange(_contentService.GetPagedChildren(
+                    id: parent.Id,
+                    pageIndex: page++,
+                    pageSize: pageSize,
+                    totalRecords: out total,
+                    propertyAliases: null,
+                    filter: null,
+                    ordering: null,
+                    loadTemplates: true));
+            }
+            return items;
+        }
+        else
+        {
+            return await Task.FromResult(GetRootItems());
+        }
+    }
+
      /// <summary>
     ///  Handle the publish events for content
     /// </summary>
