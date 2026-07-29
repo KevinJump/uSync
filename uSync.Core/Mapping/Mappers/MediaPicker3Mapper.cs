@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
@@ -6,7 +8,6 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
-using uSync.Core.Extensions;
 
 using static Umbraco.Cms.Core.Constants;
 

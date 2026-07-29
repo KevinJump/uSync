@@ -1,6 +1,9 @@
-﻿using Umbraco.Cms.Core;
+﻿using Jumoo.Json;
+
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
-using uSync.Core.Extensions;
+
+using static uSync.Core.Extensions.ConversionExtensions;
 
 namespace uSync.Core.DataTypes.DataTypeSerializers;
 
@@ -83,4 +86,3 @@ internal class MultiNodeTreePickerMigratingConfigSerializer : ConfigurationSeria
         };
 
 }
-

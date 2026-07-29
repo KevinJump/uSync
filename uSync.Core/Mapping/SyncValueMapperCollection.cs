@@ -1,11 +1,12 @@
-﻿using System.Collections.Concurrent;
+﻿using Jumoo.Json;
+
+using System.Collections.Concurrent;
 
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Extensions;
 
 using uSync.Core.Cache;
-using uSync.Core.Extensions;
 using uSync.Core.Mapping.Tracking;
 using uSync.Core.Serialization;
 using uSync.Core.Tracking;
@@ -120,7 +121,6 @@ public class SyncValueMapperCollection
 
         return value;
     }
-
 
     static readonly char[] _trimChars = ['\"', '\''];
 

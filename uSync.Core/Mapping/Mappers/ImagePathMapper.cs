@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -9,7 +11,6 @@ using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
-using uSync.Core.Extensions;
 using uSync.Core.Serialization;
 
 namespace uSync.Core.Mapping;
@@ -87,7 +88,6 @@ public class ImagePathMapper : ImagePathMapperBase, ISyncMapper
             return json.SerializeJsonNode();
         });
     }
-
 
     public override Task<string?> GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options)
     {

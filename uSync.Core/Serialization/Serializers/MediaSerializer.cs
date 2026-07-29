@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using System.Security.Cryptography;
 using System.Xml.Linq;
@@ -11,10 +13,11 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
-using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
 using uSync.Core.Serialization.Models;
+
+using static uSync.Core.Extensions.ObjectPropertyExtensions;
 
 namespace uSync.Core.Serialization.Serializers;
 
@@ -74,7 +77,6 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
             var sortOrder = info?.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(-1) ?? -1;
             HandleSortOrder(item, sortOrder);
         }
-
 
         if (details.HasWarning() && options.FailOnWarnings())
         {
@@ -180,7 +182,6 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         if (value.TryParseToJsonNode(out _) is false)
             return value;
 
-
         if (value.TryDeserialize<ImageCropperValue>(out var imageCrops) && imageCrops is not null)
         {
             return imageCrops.Src ?? string.Empty;
@@ -207,7 +208,6 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
         });
     }
-
 
     public override Task<IMedia?> FindItemAsync(Guid key)
         => uSyncTaskHelper.FromResultOf(() =>

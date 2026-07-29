@@ -1,10 +1,11 @@
-﻿using System.Runtime.Serialization;
+﻿using Jumoo.Json;
+
+using System.Runtime.Serialization;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Dependency;
-using uSync.Core.Extensions;
 
 namespace uSync.Core.Mapping;
 

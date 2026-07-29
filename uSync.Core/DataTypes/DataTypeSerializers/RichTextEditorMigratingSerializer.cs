@@ -1,4 +1,6 @@
-﻿using J2N.Collections.ObjectModel;
+﻿using Jumoo.Json;
+
+using J2N.Collections.ObjectModel;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,8 +13,6 @@ using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Extensions;
-
-using uSync.Core.Extensions;
 
 namespace uSync.Core.DataTypes.DataTypeSerializers;
 
@@ -228,10 +228,10 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
 
         foreach (var value in obj)
         {
-            var json = value.Value.SerializeJsonString();
-            if (json == null) continue;
-
-            if (json.TryDeserialize<JsonElement>(out var node))
+            // anything that doesn't round-trip through json - a null, or a bare scalar - is
+            // already the value we want, so it goes across as-is.
+            if (value.Value.SerializeJsonString() is string json
+                && json.TryDeserialize<JsonElement>(out var node))
             {
                 configuration[value.Key] = node;
             }

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using System.Diagnostics;
 using System.Reflection;
@@ -12,7 +14,6 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
-using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -205,7 +206,6 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("Saving in Serializer because item is dirty [{properties}]", dirty);
 
-
             await _contentTypeService.UpdateAsync(item, Constants.Security.SuperUserKey);
         }
 
@@ -229,15 +229,12 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             item.ListView = listView;
         }
 
-
         var allowedInLibrary = info.Element("AllowedInLibrary").ValueOrDefault(false);
         if (item.AllowedInLibrary != allowedInLibrary)
         {
             changes.AddUpdate("AllowedInLibrary", item.AllowedInLibrary, allowedInLibrary, "Info/AllowedInLibrary");
             item.AllowedInLibrary = allowedInLibrary;
         }
-
-
 
         var masterTemplate = info?.Element("DefaultTemplate").ValueOrDefault(string.Empty) ?? string.Empty;
         if (!string.IsNullOrEmpty(masterTemplate))
@@ -275,7 +272,6 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         var allowedTemplates = new List<ITemplate>();
         var changes = new List<uSyncChange>();
-
 
         foreach (var template in templates.Elements("Template"))
         {
@@ -391,7 +387,6 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         }
     }
 
-
     private List<uSyncChange> DeserializeCleanupHistory(IContentType item, XElement node)
     {
         if (!_capabilities.HasHistoryCleanup || node == null) return [];
@@ -452,7 +447,6 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         return base.CleanseNode(node);
     }
-
 
     protected static TValue? GetPropertyAs<TValue>(PropertyInfo info, object property)
     {

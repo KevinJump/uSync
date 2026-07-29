@@ -22,6 +22,12 @@
 		<PackageReference Include="Umbraco.Cms.Web.Website" />
 		<PackageReference Include="Umbraco.Cms.Api.Management" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+
+		<!--
+			json helpers - see uSync.Core/Extensions/JsonTextExtensions.cs for the obsolete
+			shim kept for downstream packages.
+		-->
+		<PackageReference Include="Jumoo.Json" />
 	</ItemGroup>
 
 	<ItemGroup>

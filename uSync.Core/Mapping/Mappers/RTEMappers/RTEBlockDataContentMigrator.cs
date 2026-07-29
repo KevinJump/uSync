@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using System.Text.RegularExpressions;
 
@@ -8,7 +10,6 @@ using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Dependency;
-using uSync.Core.Extensions;
 using uSync.Core.Serialization;
 
 namespace uSync.Core.Mapping.Mappers.RTEMappers;
@@ -60,7 +61,8 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
 
         if (richTextEditorValue.Blocks is not null && richTextEditorValue.Blocks?.ContentData.Count > 0)
         {
-            var blockJson = await base.GetImportValueAsync(richTextEditorValue.Blocks.SerializeJsonString(), editorAlias, options);
+            var blockJson = await base.GetImportValueAsync(
+                richTextEditorValue.Blocks.SerializeJsonString() ?? string.Empty, editorAlias, options);
             if (blockJson is not null)
             {
                 richTextEditorValue.Blocks = blockJson.DeserializeJson<RichTextBlockValue>();
@@ -79,7 +81,8 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
 
         if (richTextEditorValue.Blocks is not null)
         {
-            var blockJson = await base.GetExportValueAsync(richTextEditorValue.Blocks.SerializeJsonString(), editorAlias);
+            var blockJson = await base.GetExportValueAsync(
+                richTextEditorValue.Blocks.SerializeJsonString() ?? string.Empty, editorAlias);
             if (blockJson is not null)
             {
                 richTextEditorValue.Blocks = blockJson.DeserializeJson<RichTextBlockValue>();

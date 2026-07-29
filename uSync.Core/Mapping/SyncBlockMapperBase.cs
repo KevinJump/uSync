@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using System.Collections;
 using System.Text.Json;
@@ -11,7 +13,6 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
-using uSync.Core.Extensions;
 using uSync.Core.Mapping.Mappers;
 using uSync.Core.Serialization;
 
@@ -153,7 +154,6 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
     }
 #pragma warning restore CS0618 // Type or member is obsolete
 
-
     private static List<BlockPropertyValue> MigrateBlockRawValues(Dictionary<string, object?> rawValues)
     {
         var values = new List<BlockPropertyValue>();
@@ -167,7 +167,6 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         }
         return values;
     }
-
 
     private async Task<IContentType?> GetContentType(Guid contentTypeKey)
         => await _contentTypeService.GetAsync(contentTypeKey);

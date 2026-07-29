@@ -1,11 +1,10 @@
 ﻿using Json.More;
+using Jumoo.Json;
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 using Umbraco.Extensions;
-
-using uSync.Core.Extensions;
 
 namespace uSync.Core.Roots.Configs;
 
@@ -80,12 +79,12 @@ internal abstract class SyncConfigMergerBase
         var sourceItems = sourceArray?
             .Select(x => x as JsonObject)?
             .WhereNotNull()
-            .ToDictionary(k => k.TryGetPropertyAsObject(key, out var sourceKey) ? sourceKey.GetValueAsString(key) ?? sourceKey.ToString() : "", v => v) ?? [];
+            .ToDictionary(k => k.TryGetPropertyAsJsonObject(key, out var sourceKey) ? sourceKey.GetValueAsString(key) ?? sourceKey.ToString() : "", v => v) ?? [];
 
         var targetItems = targetArray?
             .Select(x => x as JsonObject)?
             .WhereNotNull()
-            .ToDictionary(k => k.TryGetPropertyAsObject(key, out var targetKey) ? targetKey.GetValueAsString(key) ?? targetKey.ToString() : "", v => v) ?? [];
+            .ToDictionary(k => k.TryGetPropertyAsJsonObject(key, out var targetKey) ? targetKey.GetValueAsString(key) ?? targetKey.ToString() : "", v => v) ?? [];
 
         // things that are only in the target. 
         var targetOnly = targetItems.Where(x => sourceItems.ContainsKey(x.Key) is false).Select(x => x.Value).ToList() ?? [];
@@ -180,12 +179,12 @@ internal abstract class SyncConfigMergerBase
         foreach (var sourceItem in sourceArray)
         {
             if (sourceItem is not JsonObject sourceObject) continue;
-            if (sourceObject.TryGetPropertyAsObject(key, out var sourceKey) is false) continue;
+            if (sourceObject.TryGetPropertyAsJsonObject(key, out var sourceKey) is false) continue;
 
             var targetObject = targetArray
                 .Select(x => x as JsonObject)
                 .WhereNotNull()
-                .FirstOrDefault(x => x?.TryGetPropertyAsObject(key, out var targetKey) == true && targetKey.GetValueAsString(key) == sourceKey.GetValueAsString(key));
+                .FirstOrDefault(x => x?.TryGetPropertyAsJsonObject(key, out var targetKey) == true && targetKey.GetValueAsString(key) == sourceKey.GetValueAsString(key));
 
             if (targetObject is null)
             {
@@ -218,7 +217,7 @@ internal abstract class SyncConfigMergerBase
             // if the item has been removed from source, but the target has
             // values inherited from source we need to now remove it?
             var targetJson = targetObject.SerializeJsonString(false);
-            if (targetJson.Contains(_inheritedValue) is true)
+            if (targetJson?.Contains(_inheritedValue) is true)
             {
                 removals.Add(i);
             }
@@ -250,7 +249,7 @@ internal abstract class SyncConfigMergerBase
                     targetObject[property.Key] = MergeJsonArrays(sourceArray, targetArray, arrayKey, arrayLabel);
                     continue;
                 case JsonValueKind.Object:
-                    var sourcePropertyObject = sourceObject.GetPropertyAsObject(property.Key);
+                    var sourcePropertyObject = sourceObject.GetPropertyAsJsonObject(property.Key);
                     if (sourcePropertyObject is not null && property.Value is JsonObject targetPropertyObject)
                     {
                         targetObject[property.Key] = MergeJsonProperties(sourcePropertyObject, targetPropertyObject, string.Empty);

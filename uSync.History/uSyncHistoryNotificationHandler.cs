@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Jumoo.Json;
+
+using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Hosting;
@@ -6,7 +8,6 @@ using Umbraco.Cms.Core.Security;
 
 using uSync.BackOffice;
 using uSync.BackOffice.Services;
-using uSync.Core.Extensions;
 using uSync.History.Service;
 
 namespace uSync.History
@@ -78,6 +79,11 @@ namespace uSync.History
                 };
 
                 var historyJson = historyInfo.SerializeJsonString(true);
+                if (historyJson is null)
+                {
+                    _logger.LogWarning("Failed to serialize the history, not saving it.");
+                    return;
+                }
 
                 var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
                 var historyFile = Path.Combine(rootFolder, "uSync", "history", DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".json");

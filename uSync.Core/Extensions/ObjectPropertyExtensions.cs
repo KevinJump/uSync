@@ -75,6 +75,9 @@ public static class ObjectPropertyExtensions
         var value = info.GetValue(property);
         if (value == null) return defaultValue;
 
-        return value.TryGetValueAs<TValue>(out var result) ? result : defaultValue;
+        // fully qualified, because this file lives in the same namespace as the obsolete
+        // JsonTextExtensions shim - which would win on namespace proximity over a using.
+        return Jumoo.Json.JsonSerialization.TryGetValueAs<TValue>(value, out var result)
+            ? result : defaultValue;
     }
 }

@@ -1,8 +1,8 @@
-﻿using System.Text.Json.Nodes;
+﻿using Jumoo.Json;
+
+using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
-
-using uSync.Core.Extensions;
 
 namespace uSync.Core.DataTypes.DataTypeSerializers;
 internal class FileUploadMigratingConfigSerializer : ConfigurationSerializerBase, IConfigurationSerializer
