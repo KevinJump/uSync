@@ -11,6 +11,50 @@ History is backfilled from the v18 release history starting at `v18.0.0`.
 
 ## [Unreleased]
 
+### Added
+
+- **Opt-in import state cache — `uSync:Settings:CacheImportState` (default `false`).**
+  uSync decides whether an item has changed by loading it from Umbraco, serializing
+  the whole thing, and comparing hashes — for every item, every run. That means an
+  import where nothing has changed costs roughly as much as a full export, which on
+  sites with thousands of files is the entire run time.
+
+  With this on, uSync remembers the hash of each file it has confirmed matches, and
+  skips those items on the next run without a database lookup or a re-serialize.
+  Import cost goes from `O(all items)` of database and serialization work to
+  `O(changed items)`.
+
+  It only ever remembers a file where the full check actually ran and said "no
+  change", or that uSync has just exported (so the file was written from the
+  database and the two match by construction). It never assumes that because an
+  import succeeded the two sides now agree. **The practical effect is that the first
+  run after turning it on is no faster than before — the benefit arrives on the
+  second run.** An export warms it too.
+
+  The cache lives in the site's temp folder (`{LocalTempPath}/uSync/cache/`), never
+  in the uSync folder, and is thrown away whenever the database, the uSync version,
+  or the handler settings change. Items are forgotten when Umbraco says they have
+  been saved, deleted, moved or published; changing a doc type, data type, template,
+  language or container clears the whole cache, because those get embedded in other
+  items' xml. A force import always ignores it.
+
+  What it cannot see is a database change made by something that raises no Umbraco
+  notification — raw SQL, for example — hence the default of off. **Read
+  [`docs/perf/state-cache.md`](docs/perf/state-cache.md) before enabling it**, in
+  particular the limitations section, and the note for anyone writing a custom
+  serializer that embeds data from another item.
+
+  Implemented entirely through uSync's existing per-item notifications, so nothing
+  in the import, report or serialization path changed.
+
+- **Extender API:** the cancelable per-item notifications
+  (`uSyncImportingItemNotification`, `uSyncReportingItemNotification`, and anything
+  else deriving from `CancelableuSyncItemNotification<T>`) gain an optional
+  `Message`, used instead of uSync's generic "change stopped by delegate event" when
+  you set it. The import and report ones also gain `Force`, so a subscriber that
+  short-cuts the check because it believes nothing has changed can stand down when
+  the user has asked for a forced import.
+
 ### Changed
 
 - **Handler settings now inherit from `HandlerDefaults`.** When a handler has its

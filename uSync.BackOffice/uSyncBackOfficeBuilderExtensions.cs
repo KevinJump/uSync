@@ -83,6 +83,12 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.Services.AddSingleton<ISyncService, SyncService>();
         builder.Services.AddSingleton<CacheLifecycleManager>();
 
+        // remembers which files we have already confirmed match Umbraco, so repeat runs can
+        // skip them (uSync:Settings:CacheImportState - off by default).
+        builder.Services.AddSingleton<ISyncStateCache, SyncStateCache>();
+        builder.Services.AddSingleton<SyncStateCacheManager>();
+        builder.Services.AddSingleton<SyncStateCacheInvalidator>();
+
         // first boot should happen before any other bits of uSync export on a blank site. 
         builder.AdduSyncFirstBoot();
 
@@ -274,6 +280,86 @@ public static class uSyncBackOfficeBuilderExtensions
             AddNotificationAsyncHandler<MediaSavingNotification, CacheLifecycleManager>().
             AddNotificationAsyncHandler<MediaSavedNotification, CacheLifecycleManager>().
             AddNotificationAsyncHandler<MediaDeletedNotification, CacheLifecycleManager>();
+
+        builder.AddStateCacheNotifications();
+    }
+
+    /// <summary>
+    ///  wire up the import state cache (uSync:Settings:CacheImportState).
+    /// </summary>
+    /// <remarks>
+    ///  registered unconditionally, and the setting is checked at runtime, so it can be turned
+    ///  on and off without restarting the site.
+    /// </remarks>
+    private static void AddStateCacheNotifications(this IUmbracoBuilder builder)
+    {
+        // uSync's own run and per-item notifications - this is where items get skipped
+        // and where we learn which files match.
+        builder.
+            AddNotificationAsyncHandler<uSyncImportStartingNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncReportStartingNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncExportStartingNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncImportCompletedNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncReportCompletedNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncExportCompletedNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncImportingItemNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncReportingItemNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncImportedItemNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncReportedItemNotification, SyncStateCacheManager>().
+            AddNotificationAsyncHandler<uSyncExportedItemNotification, SyncStateCacheManager>();
+
+        // Umbraco's notifications - what stops the cache going stale.
+        builder.
+            AddNotificationAsyncHandler<ContentSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentPublishedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentUnpublishedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentSavedBlueprintNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentDeletedBlueprintNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentMovedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentMovedToRecycleBinNotification, SyncStateCacheInvalidator>().
+
+            AddNotificationAsyncHandler<MediaSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<MediaDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<MediaMovedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<MediaMovedToRecycleBinNotification, SyncStateCacheInvalidator>().
+
+            AddNotificationAsyncHandler<ElementSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ElementDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ElementPublishedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ElementUnpublishedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ElementMovedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ElementMovedToRecycleBinNotification, SyncStateCacheInvalidator>().
+
+            AddNotificationAsyncHandler<DictionaryItemSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<DictionaryItemDeletedNotification, SyncStateCacheInvalidator>().
+
+            AddNotificationAsyncHandler<DomainSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<DomainDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<RelationTypeSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<RelationTypeDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<WebhookSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<WebhookDeletedNotification, SyncStateCacheInvalidator>().
+
+            // these all clear the whole cache - they change how other items serialize.
+            AddNotificationAsyncHandler<ContentTypeSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentTypeDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentTypeMovedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<MediaTypeSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<MediaTypeDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<MediaTypeMovedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<MemberTypeSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<MemberTypeDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<MemberTypeMovedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<DataTypeSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<DataTypeDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<DataTypeMovedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<TemplateSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<TemplateDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<LanguageSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<LanguageDeletedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<EntityContainerSavedNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<EntityContainerRenamedNotification, SyncStateCacheInvalidator>();
     }
 
     private static void CreatePolicies(AuthorizationOptions options,

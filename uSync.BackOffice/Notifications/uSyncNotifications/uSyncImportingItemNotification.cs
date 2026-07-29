@@ -21,4 +21,14 @@ public class uSyncImportingItemNotification : CancelableuSyncItemNotification<XE
     public uSyncImportingItemNotification(XElement item, ISyncHandler handler)
         : base(item, handler) { }
 
+    /// <summary>
+    ///  is this a forced import (the user has asked for the item to be imported
+    ///  regardless of whether anything appears to have changed).
+    /// </summary>
+    /// <remarks>
+    ///  anything short-cutting the import because it believes nothing has changed
+    ///  should stand down when this is set - a forced import is how someone gets a
+    ///  guaranteed, full import.
+    /// </remarks>
+    public bool Force { get; set; }
 }

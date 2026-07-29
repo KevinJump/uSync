@@ -487,11 +487,17 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             return [uSyncAction.SetAction(true, node.GetAlias(), message: "Change blocked (based on configuration)")];
         }
 
-        if (await _mutexService.FireItemStartingEventAsync(new uSyncImportingItemNotification(node, (ISyncHandler)this)))
+        var importingNotification = new uSyncImportingItemNotification(node, (ISyncHandler)this)
+        {
+            Force = options.Flags.HasFlag(SerializerFlags.Force)
+        };
+
+        if (await _mutexService.FireItemStartingEventAsync(importingNotification))
         {
             // blocked
             return [uSyncActionHelper<TObject>
-                .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "Change stopped by delegate event")];
+                .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias,
+                    importingNotification.Message ?? "Change stopped by delegate event")];
         }
 
         try
@@ -1327,11 +1333,16 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             //  starting reporting notification
             //  this lets us intercept a report and 
             //  shortcut the checking (sometimes).
-            if (await _mutexService.FireItemStartingEventAsync(new uSyncReportingItemNotification(node)))
+            var reportingNotification = new uSyncReportingItemNotification(node)
+            {
+                Force = options.Flags.HasFlag(SerializerFlags.Force)
+            };
+
+            if (await _mutexService.FireItemStartingEventAsync(reportingNotification))
             {
                 return [uSyncActionHelper<TObject>
                     .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias,
-                        "Change stopped by delegate event")];
+                        reportingNotification.Message ?? "Change stopped by delegate event")];
             }
 
             var actions = new List<uSyncAction>();
