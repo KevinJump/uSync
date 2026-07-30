@@ -78,9 +78,30 @@ public static class uSyncActionExtensions
     /// </summary>
     public static bool TryFindAction(this IEnumerable<uSyncAction> actions, Guid key, string handlerAlias, out uSyncAction action)
     {
-        action = actions.FirstOrDefault(x => $"{x.Key}_{x.HandlerAlias}" == $"{key}_{handlerAlias}", new uSyncAction { Key = Guid.Empty });
+        action = actions.FirstOrDefault(x => x.Key == key && MatchesAlias(x.HandlerAlias, handlerAlias), new uSyncAction { Key = Guid.Empty });
         return action.Key != Guid.Empty;
     }
+
+    /// <summary>
+    ///  index the actions in a list by key and handler alias, so they can be found without scanning the list.
+    /// </summary>
+    /// <remarks>
+    ///  the values are the positions of the actions in the list, so anything using the index has to
+    ///  update the actions in place - if items are added, removed, or reordered the index is stale.
+    /// </remarks>
+    public static Dictionary<(Guid key, string handlerAlias), int> CreateActionIndex(this List<uSyncAction> actions)
+    {
+        var index = new Dictionary<(Guid, string), int>(actions.Count);
+        for (var n = 0; n < actions.Count; n++)
+        {
+            // first one wins, so we find the same action as TryFindAction would.
+            _ = index.TryAdd((actions[n].Key, actions[n].HandlerAlias ?? string.Empty), n);
+        }
+        return index;
+    }
+
+    private static bool MatchesAlias(string? actionAlias, string? handlerAlias)
+        => (actionAlias ?? string.Empty) == (handlerAlias ?? string.Empty);
 
     /// <summary>
     /// merge two lists of actions together, removing duplicates
@@ -112,19 +133,47 @@ public static class uSyncActionExtensions
         if (actions.TryFindAction(key, handlerAlias, out var action))
         {
             actions.Remove(action);
-            action.Message += attempt.Message;
-            action.Details = [.. action.Details ?? [], .. attempt.Details ?? []];
-
-            action.Success = attempt.Success;
-
-            if (attempt.Success is false)
-            {
-                action.Message = "Failed: " + action.Message;
-                action.Exception = attempt.Exception;
-                action.Change = Core.ChangeType.Fail;
-            }
-            actions.Add(action);
+            actions.Add(ApplyAttempt(action, attempt));
         }
+    }
+
+    /// <summary>
+    ///  update any existing action with the details from the attempt, using an index to find it.
+    /// </summary>
+    /// <remarks>
+    ///  the action is updated in place, so the index built by <see cref="CreateActionIndex(List{uSyncAction})"/>
+    ///  stays valid for the rest of the run.
+    /// </remarks>
+    public static void UpdateActions<TObject>(this List<uSyncAction> actions, Dictionary<(Guid key, string handlerAlias), int> index, Guid key, string handlerAlias, SyncAttempt<TObject> attempt)
+    {
+        if (key == Guid.Empty) return;
+
+        // if it's not an error, and has a no message and blank details, its not worth updating,
+        // so we skip the lookup and update (worth it as the list may have 10000's of items)
+        if (attempt.Success == true
+            && string.IsNullOrWhiteSpace(attempt.Message) is true
+            && attempt.Details?.Count() == 0) return;
+
+        if (index.TryGetValue((key, handlerAlias ?? string.Empty), out var position) is false) return;
+
+        actions[position] = ApplyAttempt(actions[position], attempt);
+    }
+
+    private static uSyncAction ApplyAttempt<TObject>(uSyncAction action, SyncAttempt<TObject> attempt)
+    {
+        action.Message += attempt.Message;
+        action.Details = [.. action.Details ?? [], .. attempt.Details ?? []];
+
+        action.Success = attempt.Success;
+
+        if (attempt.Success is false)
+        {
+            action.Message = "Failed: " + action.Message;
+            action.Exception = attempt.Exception;
+            action.Change = Core.ChangeType.Fail;
+        }
+
+        return action;
     }
 
     /// <summary>

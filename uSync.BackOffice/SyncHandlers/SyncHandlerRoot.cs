@@ -541,6 +541,10 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     private async Task PerformSecondPassImportsAsync(List<ImportedItem<TObject>> importedItems, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback? callback = null)
     {
+        // index the actions once up front, so each second pass item doesn't have to
+        // scan the whole list to find the action it is updating.
+        var actionIndex = actions.CreateActionIndex();
+
         foreach (var item in importedItems.Select((update, Index) => new { update, Index }))
         {
             var itemKey = item.update.Node.GetKey();
@@ -551,7 +555,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             if (attempt.RequiresSave())
                 await serializer.SaveAsync([attempt.Item!]);
 
-            actions.UpdateActions(itemKey, this.Alias, attempt);
+            actions.UpdateActions(actionIndex, itemKey, this.Alias, attempt);
         }
     }
 

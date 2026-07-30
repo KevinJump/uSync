@@ -59,6 +59,26 @@ History is backfilled from the v18 release history starting at `v18.0.0`.
   `uSync.Core.Json.JsonXElementConverter` is obsolete for the same reason
   (use `Jumoo.Json.Converters.JsonXElementConverter`).
 
+- **Removed three O(n²) lookups from import.** All of them only showed up on
+  large syncs, and none of them change what is imported:
+  - the duplicate key check when merging folders, and the "keys to keep" check
+    when deleting missing items during a clean, are now set lookups rather than
+    a scan of a list per item.
+  - second pass imports (content, media) now index the action list once, instead
+    of scanning it — and building two interpolated strings per comparison — for
+    every item. With 10,000 two pass items that was tens of millions of string
+    allocations.
+
+  > Actions updated by a second pass are now updated in place, so they keep
+  > their original position in the results list. Previously each one was removed
+  > and re-added, which moved it to the end of the handler's list. Only the
+  > display/reporting order is affected.
+
+  **Extender API:** `List<uSyncAction>.CreateActionIndex()` and the matching
+  `UpdateActions(index, key, handlerAlias, attempt)` overload are new. The
+  existing `UpdateActions(key, handlerAlias, attempt)` is unchanged, including
+  its move-to-the-end behaviour.
+
 ### Fixed
 
 - `HandlerSettings.Clone()` no longer drops the `CreateClean` and
