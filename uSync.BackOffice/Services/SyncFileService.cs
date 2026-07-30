@@ -469,18 +469,18 @@ internal class SyncFileService : ISyncFileService
 
             var items = await GetFolderItemsAsync(absPath, extension);
 
-            var localKeys = new List<Guid>();
+            // set, not a list - so the duplicate check doesn't scan every key we have already seen.
+            var localKeys = new HashSet<Guid>();
 
             foreach (var item in items)
             {
                 var itemKey = item.Value.Node.GetKey();
                 if (item.Value.Node.IsEmptyItem() is false)
                 {
-                    if (localKeys.Contains(itemKey))
+                    if (localKeys.Add(itemKey) is false)
                     {
                         throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
                     }
-                    localKeys.Add(itemKey);
 
                     if (elements.TryGetValue(item.Key, out var value))
                     {

@@ -136,11 +136,15 @@ public abstract class SyncHandlerBase<TObject>
     {
         var items = (await GetChildItemsAsync(key)).ToArray();
 
+        // keysToKeep is usually a list, so hash it once here, otherwise every item
+        // below does a linear scan of all the keys.
+        HashSet<Guid> keys = keysToKeep as HashSet<Guid> ?? [.. keysToKeep];
+
         if (logger.IsEnabled(LogLevel.Debug))
-            logger.LogDebug("DeleteMissingItems: {parentId} Checking {itemCount} items for {keyCount} keys", key, items.Length, keysToKeep.Count());
+            logger.LogDebug("DeleteMissingItems: {parentId} Checking {itemCount} items for {keyCount} keys", key, items.Length, keys.Count);
 
         var actions = new List<uSyncAction>();
-        foreach (var item in items.Where(x => !keysToKeep.Contains(x.Key)))
+        foreach (var item in items.Where(x => !keys.Contains(x.Key)))
         {
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("DeleteMissingItems: Found {item} that is not in file list (Reporting: {reportOnly})", item.Id, reportOnly);
