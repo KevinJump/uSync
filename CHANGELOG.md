@@ -57,6 +57,14 @@ History is backfilled from the v18 release history starting at `v18.0.0`.
 
 ### Changed
 
+- Ported the v17 allocation work: fewer redundant dictionary lookups on the hot
+  paths (#997), and `internal`/`private` classes are now `sealed` so the JIT can
+  devirtualize their calls (#998). No behavioural changes.
+
+  > **Extender API:** `SyncHandlerRoot.SyncChangeInfo` is now `sealed`. It stays
+  > `protected`, so handlers can still construct and return one from an
+  > `IsItemCurrentAsync` override — only deriving from it is no longer possible.
+
 - **Handler settings now inherit from `HandlerDefaults`.** When a handler has its
   own settings block, its values are layered _over_ the set's `HandlerDefaults`
   instead of replacing them wholesale. A handler now only needs to specify the
