@@ -189,8 +189,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
             var headerValue = header.ValueOrDefault(string.Empty);
 
             if (headerKey == string.Empty) continue;
-            if (newHeaders.ContainsKey(headerKey)) continue; // stop duplicates.
-            newHeaders.Add(headerKey, headerValue);
+            newHeaders.TryAdd(headerKey, headerValue); // stop duplicates.
         }
 
         var existingOrderedEvents = item.Headers.OrderBy(x => x.Key).ToDictionary();

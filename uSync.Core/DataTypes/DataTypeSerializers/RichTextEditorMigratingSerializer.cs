@@ -118,8 +118,7 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
             extensions.Add("Umb.Tiptap.Block");
         }
         
-        if (configuration.ContainsKey("toolbar"))
-            configuration.Remove("toolbar");
+        configuration.Remove("toolbar");
 
         configuration["toolbar"] = new List<List<List<string>>> { new() { newToolbar } };
         
@@ -128,7 +127,7 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         return configuration;
     }
 
-    private bool TryGetToolbarArray(object? toolbar, out List<string> toolBarList)
+    private static bool TryGetToolbarArray(object? toolbar, out List<string> toolBarList)
     {
         toolBarList = new List<string>();
         if (toolbar is null) return false;
@@ -146,7 +145,7 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         return true;
     }
 
-    private string? MapToolbarItem(string item)
+    private static string? MapToolbarItem(string item)
     {
         return item switch
         {

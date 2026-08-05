@@ -160,8 +160,7 @@ internal abstract class SyncConfigMergerBase
                 // targetObject[property.Key] = JsonValue.Create(_inheritedValue);
 
                 // inherited is implicit.
-                if (targetObject.ContainsKey(property.Key)) 
-                    targetObject.Remove(property.Key);
+                targetObject.Remove(property.Key);
             }
         }
 
@@ -206,9 +205,9 @@ internal abstract class SyncConfigMergerBase
         for (int i = 0; i < targetArray.Count; i++)
         {
             if (targetArray[i] is not JsonObject targetObject) continue;
-            if (targetObject.ContainsKey(removeProperty) is false) continue;
+            if (targetObject.TryGetPropertyValue(removeProperty, out JsonNode? removal) is false) continue;
 
-            if (targetObject[removeProperty]!.ToString().StartsWith(_removedLabel) is true)
+            if (removal!.ToString().StartsWith(_removedLabel) is true)
             {
                 // we can't remove it while iterating, so add to a list. 
                 removals.Add(i);
