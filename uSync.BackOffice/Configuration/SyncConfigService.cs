@@ -57,7 +57,7 @@ internal class SyncConfigService : ISyncConfigService
             .ToArray();
     }
 
-    private class SyncFolderItem
+    private sealed class SyncFolderItem
     {
         public required string Path { get; set; }
         public int Weight { get; set; }

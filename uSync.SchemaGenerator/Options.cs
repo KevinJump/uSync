@@ -2,7 +2,7 @@
 
 namespace uSync;
 
-internal class Options
+internal sealed class Options
 {
     [Option('o', "outputFile", Required = false,
         HelpText = "",

@@ -40,7 +40,7 @@ public class MultiUrlMapper : SyncValueMapperBase, ISyncMapper
     // we need to just be able to read / manipulate the storage 
     // to make things generic .
     [DataContract]
-    internal class LinkDto
+    internal sealed class LinkDto
     {
         [DataMember(Name = "name")]
         public string? Name { get; set; }

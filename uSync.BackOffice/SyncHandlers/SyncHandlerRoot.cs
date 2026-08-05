@@ -2012,7 +2012,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     ///  Holds the result of an item comparison - the type of change and the current serialized node.
     /// </summary>
-    protected class SyncChangeInfo
+    protected sealed class SyncChangeInfo
     {
         /// <summary>
         ///  The type of change detected for the item.

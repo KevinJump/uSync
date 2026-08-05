@@ -10,7 +10,7 @@ internal delegate void uSyncTriggerEventHandler(uSyncTriggerArgs e);
 /// <summary>
 ///  used to trigger uSync events from within other elements of uSync
 /// </summary>
-internal class uSyncTriggers
+internal sealed class uSyncTriggers
 {
     internal static event uSyncTriggerEventHandler? DoExport;
     internal static event uSyncTriggerEventHandler? DoImport;
@@ -47,12 +47,11 @@ internal class uSyncTriggers
 
 }
 
-internal class uSyncTriggerArgs
+internal sealed class uSyncTriggerArgs
 {
     public string Folder { get; set; } = string.Empty;
 
     public IEnumerable<string> EntityTypes { get; set; } = [];
 
     public SyncHandlerOptions? HandlerOptions { get; set; }
-
 }
