@@ -87,9 +87,9 @@ public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
 
     private static Guid GetGuidValue(JsonObject obj, string key)
     {
-        if (obj != null && obj.ContainsKey(key))
+        if (obj != null && obj.TryGetPropertyValue(key, out JsonNode? node))
         {
-            if (obj[key]?.ToString().TryGetValueAs<Guid>(out var guid) is true)
+            if (node?.ToString().TryGetValueAs<Guid>(out var guid) is true)
                 return guid;
         }
 

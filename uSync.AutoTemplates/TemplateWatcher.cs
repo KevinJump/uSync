@@ -31,7 +31,6 @@ public partial class TemplateWatcher : IRegisteredObject
     private readonly ILogger<TemplateWatcher> _logger;
     private readonly ITemplateService _templateService;
     private readonly IShortStringHelper _shortStringHelper;
-    private readonly IHostEnvironment _hostEnvironment;
 
     private readonly IFileSystem? _templateFileSystem;
 
@@ -51,14 +50,13 @@ public partial class TemplateWatcher : IRegisteredObject
         ITemplateService templateService)
     {
         _shortStringHelper = shortStringHelper;
-        _hostEnvironment = hostEnvironment;
         _hostingLifetime = hostingLifetime;
 
         _logger = logger;
 
         _templateFileSystem = fileSystems.MvcViewsFileSystem;
 
-        _viewsFolder = _hostEnvironment.MapPathContentRoot(Constants.SystemDirectories.MvcViews);
+        _viewsFolder = hostEnvironment.MapPathContentRoot(Constants.SystemDirectories.MvcViews);
 
 
         // 
@@ -157,7 +155,7 @@ public partial class TemplateWatcher : IRegisteredObject
     }
 
 
-    private static object lockObject = new Object();
+    private static readonly Lock lockObject = new();
 
     private void CheckFile(string filename)
     {

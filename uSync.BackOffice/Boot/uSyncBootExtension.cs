@@ -48,7 +48,7 @@ internal static class uSyncBootExtension
 /// <summary>
 ///  Handler to mange app starting for first boot migrations 
 /// </summary>
-internal class FirstBootAppStartingHandler
+internal sealed class FirstBootAppStartingHandler
     : INotificationAsyncHandler<UmbracoApplicationStartingNotification>
 {
 

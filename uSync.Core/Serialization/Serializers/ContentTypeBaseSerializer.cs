@@ -750,7 +750,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return [];
     }
 
-    private class TabInfo
+    private sealed class TabInfo
     {
         public TabInfo(string alias)
         {
@@ -991,8 +991,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (tabNode == null) return [];
 
         var newTabs = tabNode.Elements("Tab")
-            .Select(x => GetTabAliasFromTabGroup(x))
-            .ToList();
+            .Select(GetTabAliasFromTabGroup)
+            .ToArray();
 
         var inheritedTabs =
             item.ContentTypeComposition
@@ -1128,7 +1128,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return false;
     }
 
-    private class PropertyTypeResult
+    private sealed class PropertyTypeResult
     {
         public bool IsNew { get; set; }
         public IPropertyType? Property { get; set; }
@@ -1401,7 +1401,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     public bool TabClashesWithExisting(TObject item, string alias, PropertyGroupType tabType)
     {
         EnsureAllTabsCacheLoaded(item);
-        return _allTabs?.ContainsKey(alias) is true && _allTabs?[alias] != tabType;
+        return _allTabs?.TryGetValue(alias, out PropertyGroupType aliasTab) is true && aliasTab != tabType;
     }
 
     public void EnsureAllTabsCacheLoaded(TObject item)

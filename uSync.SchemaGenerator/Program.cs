@@ -10,7 +10,7 @@ namespace uSync;
 ///  Generate the JSON Schema file for uSync. 
 ///   just like in the Umbraco Core - https://github.com/umbraco/Umbraco-CMS/tree/v9/contrib/src/JsonSchema
 /// </summary>
-internal class Program
+internal sealed class Program
 {
     public static async Task Main(string[] args)
     {
