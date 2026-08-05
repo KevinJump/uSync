@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 using Moq;
 
@@ -133,6 +135,35 @@ public class ExportDeduplicationTests
             Assert.That(PublishableContentHandlerBase<IContent>.ClaimItemForExport(firstSaved, item), Is.True);
             Assert.That(PublishableContentHandlerBase<IContent>.ClaimItemForExport(secondSaved, item), Is.True);
         });
+    }
+
+    [Test]
+    public void Concurrent_Claims_Only_Let_One_Caller_Through()
+    {
+        // Umbraco raises the notifications for an operation one after another, so this shouldn't
+        // happen in practice - but the state dictionary is a plain Dictionary, and the claim is
+        // what stops a torn read of it turning into a duplicate export. Hammer it to prove the
+        // lock does its job.
+        const int itemCount = 50;
+        const int threadsPerItem = 8;
+
+        var items = Enumerable.Range(0, itemCount).Select(_ => MakeContent(Guid.NewGuid())).ToArray();
+        var messages = new EventMessages();
+        var state = new Dictionary<string, object>();
+
+        // every thread gets its own notification, all sharing one state - as they do in an operation.
+        var claims = items
+            .SelectMany(item => Enumerable.Range(0, threadsPerItem).Select(_ => (Item: item, Notification: new ContentSavedNotification(item, messages) { State = state })))
+            .ToArray();
+
+        var results = new bool[claims.Length];
+
+        Parallel.For(0, claims.Length, i =>
+            results[i] = PublishableContentHandlerBase<IContent>.ClaimItemForExport(claims[i].Notification, claims[i].Item));
+
+        Assert.That(
+            results.Count(x => x), Is.EqualTo(itemCount),
+            "exactly one claim per item should succeed, however many threads race for it");
     }
 
     [Test]
