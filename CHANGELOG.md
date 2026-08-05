@@ -81,6 +81,19 @@ History is backfilled from the v18 release history starting at `v18.0.0`.
 
 ### Fixed
 
+- **Content and Library items are no longer exported twice by one editor
+  action.** Umbraco 18.1 raises the saved notification for a save-and-publish as
+  well as the published one ([umbraco/Umbraco-CMS#23523][u23523]); uSync
+  listens to both, so a single save-and-publish serialized and wrote the item
+  twice, and un-publishing a culture could write it three times. All the
+  notifications for one operation now share a record of which items have been
+  exported, so each item is exported once. Publishing or un-publishing from the
+  tree — which still only raises the publish notification — is unaffected.
+
+  This applies to both the Content and the Library (Element) handlers.
+
+  [u23523]: https://github.com/umbraco/Umbraco-CMS/issues/23523
+
 - `HandlerSettings.Clone()` no longer drops the `CreateClean` and
   `FullFileOnDifference` properties. Handlers that set either value in their own
   block were previously resolved as `false` regardless; they are now honoured.

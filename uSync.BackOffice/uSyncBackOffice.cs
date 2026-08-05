@@ -28,6 +28,17 @@ public class uSync
     public const string EventPausedKey = "uSync.PausedKey";
 
     /// <summary>
+    ///  a key we set on notifications, holding the keys of the items already exported
+    ///  during the current Umbraco operation.
+    /// </summary>
+    /// <remarks>
+    ///  a single operation can raise more than one notification for the same item (a
+    ///  save-and-publish raises both the saved and the published notification), and they
+    ///  all share one notification state, so we use it to only export the item once.
+    /// </remarks>
+    public const string EventExportedItemsKey = "uSync.ExportedItems";
+
+    /// <summary>
     ///  the name we use internally for the 'everything' group.
     /// </summary>
     public const string EverythingGroupName = "All";

@@ -275,7 +275,8 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
     ///  Handle the publish events for content
     /// </summary>
     /// <remarks>
-    ///  some publication events do not fire the save notification, so we need to handle those here.
+    ///  publishing from the tree does not fire the save notification, so we need to handle it here.
+    ///  a save-and-publish fires both, and ProcessItem de-duplicates the export.
     /// </remarks>
     public async Task HandleAsync(ElementPublishedNotification notification, CancellationToken cancellationToken)
     {
@@ -296,6 +297,7 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
     /// </summary>
     /// <remarks>
     ///  un-publish does not fire the save notification, so we need to handle those here.
+    ///  un-publishing a single culture does fire both, and ProcessItem de-duplicates the export.
     /// </remarks>
     public async Task HandleAsync(ElementUnpublishedNotification notification, CancellationToken cancellationToken)
     {
