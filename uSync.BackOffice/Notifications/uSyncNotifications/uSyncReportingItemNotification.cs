@@ -10,4 +10,9 @@ public class uSyncReportingItemNotification : CancelableuSyncItemNotification<XE
     /// <inheritdoc/>
     public uSyncReportingItemNotification(XElement item)
         : base(item) { }
+
+    /// <summary>
+    ///  is this a forced report (nothing should short-cut the checking).
+    /// </summary>
+    public bool Force { get; set; }
 }

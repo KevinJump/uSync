@@ -27,4 +27,13 @@ public class CancelableuSyncItemNotification<TObject> : uSyncItemNotification<TO
     ///  Cancel the current process
     /// </summary>
     public bool Cancel { get; set; }
+
+    /// <summary>
+    ///  Why the process was cancelled, shown to the user against the item.
+    /// </summary>
+    /// <remarks>
+    ///  optional - if you cancel without setting this, uSync reports its generic
+    ///  "change stopped by delegate event" message.
+    /// </remarks>
+    public string? Message { get; set; }
 }

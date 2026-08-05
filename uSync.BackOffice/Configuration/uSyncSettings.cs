@@ -146,6 +146,32 @@ public class uSyncSettings
 
 
     /// <summary>
+    /// Cache the results of the "no change" checks between runs, so repeat imports can skip
+    /// unchanged items without a database lookup or a re-serialize.
+    /// </summary>
+    /// <remarks>
+    ///  uSync works out if an item has changed by loading the item from Umbraco, serializing it,
+    ///  and comparing the hash to the file. that means an import where nothing has changed costs
+    ///  about as much as a full export. with this on, uSync remembers the file hashes it has
+    ///  already confirmed as matching, and skips those items entirely.
+    ///
+    ///  the cache only ever remembers items where the full check actually ran and said
+    ///  "no change" (or that we have just exported), so the fast path is only taken for items
+    ///  we have positively checked. that also means the first run after turning this on is no
+    ///  faster than before - the benefit arrives on the second run.
+    ///
+    ///  the cache lives in the site's temp folder, never in the uSync folder, and is thrown
+    ///  away when the database, the uSync version, or the handler settings change. items are
+    ///  removed from it when Umbraco tells us they have been saved, deleted, moved or published.
+    ///  a force import always ignores it.
+    ///
+    ///  what it cannot see is a change made to the database by something that raises no Umbraco
+    ///  notification (raw SQL, for example) - hence the default of off.
+    /// </remarks>
+    [DefaultValue(false)]
+    public bool CacheImportState { get; set; } = false;
+
+    /// <summary>
     /// Show a version check warning to the user if the folder version is less than the version expected by uSync.
     /// </summary>
     [DefaultValue(true)]
