@@ -136,6 +136,20 @@ public abstract class PublishableContentHandlerBase<TObject>
     }
 
     /// <summary>
+    ///  Guards the claim below.
+    /// </summary>
+    /// <remarks>
+    ///  the notification state we track claims in is Umbraco's dictionary, not ours, so we can't
+    ///  lock on it - anything else holding a reference could contend with us on an object neither
+    ///  side knows the other is using. This is our own lock instead.
+    ///  <para>
+    ///   statics on a generic type are per closed type, so documents and elements get one each.
+    ///   That suits us: they never share a notification state, so they have nothing to contend over.
+    ///  </para>
+    /// </remarks>
+    private static readonly Lock _claimLock = new();
+
+    /// <summary>
     ///  Claim an item for export, returning false if it has already been exported in this operation.
     /// </summary>
     /// <remarks>
@@ -155,12 +169,18 @@ public abstract class PublishableContentHandlerBase<TObject>
     ///   persisted the item - including its publish state - so the export reflects the finished
     ///   operation whichever notification triggers it.
     ///  </para>
+    ///  <para>
+    ///   Umbraco raises the notifications for one operation one after another, so the lock is
+    ///   belt-and-braces rather than something we expect to contend on - but the state dictionary
+    ///   is a plain Dictionary, and SyncScopedNotificationPublisher can dispatch on a queued
+    ///   background thread when BackgroundNotifications is on.
+    ///  </para>
     /// </remarks>
     internal static bool ClaimItemForExport(EnumerableObjectNotification<TObject> notification, TObject item)
     {
         var state = notification.State;
 
-        lock (state)
+        lock (_claimLock)
         {
             if (state.TryGetValue(uSync.EventExportedItemsKey, out var value) is false
                 || value is not HashSet<Guid> exported)
