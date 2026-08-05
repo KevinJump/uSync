@@ -15,22 +15,20 @@ internal static class DictionaryExtensions
     {
         if (usernames == null || id == null) return "unknown";
 
-        usernames[id.Value] = usernames.ContainsKey(id.Value)
-            ? usernames[id.Value]
-            : findMethod(id.Value)?.Email ?? "unknown";
+        if (usernames.TryGetValue(id.Value, out string? username))
+            return username;
 
-        return usernames[id.Value];
+        return usernames[id.Value] = findMethod(id.Value)?.Email ?? "unknown";
     }
 
     public static int GetEmails(this Dictionary<string, int> emails, string email, Func<string, IUser> findMethod)
     {
         if (emails == null || string.IsNullOrEmpty(email)) return -1;
 
-        emails[email] = emails.TryGetValue(email, out int value)
-            ? value
-            : findMethod(email)?.Id ?? -1;
+        if (emails.TryGetValue(email, out int value))
+            return value;
 
-        return emails[email];
+        return emails[email] = findMethod(email)?.Id ?? -1;
     }
 
     // This method converts an object to a dictionary of string, object
@@ -40,7 +38,7 @@ internal static class DictionaryExtensions
         var properties = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         // Create a dictionary and populate it with the property names and values
-        var dictionary = new Dictionary<string, object?>();
+        Dictionary<string, object?> dictionary = new(properties.Length);
         foreach (var property in properties)
         {
             dictionary.Add(property.Name, property.GetValue(obj));
@@ -60,7 +58,7 @@ internal static class DictionaryExtensions
         {
             var properties = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-            var dictionary = new Dictionary<string, object?>();
+            Dictionary<string, object?> dictionary = new(properties.Length);
             foreach (var property in properties)
             {
                 dictionary.Add(property.Name, property.GetValue(obj));
@@ -87,8 +85,7 @@ internal static class DictionaryExtensions
         {
             foreach (var kvp in dictionary)
             {
-                if (mergedDictionary.ContainsKey(kvp.Key) is true) continue;
-                mergedDictionary.Add(kvp.Key, kvp.Value);
+                mergedDictionary.TryAdd(kvp.Key, kvp.Value);
             }
         }
 
@@ -111,6 +108,6 @@ internal static class DictionaryExtensions
             return s.ToLowerInvariant();
         }
 
-        return char.ToLowerInvariant(s[0]) + s.Substring(1);
+        return $"{char.ToLowerInvariant(s[0])}{s.AsSpan(1)}";
     }
 }
