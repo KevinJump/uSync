@@ -38,7 +38,7 @@ public class uSync
         internal const string Group = "sync";
     }
 
-    internal class Sets
+    internal sealed class Sets
     {
         internal const string DefaultSet = "Default";
     }

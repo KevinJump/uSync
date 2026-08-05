@@ -14,7 +14,7 @@ namespace uSync.Core.Json;
 ///  less changes in the files = faster comparison checks.
 /// </para>
 /// </remarks>
-internal class OrderedPropertiesJsonResolver : DefaultJsonTypeInfoResolver
+internal sealed class OrderedPropertiesJsonResolver : DefaultJsonTypeInfoResolver
 {
     public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
     {

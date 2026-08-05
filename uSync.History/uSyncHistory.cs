@@ -24,7 +24,7 @@ namespace uSync.History
         public int SortOrder => 20;
     }
 
-    internal class SyncHistoryConstants
+    internal sealed class SyncHistoryConstants
     {
         public const string ApiName = "uSync.History";
         public const string AppName = "uSync.History";

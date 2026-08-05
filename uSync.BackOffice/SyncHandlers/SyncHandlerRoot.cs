@@ -1962,7 +1962,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         return null;
     }
 
-    private class SyncChangeInfo
+    private sealed class SyncChangeInfo
     {
         public ChangeType Change { get; set; }
         public XElement? CurrentNode { get; set; }

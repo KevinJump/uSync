@@ -37,7 +37,7 @@ internal class DataListMigratingConfigSerializer : ConfigurationSerializerBase, 
 
         return configuration;
     }
-    private class IdValuePair
+    private sealed class IdValuePair
     {
         public int? Id { get; set; }
         public string? Value { get; set; }

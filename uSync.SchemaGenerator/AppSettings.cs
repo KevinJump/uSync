@@ -4,14 +4,14 @@ using uSync.BackOffice.Configuration;
 
 namespace uSync;
 
-internal class AppSettings
+internal sealed class AppSettings
 {
     public uSyncDefinition uSync { get; set; }
 
     /// <summary>
     /// Configuration of uSync settings
     /// </summary>
-    internal class uSyncDefinition
+    internal sealed class uSyncDefinition
     {
         /// <summary>
         /// uSync settings
@@ -33,12 +33,12 @@ internal class AppSettings
         /// </summary>
         public AutoTemplatesDefinition AutoTemplates { get; set; }
 
-        internal class uSyncSetsDefinition
+        internal sealed class uSyncSetsDefinition
         {
             public uSyncHandlerSetSettings Default { get; set; }
         }
 
-        internal class AutoTemplatesDefinition
+        internal sealed class AutoTemplatesDefinition
         {
             /// <summary>
             /// Enable AutoTemplates feature
