@@ -47,7 +47,11 @@ namespace uSync.Core.Cache
 
         public void AddName(int id, Guid guid, string name)
         {
-            nameCache.ClearByKey(id.ToString());
+            // was ClearByKey(id.ToString()) - a full LINQ scan of every entry in nameCache
+            // looking for a prefix match, on every single call. id.ToString() is an exact
+            // key here (no other key is ever a variant/suffix of it in this cache), so a
+            // direct single-key removal is correct and avoids the O(n) scan entirely.
+            nameCache.Clear(id.ToString());
             nameCache.GetCacheItem(id.ToString(), () =>
             {
                 return new CachedName(guid, name);
@@ -103,7 +107,8 @@ namespace uSync.Core.Cache
             }
             else
             {
-                keyCache.ClearByKey(id.ToString());
+                // was ClearByKey (O(n) scan) - id.ToString() is an exact key here too.
+                keyCache.Clear(id.ToString());
                 return null;
             }
         }
@@ -134,7 +139,8 @@ namespace uSync.Core.Cache
             }
             else
             {
-                keyCache.ClearByKey(id.ToString());
+                // was ClearByKey (O(n) scan) - id.ToString() is an exact key here too.
+                keyCache.Clear(id.ToString());
                 return null;
             }
         }
