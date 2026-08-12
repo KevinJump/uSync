@@ -1,11 +1,15 @@
 name: PR Project Build and Test
+
 permissions:
   contents: read
   pull-requests: write
 
+# NOTE: uSync releases from "v{major}/main" - a branch per Umbraco major. Plain "main"
+# is kept in the filter so a re-created main, or a branch that hasn't been moved over
+# yet, still builds.
 on:
   pull_request:
-    branches: [ "*/main" ]
+    branches: [ "main", "*/main" ]
     paths-ignore:
       - "**.md"
       - "docs/**"
@@ -26,16 +30,17 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          global-json-file: global.json
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
       # the client project's build runs `npm run build` via an MSBuild target,
       # so node needs to be available before the dotnet build step below.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "lts/*"
 
@@ -43,7 +48,7 @@ jobs:
         run: dotnet restore ${{ env.solution_name }} --locked-mode
 
       - name: build
-        run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
+        run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} --no-restore -p:ContinuousIntegrationBuild=true
 
       - name: test
         run: dotnet test ${{ env.test_project }} -c ${{ env.config }}
