@@ -1,0 +1,67 @@
+name: CodeQL
+
+# Public repo, so Advanced Security / code scanning is available for free - these
+# triggers run for real (see the disabled variant used on Jumoo's private repos,
+# where the upload step is rejected and the triggers stay commented out until
+# Advanced Security is turned on).
+
+on:
+  push:
+    branches: [ "main", "*/main" ]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  pull_request:
+    branches: [ "main", "*/main" ]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  schedule:
+    # weekly, so advisories published after a change still get picked up
+    - cron: "33 8 * * 0"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # build-mode none: CodeQL scans the source without compiling it, so this
+          # doesn't need the sdk, node, a restore, or the locked-mode dance.
+          - language: actions
+            build-mode: none
+          - language: csharp
+            build-mode: none
+          # the backoffice management client and the history viewer client are both
+          # TypeScript, and between them cover most of uSync's user facing UI - worth
+          # scanning too.
+          - language: javascript-typescript
+            build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"

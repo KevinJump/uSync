@@ -4,34 +4,66 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Umbraco and Jumoo.Json are pinned deliberately. The versions referenced here set
+    # the minimum for anyone installing uSync against a given Umbraco major, so they
+    # move when we choose to move them - not on a weekly schedule. Note this also opts
+    # them out of dependabot security updates.
+    ignore:
+      - dependency-name: "Umbraco.*"
+      - dependency-name: "Jumoo.*"
+    # majors are deliberately left out of the group so they arrive as one PR each.
     groups:
       nuget-dependencies:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
+  # @umbraco-cms/backoffice is pinned for the same reason as above, it has to line up
+  # with the server side packages for this Umbraco major.
   - package-ecosystem: "npm"
     directory: "/uSync.Backoffice.Management.Client/usync-assets"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "@umbraco-cms/*"
     groups:
       npm-dependencies:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "npm"
     directory: "/uSync.History/history-client"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "@umbraco-cms/*"
     groups:
       npm-dependencies:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    # gittools/actions v4 requires GitVersion >= 6.2, which needs GitVersion.yml
+    # migrating to the v6 schema. Dependabot can't see that the action version and the
+    # versionSpec input are coupled, so bumping this alone would break the version job.
+    # Unpin this when the GitVersion 6 migration happens deliberately.
+    ignore:
+      - dependency-name: "gittools/actions"
     groups:
       github-actions:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
