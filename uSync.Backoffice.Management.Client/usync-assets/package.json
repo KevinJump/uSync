@@ -59,17 +59,17 @@
 		"make": "npm run build && npm run client:make"
 	},
 	"devDependencies": {
-		"@hey-api/openapi-ts": "^0.97.1",
-		"@microsoft/signalr": "^10.0.0",
+		"@hey-api/openapi-ts": "^0.99.0",
+		"@microsoft/signalr": "^10.0.11",
 		"@umbraco-cms/backoffice": "^18.0.0-rc3",
 		"chalk": "^5.6.2",
 		"cross-env": "^10.1.0",
-		"eslint": "^10.2.0",
-		"lit": "^3.3.2",
+		"eslint": "^10.8.1",
+		"lit": "^3.3.3",
 		"node-fetch": "^3.3.2",
-		"prettier": "^3.8.1",
+		"prettier": "^3.9.6",
 		"typescript": "^5.9.3",
-		"vite": "^8.0.16",
+		"vite": "^8.2.1",
 		"vite-plugin-dts": "^4.5.4"
 	}
 }
