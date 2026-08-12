@@ -9,7 +9,7 @@ re-export), see [`changes/format.md`](changes/format.md).
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 History is backfilled from the v18 release history starting at `v18.0.0`.
 
-## [Unreleased]
+## [18.1.0] - 2026-08-12
 
 ### Added
 
