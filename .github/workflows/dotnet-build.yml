@@ -44,8 +44,12 @@ jobs:
         with:
           node-version: "lts/*"
 
+      # -p:Configuration matters here: uSync.Extend is excluded from the Debug solution
+      # configuration (<Build Solution="Debug|*" Project="false" /> in uSync.slnx), so a
+      # restore with no configuration defaults to Debug and silently skips it, leaving no
+      # project.assets.json for the Release build below to pick up.
       - name: restore
-        run: dotnet restore ${{ env.solution_name }} --locked-mode
+        run: dotnet restore ${{ env.solution_name }} --locked-mode -p:Configuration=${{ env.config }}
 
       - name: build
         run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} --no-restore -p:ContinuousIntegrationBuild=true
