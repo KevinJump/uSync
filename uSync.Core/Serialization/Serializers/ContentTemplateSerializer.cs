@@ -269,6 +269,21 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         return Task.CompletedTask;
     }
 
+    /// <remarks>
+    ///  has to save via SaveBlueprint, the inherited ContentSerializer.SaveAsync would
+    ///  save through IContentService.Save, and that persists the item with the Document
+    ///  node object type - so the blueprint stops being a blueprint.
+    /// </remarks>
+    public override Task SaveAsync(IEnumerable<IContent> items)
+    {
+        foreach (var item in items)
+        {
+            contentService.SaveBlueprint(item, null);
+        }
+
+        return Task.CompletedTask;
+    }
+
     public override Task DeleteItemAsync(IContent item)
     {
         contentService.DeleteBlueprint(item);
