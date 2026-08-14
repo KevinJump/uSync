@@ -258,13 +258,14 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
     ///  node object type - so the blueprint stops being a blueprint.
     /// </remarks>
     public override Task SaveAsync(IEnumerable<IContent> items)
-        => uSyncTaskHelper.FromResultOf(() =>
+    {
+        foreach (var item in items)
         {
-            foreach (var item in items)
-            {
-                contentService.SaveBlueprint(item, null, Constants.Security.SuperUserId);
-            }
-        });
+            contentService.SaveBlueprint(item, null, Constants.Security.SuperUserId);
+        }
+
+        return Task.CompletedTask;
+    }
 
     public override Task DeleteItemAsync(IContent item)
         => uSyncTaskHelper.FromResultOf(() =>
