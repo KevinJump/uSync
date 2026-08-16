@@ -152,9 +152,17 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         => Task.FromResult(default(ILanguage));
 
     public override async Task SaveItemAsync(ILanguage item)
-        => _ = item.HasIdentity
+    {
+        var attempt = item.HasIdentity
             ? await _languageService.UpdateAsync(item, Constants.Security.SuperUserKey)
             : await _languageService.CreateAsync(item, Constants.Security.SuperUserKey);
+
+        if (attempt.Success is false)
+        {
+            throw new InvalidOperationException(
+                $"Could not save language {item.IsoCode}: {attempt.Status}");
+        }
+    }
 
     public override Task DeleteItemAsync(ILanguage item)
         => _languageService.DeleteAsync(item.IsoCode, Constants.Security.SuperUserKey);
