@@ -368,10 +368,15 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         // see : https://github.com/umbraco/Umbraco-CMS/issues/19732
         // if (item.IsDirty() is false) return;
 
-        if (item.HasIdentity is true)
-            await _dataTypeService.UpdateAsync(item, Constants.Security.SuperUserKey);
-        else
-            await _dataTypeService.CreateAsync(item, Constants.Security.SuperUserKey);
+        var attempt = item.HasIdentity is true
+            ? await _dataTypeService.UpdateAsync(item, Constants.Security.SuperUserKey)
+            : await _dataTypeService.CreateAsync(item, Constants.Security.SuperUserKey);
+
+        if (attempt.Success is false)
+        {
+            throw new InvalidOperationException(
+                $"Could not save data type {item.Name}: {attempt.Status}");
+        }
     }
 
     public override async Task SaveAsync(IEnumerable<IDataType> items)
