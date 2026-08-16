@@ -355,9 +355,15 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                 logger.LogDebug("Saving: {alias} {path}", item.Alias, item.Path);
 
             var result = await _templateService.UpdateAsync(item, userKey);
-            
+
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
+
+            if (result.Success is false)
+            {
+                throw new InvalidOperationException(
+                    $"Could not save template {item.Alias}: {result.Status}");
+            }
         }
         else
         {
@@ -365,9 +371,15 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                 logger.LogDebug("Creating: {alias} {path}", item.Alias, item.Path);
 
             var result = await _templateService.CreateAsync(item.Name ?? item.Alias, item.Alias, item.Content, userKey, item.Key);
-            
+
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
+
+            if (result.Success is false)
+            {
+                throw new InvalidOperationException(
+                    $"Could not save template {item.Alias}: {result.Status}");
+            }
         }
     }
 

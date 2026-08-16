@@ -1395,13 +1395,14 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             return;
         }
 
-        if (item.Id <= 0)
+        var attempt = item.Id <= 0
+            ? await _baseService.CreateAsync(item, Constants.Security.SuperUserKey)
+            : await _baseService.UpdateAsync(item, Constants.Security.SuperUserKey);
+
+        if (attempt.Success is false)
         {
-            await _baseService.CreateAsync(item, Constants.Security.SuperUserKey);
-        }
-        else
-        {
-            await _baseService.UpdateAsync(item, Constants.Security.SuperUserKey);
+            throw new InvalidOperationException(
+                $"Could not save {typeof(TObject).Name} {item.Alias}: {attempt.Result}");
         }
 
         //if (item.IsDirty()) _baseService.Save(item);
