@@ -228,9 +228,17 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
     }
 
     public override async Task SaveItemAsync(IDictionaryItem item)
-        => _ = item.HasIdentity
+    {
+        var attempt = item.HasIdentity
             ? await _dictionaryItemService.UpdateAsync(item, Constants.Security.SuperUserKey)
             : await _dictionaryItemService.CreateAsync(item, Constants.Security.SuperUserKey);
+
+        if (attempt.Success is false)
+        {
+            throw new InvalidOperationException(
+                $"Could not save dictionary item {item.ItemKey}: {attempt.Status}");
+        }
+    }
 
     public override Task DeleteItemAsync(IDictionaryItem item)
         => _dictionaryItemService.DeleteAsync(item.Key, Constants.Security.SuperUserKey);

@@ -50,7 +50,17 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
     /// <inheritdoc/>
     /// 
     public override async Task SaveItemAsync(IWebhook item)
-        => _ = item.HasIdentity ? await _webhookService.UpdateAsync(item) : await _webhookService.CreateAsync(item);
+    {
+        var attempt = item.HasIdentity
+            ? await _webhookService.UpdateAsync(item)
+            : await _webhookService.CreateAsync(item);
+
+        if (attempt.Success is false)
+        {
+            throw new InvalidOperationException(
+                $"Could not save webhook {item.Key}: {attempt.Status}");
+        }
+    }
 
     /// <inheritdoc/>
     protected override async Task<SyncAttempt<IWebhook>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
