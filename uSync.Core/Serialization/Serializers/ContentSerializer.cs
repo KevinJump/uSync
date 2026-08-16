@@ -774,7 +774,15 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         => Task.FromResult(contentService.GetById(id));
 
     public override Task SaveAsync(IEnumerable<IContent> items)
-        => Task.FromResult(contentService.Save(items));
+        => uSyncTaskHelper.FromResultOf(() =>
+        {
+            var result = contentService.Save(items);
+            if (result.Success is false)
+            {
+                throw new InvalidOperationException(
+                    $"Could not save content items: {result.Result}");
+            }
+        });
 
     public override async Task SaveItemAsync(IContent item)
         => await SaveItemAsync(item, -1);
@@ -785,11 +793,16 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         {
             try
             {
-                contentService.Save(item, userId);
+                var result = contentService.Save(item, userId);
+                if (result.Success is false)
+                {
+                    throw new InvalidOperationException(
+                        $"Could not save content {item.Name}: {result.Result}");
+                }
             }
             catch (ArgumentNullException ex)
             {
-                // we can get thrown a null argument exception by the notifier, 
+                // we can get thrown a null argument exception by the notifier,
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
                 if (!ex.Message.Contains("siteUri")) throw;
             }
