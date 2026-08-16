@@ -342,7 +342,12 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
                 })
         };
 
-        await _domainService.UpdateDomainsAsync(contentKey.Result, updateModel);
+        var attempt = await _domainService.UpdateDomainsAsync(contentKey.Result, updateModel);
+        if (attempt.Success is false)
+        {
+            throw new InvalidOperationException(
+                $"Could not save domain {item.DomainName}: {attempt.Status}");
+        }
     }
 
     private sealed class DomainSyncModel
@@ -362,7 +367,12 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         var existing = await _domainService.GetAssignedDomainsAsync(contentKey.Result, true);
         var remaining = existing.Where(x => x.Key != item.Key).Select(x => new DomainModel { DomainName = x.DomainName, IsoCode = x.LanguageIsoCode! });
 
-        await _domainService.UpdateDomainsAsync(contentKey.Result, new DomainsUpdateModel { Domains = remaining });
+        var attempt = await _domainService.UpdateDomainsAsync(contentKey.Result, new DomainsUpdateModel { Domains = remaining });
+        if (attempt.Success is false)
+        {
+            throw new InvalidOperationException(
+                $"Could not remove domain {item.DomainName}: {attempt.Status}");
+        }
     }
 
     public override string ItemAlias(IDomain item)

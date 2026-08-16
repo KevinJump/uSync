@@ -230,13 +230,37 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
     }
 
     public override Task SaveAsync(IEnumerable<IMedia> items)
-        => uSyncTaskHelper.FromResultOf(() => { return _mediaService.Save(items); });
+        => uSyncTaskHelper.FromResultOf(() =>
+        {
+            var attempt = _mediaService.Save(items);
+            if (attempt.Success is false)
+            {
+                throw new InvalidOperationException(
+                    $"Could not save media items: {attempt.Result?.Result}");
+            }
+        });
 
     public override Task SaveItemAsync(IMedia item)
-        => uSyncTaskHelper.FromResultOf(() => { return _mediaService.Save(item); });
+        => uSyncTaskHelper.FromResultOf(() =>
+        {
+            var attempt = _mediaService.Save(item);
+            if (attempt.Success is false)
+            {
+                throw new InvalidOperationException(
+                    $"Could not save media {item.Name}: {attempt.Result?.Result}");
+            }
+        });
 
     public override Task DeleteItemAsync(IMedia item)
-        => uSyncTaskHelper.FromResultOf(() => { return _mediaService.Delete(item); });
+        => uSyncTaskHelper.FromResultOf(() =>
+        {
+            var attempt = _mediaService.Delete(item);
+            if (attempt.Success is false)
+            {
+                throw new InvalidOperationException(
+                    $"Could not delete media {item.Name}: {attempt.Result?.Result}");
+            }
+        });
 
     protected override Task<SyncParentItem?> FindParentByIdAsync(int id)
     {

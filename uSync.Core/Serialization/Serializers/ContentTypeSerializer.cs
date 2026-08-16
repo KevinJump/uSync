@@ -206,7 +206,12 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("Saving in Serializer because item is dirty [{properties}]", dirty);
 
-            await _contentTypeService.UpdateAsync(item, Constants.Security.SuperUserKey);
+            var attempt = await _contentTypeService.UpdateAsync(item, Constants.Security.SuperUserKey);
+            if (attempt.Success is false)
+            {
+                throw new InvalidOperationException(
+                    $"Could not save content type {item.Alias}: {attempt.Result}");
+            }
         }
 
         await CleanFolderAsync(item, node);
