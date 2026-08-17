@@ -172,11 +172,13 @@ jobs:
 
       # --skip-duplicate so re-running the workflow for an already-published version
       # is a no-op rather than a failure.
+      #
+      # `dotnet nuget push "<dir>/*.nupkg"` does not reliably glob-expand on this
+      # runner, so the .nupkg files are enumerated explicitly instead.
       - name: push to nuget
         env:
           NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
-        run: >
-          dotnet nuget push "${{ env.out_folder }}*.nupkg"
-          --api-key "$NUGET_API_KEY"
-          --source ${{ env.nuget_source }}
-          --skip-duplicate
+        run: |
+          Get-ChildItem -Path "${{ env.out_folder }}" -Filter *.nupkg | ForEach-Object {
+            dotnet nuget push $_.FullName --api-key "$env:NUGET_API_KEY" --source ${{ env.nuget_source }} --skip-duplicate
+          }
