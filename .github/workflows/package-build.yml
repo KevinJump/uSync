@@ -196,9 +196,11 @@ jobs:
 
       # --skip-duplicate so re-running this workflow for a version already on the
       # nightly feed is a no-op rather than a failure.
+      #
+      # `dotnet nuget push "<dir>/*.nupkg"` does not reliably glob-expand on this
+      # runner, so the .nupkg files are enumerated explicitly instead.
       - name: push to Azure Artifacts nightly feed
-        run: >
-          dotnet nuget push "${{ env.out_folder }}*.nupkg"
-          --api-key az
-          --source AzureArtifactsNightly
-          --skip-duplicate
+        run: |
+          Get-ChildItem -Path "${{ env.out_folder }}" -Filter *.nupkg | ForEach-Object {
+            dotnet nuget push $_.FullName --api-key az --source AzureArtifactsNightly --skip-duplicate
+          }
