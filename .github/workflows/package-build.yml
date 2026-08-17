@@ -155,11 +155,50 @@ jobs:
       - name: package uSync (meta package)
         run: dotnet pack ./uSync/uSync.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
 
-      # NOTE: intentionally no `dotnet nuget push` / `npm publish` step here - this
-      # workflow builds artifacts on every push to a release branch for review. The
-      # actual release happens in release.yml, triggered by pushing a v{version} tag.
+      # NOTE: this workflow builds artifacts on every push to a release branch for
+      # review. Full releases to nuget.org happen separately, in release.yml,
+      # triggered by pushing a v{version} tag. The publish-nightly job below pushes
+      # these same build-every-commit packages to the Azure Artifacts nightly feed
+      # instead, so testers can track main without waiting for a tagged release.
       - name: Upload nuget file as build artifact
         uses: actions/upload-artifact@v7
         with:
           name: Nuget Build Output
           path: ${{ env.out_folder }}
+
+  publish-nightly:
+    runs-on: windows-latest
+
+    needs: package-up
+
+    # Nightly feed is only fed from the current active major version branch.
+    if: github.ref == 'refs/heads/v18/main'
+
+    env:
+      nightly_source: https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
+
+    steps:
+      - name: Download nuget build artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: Nuget Build Output
+          path: ${{ env.out_folder }}
+
+      # Azure Artifacts doesn't accept a bare API key for push auth - the PAT has to
+      # go on the source itself as the password of a basic-auth credential.
+      - name: Add Azure Artifacts nightly feed as a nuget source
+        run: >
+          dotnet nuget add source ${{ env.nightly_source }}
+          --name AzureArtifactsNightly
+          --username jumoo
+          --password ${{ secrets.AZURE_ARTIFACTS_PAT }}
+          --store-password-in-clear-text
+
+      # --skip-duplicate so re-running this workflow for a version already on the
+      # nightly feed is a no-op rather than a failure.
+      - name: push to Azure Artifacts nightly feed
+        run: >
+          dotnet nuget push "${{ env.out_folder }}*.nupkg"
+          --api-key az
+          --source AzureArtifactsNightly
+          --skip-duplicate
