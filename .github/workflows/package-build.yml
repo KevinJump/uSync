@@ -135,6 +135,13 @@ jobs:
       - name: restore
         run: dotnet restore ${{ env.solution_name }} --locked-mode
 
+      # matches release.yml's build step, so nightly and release packages are built
+      # the same way (deterministic/reproducible outputs) rather than just sharing
+      # a project list. The pack steps below rely on this build's outputs already
+      # being up to date, the same way release.yml's pack steps do.
+      - name: build
+        run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
+
       - name: package uSync.Core
         run: dotnet pack ./uSync.Core/uSync.Core.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
 
