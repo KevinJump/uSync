@@ -93,6 +93,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "lts/*"
+          cache: npm
+          cache-dependency-path: ${{ env.client_folder }}/package-lock.json
 
       - name: Stamp version on NPM Package
         working-directory: ${{ env.client_folder }}

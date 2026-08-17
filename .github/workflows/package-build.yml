@@ -73,6 +73,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "lts/*"
+          cache: npm
+          cache-dependency-path: ./uSync.Backoffice.Management.Client/usync-assets/package-lock.json
 
       - name: restore
         run: dotnet restore ${{ env.solution_name }} --locked-mode
@@ -102,6 +104,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "lts/*"
+          cache: npm
+          cache-dependency-path: ./uSync.Backoffice.Management.Client/usync-assets/package-lock.json
 
       - name: version
         run: |
