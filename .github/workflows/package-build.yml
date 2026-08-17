@@ -28,7 +28,11 @@ jobs:
   version:
     runs-on: windows-latest
     outputs:
-      version_string: ${{ steps.gitversion.outputs.fullSemVer }}
+      # These builds are only ever pushed to the Azure Artifacts nightly feed, never
+      # to nuget.org, so the version carries a date + run number rather than
+      # GitVersion's own prerelease scheme - makes it obvious which nightly a given
+      # package build is, and when it was built.
+      version_string: ${{ steps.gitversion.outputs.majorMinorPatch }}-build.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}
 
     steps:
       - name: Checkout
@@ -51,9 +55,14 @@ jobs:
           useConfigFile: true
           configFilePath: ./GitVersion.yml
 
+      - name: Determine build date
+        id: nightly_date
+        shell: bash
+        run: echo "date=$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+
       - name: Display version
         run: |
-          echo "Full Version: ${{ steps.gitversion.outputs.fullSemVer }}"
+          echo "Full Version: ${{ steps.gitversion.outputs.majorMinorPatch }}-build.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}"
 
   build-project:
     runs-on: windows-latest
