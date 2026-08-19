@@ -199,7 +199,7 @@ jobs:
 
     steps:
       - name: Download nuget build artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: Nuget Build Output
           path: ${{ env.out_folder }}
