@@ -102,8 +102,10 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                 contentAttempt.Result,
                 userKey, key);
 
-            if (attempt.Success is false)
-                return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "Failed to create template");
+            if (attempt.Success is false) 
+                return SyncAttempt<ITemplate>.Fail(name, attempt.Result, ChangeType.Import,
+                    $"Failed to create template: {attempt.Status}",
+                    new InvalidOperationException($"Failed to create template '{alias}': {attempt.Status} {attempt.Exception?.Message ?? "Unknown error"}"));
 
             item = attempt.Result;
             details.AddNew(alias, alias, "Template");
@@ -113,13 +115,6 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
             // don't need to go through the process, the create also saves it.
             return SyncAttempt<ITemplate>.Succeed(name, item, ChangeType.Import, "Created", true, details);
-        }
-
-        if (item is null)
-        {
-            // creating went wrong
-            logger.LogWarning("Failed to create template");
-            return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "Failed to create template");
         }
 
         if (item.Key != key)
