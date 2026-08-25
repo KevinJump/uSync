@@ -269,7 +269,7 @@ internal class uSyncManagementService : ISyncManagementService
         if (actionRequest.StepNumber >= handlers.Count)
         {
             var actions = await PerformFinalSteps(requestId, action, handlerOptions, callbacks, user?.Username);
-            return SummerizeCompleteProcess(actionRequest, action, handlers, requestId, callbacks, actions);
+            return await SummerizeCompleteProcess(actionRequest, action, handlers, requestId, callbacks, actions);
         }
 
 
@@ -282,7 +282,7 @@ internal class uSyncManagementService : ISyncManagementService
         var allActions = _syncManagementCache.GetCachedActions(requestId);
 
         var summaries = GetSummaries(action, handlers, actionRequest.StepNumber, allActions);
-        callbacks.Callback?.Invoke(new SyncProgressSummary(summaries, "Processing " + action.ToString(), handlers.Count));
+        await callbacks.RaiseCallbackAsync(new SyncProgressSummary(summaries, "Processing " + action.ToString(), handlers.Count));
 
         return new PerformActionResponse
         {
@@ -293,15 +293,18 @@ internal class uSyncManagementService : ISyncManagementService
         };
     }
 
-    private static PerformActionResponse SummerizeCompleteProcess(PerformActionRequest actionRequest, HandlerActions action, List<SyncHandlerView> handlers, Guid requestId, uSyncCallbacks callbacks, List<uSyncAction> actions)
+    private static async Task<PerformActionResponse> SummerizeCompleteProcess(PerformActionRequest actionRequest, HandlerActions action, List<SyncHandlerView> handlers, Guid requestId, uSyncCallbacks callbacks, List<uSyncAction> actions)
     {
         var finalSummary = GetSummaries(action, handlers, actionRequest.StepNumber + 1, actions);
         var actionViews = actions.Select(x => x.AsActionView());
 
-        callbacks?.Callback?.Invoke(new SyncProgressSummary(finalSummary, "Completed", handlers.Count));
-        callbacks?.Complete?.Invoke(requestId, "Sync complete", true, actionViews);
+        if (callbacks is not null)
+        {
+            await callbacks.RaiseCallbackAsync(new SyncProgressSummary(finalSummary, "Completed", handlers.Count));
+            await callbacks.RaiseCompleteAsync(requestId, "Sync complete", true, actionViews);
+        }
 
-        // finished. 
+        // finished.
         return new PerformActionResponse
         {
             RequestId = requestId.ToString(),
