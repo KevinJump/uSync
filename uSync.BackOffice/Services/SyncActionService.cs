@@ -124,7 +124,8 @@ internal class SyncActionService : ISyncActionService
             request.ActionOptions.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
             request.Actions);
 
-        request.Callbacks?.Update?.Invoke("Post Import Complete", 1, 1);
+        if (request.Callbacks is not null)
+            await request.Callbacks.RaiseUpdateAsync("Post Import Complete", 1, 1);
         return new SyncActionResult([.. actions.Where(x => x.Change > Core.ChangeType.NoChange)]);
     }
 
@@ -218,7 +219,8 @@ internal class SyncActionService : ISyncActionService
                 request.HandlerAction, request.Actions.CountChanges(), request.Actions.Count(), elapsed);
         }
 
-        request.Callbacks?.Update?.Invoke($"{request.HandlerAction} completed ({elapsed:#,#}ms)", 1, 1);
+        if (request.Callbacks is not null)
+            await request.Callbacks.RaiseUpdateAsync($"{request.HandlerAction} completed ({elapsed:#,#}ms)", 1, 1);
 
         // for speed we return an empty list. the merge will just take 
         // what we where passed in, and we avoid a whole copy and compare step
