@@ -270,11 +270,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         var cacheKey = PrepCaches();
         try
         {
-            options.Callbacks?.Update?.Invoke("Calculating import order", 1, 9);
+            if (options.Callbacks is not null)
+                await options.Callbacks.RaiseUpdateAsync("Calculating import order", 1, 9);
 
             var items = await GetMergedItemsAsync(folders, new SyncMergeOptions(options.Callbacks?.Update));
 
-            options.Callbacks?.Update?.Invoke($"Processing {items.Count} items", 2, 9);
+            if (options.Callbacks is not null)
+                await options.Callbacks.RaiseUpdateAsync($"Processing {items.Count} items", 2, 9);
 
             // create the update list with items.count space. this is the max size we need this list.
             List<uSyncAction> actions = new(items.Count);
@@ -284,7 +286,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             int count = 0;
             int total = items.Count;
 
-            options.Callbacks?.SetRange?.Invoke(count, total);
+            if (options.Callbacks is not null)
+                await options.Callbacks.RaiseSetRangeAsync(count, total);
 
             foreach (var item in items)
             {
@@ -330,7 +333,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 await PerformImportCleanAsync(cleanMarkers, actions, config, options.Callbacks?.Update);
             }
 
-            options.Callbacks?.Update?.Invoke("Done", 3, 3);
+            if (options.Callbacks is not null)
+                await options.Callbacks.RaiseUpdateAsync("Done", 3, 3);
 
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("ImportAll: {count} items imported", actions.Count);
@@ -462,7 +466,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             var actions = new List<uSyncAction>();
             var elements = node.Elements().ToList();
-            options.Callbacks?.SetRange?.Invoke(0, elements.Count);
+            if (options.Callbacks is not null)
+                await options.Callbacks.RaiseSetRangeAsync(0, elements.Count);
             foreach (var item in elements)
             {
                 actions.AddRange(await ImportSingleElementAsync(new XElement(item), filename, settings, options));
@@ -502,7 +507,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         try
         {
-            options.Callbacks?.IncrementalUpdate?.Invoke(node.GetAlias());
+            if (options.Callbacks is not null)
+                await options.Callbacks.RaiseIncrementalUpdateAsync(node.GetAlias());
 
             // merge the options from the handler and any import options into our serializer options.
             var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings, options.UserId);

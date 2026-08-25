@@ -197,7 +197,8 @@ public partial class SyncService : ISyncService
                 summary.UpdateHandler(
                     handler.Name, HandlerStatus.Processing, $"Importing {handler.Name}", 0);
 
-                callbacks?.Callback?.Invoke(summary);
+                if (callbacks is not null)
+                    await callbacks.RaiseCallbackAsync(summary);
 
                 var handlerActions = await this.ImportHandlerAsync(handler.Alias, importOptions);
 
@@ -227,14 +228,18 @@ public partial class SyncService : ISyncService
             if (actions.ContainsErrors())
                 _logger.LogWarning("uSync Import: Errors detected in import : {count}", actions.CountErrors());
 
-            callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
+            if (callbacks is not null)
+                await callbacks.RaiseUpdateAsync($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
             summary.Message = "Completed";
             summary.Total = handlers.Count() + 1;
             var finalActions = actions.Select(x => x.AsActionView()).ToList();
 
-            callbacks?.Callback?.Invoke(summary);
-            callbacks?.Complete?.Invoke(requestId, "Sync complete", true, finalActions);
+            if (callbacks is not null)
+            {
+                await callbacks.RaiseCallbackAsync(summary);
+                await callbacks.RaiseCompleteAsync(requestId, "Sync complete", true, finalActions);
+            }
 
             return actions;
         }
@@ -386,7 +391,8 @@ public partial class SyncService : ISyncService
             summary.UpdateHandler(
                 handler.Name, HandlerStatus.Processing, $"Exporting {handler.Name}", 0);
 
-            callbacks?.Callback?.Invoke(summary);
+            if (callbacks is not null)
+                await callbacks.RaiseCallbackAsync(summary);
 
             var handlerActions = await handler.ExportAllAsync([$"{folder}/{handler.DefaultFolder}"], configuredHandler.Settings, callbacks?.Update);
 
@@ -398,7 +404,8 @@ public partial class SyncService : ISyncService
         }
 
         summary.UpdateMessage("Export Completed");
-        callbacks?.Callback?.Invoke(summary);
+        if (callbacks is not null)
+            await callbacks.RaiseCallbackAsync(summary);
 
         await _mutexService.FireBulkCompleteAsync(new uSyncExportCompletedNotification(actions, null));
 
@@ -412,7 +419,8 @@ public partial class SyncService : ISyncService
                 sw.ElapsedMilliseconds);
         }
 
-        callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
+        if (callbacks is not null)
+            await callbacks.RaiseUpdateAsync($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
         return actions;
     }

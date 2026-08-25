@@ -59,8 +59,9 @@ public partial class SyncService
             }
 
 
-            options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
-                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+            if (options.Callbacks is not null)
+                await options.Callbacks.RaiseUpdateAsync(item.Node.GetAlias(),
+                    CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
             if (handlerPair != null)
             {
@@ -131,8 +132,9 @@ public partial class SyncService
                                 continue;
                             }
 
-                            options.Callbacks?.Update?.Invoke(node.GetAlias(),
-                                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+                            if (options.Callbacks is not null)
+                                await options.Callbacks.RaiseUpdateAsync(node.GetAlias(),
+                                    CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                             if (handlerPair != null)
                             {
@@ -208,8 +210,9 @@ public partial class SyncService
                                 continue;
                             }
 
-                            options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}",
-                                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+                            if (options.Callbacks is not null)
+                                await options.Callbacks.RaiseUpdateAsync($"Second Pass: {action.Name}",
+                                    CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                             secondPassActions.AddRange(await handlerPair.Handler.ImportSecondPassAsync(action, handlerPair.Settings, options));
 
@@ -273,7 +276,8 @@ public partial class SyncService
                     {
                         if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
                         {
-                            options.Callbacks?.Update?.Invoke(actionItem.alias, index, folders.Count);
+                            if (options.Callbacks is not null)
+                                await options.Callbacks.RaiseUpdateAsync(actionItem.alias, index, folders.Count);
 
                             var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
                             results.AddRange(await postImportHandler.ProcessPostImportAsync(handlerActions, handlerPair.Settings));
@@ -326,7 +330,8 @@ public partial class SyncService
 
                     if (handlerPair.Handler is ISyncCleanEntryHandler cleanEntryHandler)
                     {
-                        options.Callbacks?.Update?.Invoke(actionItem.alias, index, cleans.Count);
+                        if (options.Callbacks is not null)
+                            await options.Callbacks.RaiseUpdateAsync(actionItem.alias, index, cleans.Count);
 
                         var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
                         results.AddRange(await cleanEntryHandler.ProcessCleanActionsAsync(actionItem.folder, handlerActions, handlerPair.Settings));
