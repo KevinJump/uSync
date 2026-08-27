@@ -3,6 +3,8 @@ import { UmbDataSourceResponse } from '@umbraco-cms/backoffice/repository';
 import { tryExecute } from '@umbraco-cms/backoffice/resources';
 import {
 	getActionsBySet,
+	getRunning,
+	getStatus,
 	getSyncFileInfo,
 	PerformActionRequest,
 	PerformActionResponse,
@@ -11,6 +13,8 @@ import {
 	postPerform,
 	postProcessUpload,
 	SyncActionGroup,
+	SyncOperationStatusResponse,
+	SyncRunningOperationResponse,
 	USyncActionView,
 } from '@jumoo/uSync';
 
@@ -19,6 +23,12 @@ export interface SyncActionDataSource {
 	performAction(
 		request: PerformActionRequest,
 	): Promise<UmbDataSourceResponse<PerformActionResponse>>;
+	getOperationStatus(
+		operationId: string,
+	): Promise<UmbDataSourceResponse<SyncOperationStatusResponse>>;
+	getRunningOperation(): Promise<
+		UmbDataSourceResponse<SyncRunningOperationResponse>
+	>;
 }
 
 export class uSyncActionDataSource implements SyncActionDataSource {
@@ -56,6 +66,23 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 
 	async downloadFile() {
 		return await tryExecute(this.#host, postDownload());
+	}
+
+	async getOperationStatus(
+		operationId: string,
+	): Promise<UmbDataSourceResponse<SyncOperationStatusResponse>> {
+		return await tryExecute(
+			this.#host,
+			getStatus({
+				query: { operationId: operationId },
+			}),
+		);
+	}
+
+	async getRunningOperation(): Promise<
+		UmbDataSourceResponse<SyncRunningOperationResponse>
+	> {
+		return await tryExecute(this.#host, getRunning());
 	}
 
 	async processUpload(fileId: string) {

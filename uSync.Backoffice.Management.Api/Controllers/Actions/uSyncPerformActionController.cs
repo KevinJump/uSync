@@ -41,6 +41,23 @@ public class uSyncPerformActionController : uSyncControllerBase
     public async Task<PerformActionResponse> PerformAction(PerformActionRequest model)
         => await _managementService.PerformActionAsync(model, _backOfficeSecurityAccessor.BackOfficeSecurity?.CurrentUser);
 
+    /// <summary>
+    ///  status of a background operation - lets the client poll for progress,
+    ///  or reattach to a run it did not itself start (e.g. after a page reload).
+    /// </summary>
+    [HttpGet("Status")]
+    [ProducesResponseType(typeof(SyncOperationStatusResponse), 200)]
+    public async Task<SyncOperationStatusResponse> Status(Guid operationId)
+        => await _managementService.GetOperationStatusAsync(operationId);
+
+    /// <summary>
+    ///  the run (if any) currently active on the server.
+    /// </summary>
+    [HttpGet("Running")]
+    [ProducesResponseType(typeof(SyncRunningOperationResponse), 200)]
+    public async Task<SyncRunningOperationResponse> Running()
+        => await _managementService.GetRunningOperationAsync();
+
 
     [HttpPost("Download")]
     [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK)]

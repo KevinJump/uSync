@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetActionsBySetData, GetActionsBySetErrors, GetActionsBySetResponses, GetAddOnsData, GetAddOnsErrors, GetAddOnSplashData, GetAddOnSplashErrors, GetAddOnSplashResponses, GetAddOnsResponses, GetCheckLegacyData, GetCheckLegacyErrors, GetCheckLegacyResponses, GetHandlerSettingsData, GetHandlerSettingsErrors, GetHandlerSettingsResponses, GetSetsData, GetSetsErrors, GetSetsResponses, GetSettingsData, GetSettingsErrors, GetSettingsResponses, GetSyncFileInfoData, GetSyncFileInfoErrors, GetSyncFileInfoResponses, PostCopyLegacyData, PostCopyLegacyErrors, PostCopyLegacyResponses, PostDownloadData, PostDownloadErrors, PostDownloadResponses, PostIgnoreLegacyData, PostIgnoreLegacyErrors, PostIgnoreLegacyResponses, PostImportData, PostImportErrors, PostImportResponses, PostMergeExportData, PostMergeExportErrors, PostMergeExportResponses, PostPerformData, PostPerformErrors, PostPerformResponses, PostProcessUploadData, PostProcessUploadErrors, PostProcessUploadResponses } from './types.gen';
+import type { GetActionsBySetData, GetActionsBySetErrors, GetActionsBySetResponses, GetAddOnsData, GetAddOnsErrors, GetAddOnSplashData, GetAddOnSplashErrors, GetAddOnSplashResponses, GetAddOnsResponses, GetCheckLegacyData, GetCheckLegacyErrors, GetCheckLegacyResponses, GetHandlerSettingsData, GetHandlerSettingsErrors, GetHandlerSettingsResponses, GetRunningData, GetRunningErrors, GetRunningResponses, GetSetsData, GetSetsErrors, GetSetsResponses, GetSettingsData, GetSettingsErrors, GetSettingsResponses, GetStatusData, GetStatusErrors, GetStatusResponses, GetSyncFileInfoData, GetSyncFileInfoErrors, GetSyncFileInfoResponses, PostCopyLegacyData, PostCopyLegacyErrors, PostCopyLegacyResponses, PostDownloadData, PostDownloadErrors, PostDownloadResponses, PostIgnoreLegacyData, PostIgnoreLegacyErrors, PostIgnoreLegacyResponses, PostImportData, PostImportErrors, PostImportResponses, PostMergeExportData, PostMergeExportErrors, PostMergeExportResponses, PostPerformData, PostPerformErrors, PostPerformResponses, PostProcessUploadData, PostProcessUploadErrors, PostProcessUploadResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -21,6 +21,18 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 export const getActionsBySet = <ThrowOnError extends boolean = false>(options?: Options<GetActionsBySetData, ThrowOnError>) => (options?.client ?? client).get<GetActionsBySetResponses, GetActionsBySetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/umbraco/usync/api/v1/ActionsBySet',
+    ...options
+});
+
+export const getRunning = <ThrowOnError extends boolean = false>(options?: Options<GetRunningData, ThrowOnError>) => (options?.client ?? client).get<GetRunningResponses, GetRunningErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/Running',
+    ...options
+});
+
+export const getStatus = <ThrowOnError extends boolean = false>(options?: Options<GetStatusData, ThrowOnError>) => (options?.client ?? client).get<GetStatusResponses, GetStatusErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/Status',
     ...options
 });
 

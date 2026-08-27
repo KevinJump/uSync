@@ -135,6 +135,22 @@ export class uSyncActionRepository extends UmbControllerBase {
 		return result.data;
 	}
 
+	/**
+	 * Poll the status of a background operation.
+	 * @param operationId the operation id returned from performAction when inBackground is true
+	 */
+	async getOperationStatus(operationId: string) {
+		return await this.#actionDataSource.getOperationStatus(operationId);
+	}
+
+	/**
+	 * Ask the server if there is a background run currently active -
+	 * used to reattach to a run this client didn't itself start (e.g. after a reload).
+	 */
+	async getRunningOperation() {
+		return await this.#actionDataSource.getRunningOperation();
+	}
+
 	async processUpload(fileId: string) {
 		return (await this.#actionDataSource.processUpload(fileId)).data;
 	}
