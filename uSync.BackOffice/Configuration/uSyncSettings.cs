@@ -250,8 +250,19 @@ public class uSyncSettings
 
     /// <summary>
     ///  What type of processing mode to use (normal or background)
-    /// </summary> 
-    [DefaultValue(SyncProcessingMode.Background)]
+    /// </summary>
+    /// <remarks>
+    ///  Background mode runs the whole sync process as one long-running server-side
+    ///  operation (via Umbraco's ILongRunningOperationService) instead of one HTTP
+    ///  request per handler, so the user isn't tied to the uSync page while it runs.
+    ///
+    ///  On SQLite this can cause other backoffice activity (by the same user or
+    ///  anyone else) to fail with 'database table is locked' errors while a large
+    ///  import is in progress - SQLite is much less tolerant of a long-held write
+    ///  lock than SQL Server. Defaults to Normal for that reason; switch to
+    ///  Background deliberately, and expect that caveat on SQLite.
+    /// </remarks>
+    [DefaultValue(SyncProcessingMode.Normal)]
     public SyncProcessingMode ProcessingMode { get; set; } = SyncProcessingMode.Normal;
 
     /// <summary>

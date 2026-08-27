@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
+using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Membership;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
@@ -182,6 +183,15 @@ internal class uSyncManagementService : ISyncManagementService
     }
 
 
+    /// <summary>
+    ///  category prefix used for uSync's long-running operations - the action name is
+    ///  appended so a Report doesn't block an Import (or vice versa) from starting.
+    /// </summary>
+    private const string OperationTypePrefix = "uSync";
+
+    private static string GetOperationType(HandlerActions action)
+        => $"{OperationTypePrefix}:{action}";
+
     public async Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user)
     {
         if (_configService.Settings.ProcessingMode == SyncProcessingMode.Background)
@@ -198,42 +208,171 @@ internal class uSyncManagementService : ISyncManagementService
         if (Enum.TryParse(actionRequest.Action, out HandlerActions action) is false)
             throw new ArgumentException($"Invalid action {actionRequest.Action}");
 
-        var handlers = _syncActionService.GetActionHandlers(action, actionRequest.Options)
-            .ToList();
+        var requestId = GetRequestId(actionRequest);
+        actionRequest.RequestId = requestId.ToString();
 
-        actionRequest.RequestId = GetRequestId(actionRequest).ToString();
-
-        var enqueAttempt = await _longRunningOperationService.RunAsync(
-            actionRequest.RequestId,
-            async _ => await ProcessAllActions(actionRequest, user),
+        var enqueueAttempt = await _longRunningOperationService.RunAsync(
+            GetOperationType(action),
+            ct => ProcessAllActions(actionRequest, user, ct),
             allowConcurrentExecution: false);
+
+        if (enqueueAttempt.Success is false)
+        {
+            return new PerformActionResponse
+            {
+                RequestId = requestId.ToString(),
+                Complete = true,
+                InBackground = false,
+                Message = $"A {action} process is already running in the background, please wait for it to complete."
+            };
+        }
+
+        var operationId = enqueueAttempt.Result;
+        _syncManagementCache.RegisterOperation(operationId, requestId);
+        _syncManagementCache.SaveProgress(new SyncManagementProgress
+        {
+            RequestId = requestId,
+            OperationId = operationId,
+            Action = action.ToString(),
+        });
 
         return new PerformActionResponse
         {
-            RequestId = Guid.NewGuid().ToString(),
+            RequestId = requestId.ToString(),
+            OperationId = operationId.ToString(),
             Complete = true,
             InBackground = true
         };
     }
 
-    public async Task ProcessAllActions(PerformActionRequest request, IUser? user)
+    public async Task ProcessAllActions(PerformActionRequest request, IUser? user, CancellationToken cancellationToken)
     {
         var result = default(PerformActionResponse);
 
         // this is a break should something get stuck in a loop.
-        // in theory there is only ~ 13/14 handlers so 100 means 
-        // its gone wrong by a bit. 
+        // in theory there is only ~ 13/14 handlers so 100 means
+        // its gone wrong by a bit.
         var count = 0;
 
         do
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             result = await PerformActionInternalAsync(count == 0, request, user);
             request.RequestId = result.RequestId;
             request.StepNumber++;
             count++;
         } while (result.Complete is false && count < 100);
+    }
 
-        
+    public async Task<SyncOperationStatusResponse> GetOperationStatusAsync(Guid operationId)
+    {
+        var operationStatus = await _longRunningOperationService.GetStatusAsync(operationId);
+        var requestId = _syncManagementCache.GetRequestIdForOperation(operationId);
+        var progress = requestId is not null ? _syncManagementCache.GetProgress(requestId.Value) : null;
+
+        // GetStatusAsync returns the raw stored status - unlike GetByTypeAsync it does NOT
+        // treat an expired Enqueued/Running row as Stale. That matters here specifically:
+        // if the server crashes or restarts mid-run, nothing ever moves that row to
+        // Failed/Success, so this would otherwise report "Running" forever (until the
+        // hourly cleanup job eventually deletes the row) and the client would be stuck
+        // polling a run that's never coming back. Cross-check against the staleness-aware
+        // lookup so this self-heals within the configured expiration window instead.
+        if (operationStatus is LongRunningOperationStatus.Enqueued or LongRunningOperationStatus.Running
+            && await IsOperationActiveAsync(operationId) is false)
+        {
+            operationStatus = LongRunningOperationStatus.Stale;
+        }
+
+        if (operationStatus is null)
+        {
+            return new SyncOperationStatusResponse
+            {
+                OperationId = operationId.ToString(),
+                RequestId = requestId?.ToString(),
+                Action = progress?.Action,
+                OperationStatus = "NotFound",
+                Complete = true,
+                Status = progress?.Status,
+                Actions = progress?.Actions,
+                Message = progress?.Message
+            };
+        }
+
+        var complete = operationStatus is LongRunningOperationStatus.Success
+            or LongRunningOperationStatus.Failed
+            or LongRunningOperationStatus.Stale;
+
+        var message = operationStatus switch
+        {
+            LongRunningOperationStatus.Failed => "The sync process failed, check the server logs for details.",
+            LongRunningOperationStatus.Stale => "The sync process did not report progress in time and is considered stale.",
+            _ => progress?.Message
+        };
+
+        return new SyncOperationStatusResponse
+        {
+            OperationId = operationId.ToString(),
+            RequestId = requestId?.ToString(),
+            Action = progress?.Action,
+            OperationStatus = operationStatus.Value.ToString(),
+            Complete = complete,
+            Status = progress?.Status,
+            Actions = progress?.Actions,
+            Message = message
+        };
+    }
+
+    public async Task<SyncRunningOperationResponse> GetRunningOperationAsync()
+    {
+        var active = await FindActiveOperationAsync();
+        if (active is null) return new SyncRunningOperationResponse();
+
+        var (action, operation) = active.Value;
+        var requestId = _syncManagementCache.GetRequestIdForOperation(operation.Id);
+
+        return new SyncRunningOperationResponse
+        {
+            OperationId = operation.Id.ToString(),
+            RequestId = requestId?.ToString(),
+            Action = action.ToString()
+        };
+    }
+
+    /// <summary>
+    ///  find the run (if any) currently active on the server, across all action types.
+    ///  Backed by <see cref="ILongRunningOperationService.GetByTypeAsync"/>, which -
+    ///  unlike <see cref="ILongRunningOperationService.GetStatusAsync"/> - treats an
+    ///  Enqueued/Running row whose expiration has passed as gone rather than as still
+    ///  active, so this correctly stops finding a run once the server that was
+    ///  processing it has crashed/restarted and stopped renewing it.
+    /// </summary>
+    private async Task<(HandlerActions Action, LongRunningOperation Operation)?> FindActiveOperationAsync()
+    {
+        foreach (var action in new[] { HandlerActions.Report, HandlerActions.Import, HandlerActions.Export })
+        {
+            var page = await _longRunningOperationService.GetByTypeAsync(GetOperationType(action), 0, 1);
+            var running = page.Items.FirstOrDefault();
+            if (running is not null) return (action, running);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///  is this specific operation still active (Enqueued/Running and not expired)?
+    ///  Used to re-check a raw <see cref="ILongRunningOperationService.GetStatusAsync"/>
+    ///  result, which does not itself account for staleness.
+    /// </summary>
+    private async Task<bool> IsOperationActiveAsync(Guid operationId)
+    {
+        foreach (var action in new[] { HandlerActions.Report, HandlerActions.Import, HandlerActions.Export })
+        {
+            var page = await _longRunningOperationService.GetByTypeAsync(GetOperationType(action), 0, 50);
+            if (page.Items.Any(x => x.Id == operationId)) return true;
+        }
+
+        return false;
     }
 
     private async Task<PerformActionResponse> PerformActionInternalAsync(bool isFirstRequest, PerformActionRequest actionRequest, IUser? user)
@@ -244,17 +383,19 @@ internal class uSyncManagementService : ISyncManagementService
         var handlers = _syncActionService.GetActionHandlers(action, actionRequest.Options)
             .ToList();
 
+        Guid requestId = GetRequestId(actionRequest);
+
         if (isFirstRequest)
         {
             await _syncActionService.StartProcessAsync(new SyncStartActionRequest
             {
+                RequestId = requestId,
                 Username = user?.Username,
                 HandlerAction = action,
                 Clean = actionRequest.Options?.Clean ?? false
             });
         }
 
-        Guid requestId = GetRequestId(actionRequest);
         uSyncCallbacks callbacks = GetCallbacksFromRequest(actionRequest);
 
         var handlerOptions = new SyncActionOptions()
@@ -284,25 +425,47 @@ internal class uSyncManagementService : ISyncManagementService
         var summaries = GetSummaries(action, handlers, actionRequest.StepNumber, allActions);
         await callbacks.RaiseCallbackAsync(new SyncProgressSummary(summaries, "Processing " + action.ToString(), handlers.Count));
 
+        var actionViews = allActions.Where(x => x.Change != Core.ChangeType.Hidden).Select(x => x.AsActionView()).ToList();
+
+        _syncManagementCache.SaveProgress(new SyncManagementProgress
+        {
+            RequestId = requestId,
+            Action = action.ToString(),
+            Status = summaries,
+            Actions = actionViews,
+            Complete = false,
+            Message = "Processing " + action.ToString()
+        });
+
         return new PerformActionResponse
         {
             RequestId = requestId.ToString(),
-            Actions = allActions.Where(x => x.Change != Core.ChangeType.Hidden).Select(x => x.AsActionView()),
+            Actions = actionViews,
             Status = summaries,
             Complete = false
         };
     }
 
-    private static async Task<PerformActionResponse> SummerizeCompleteProcess(PerformActionRequest actionRequest, HandlerActions action, List<SyncHandlerView> handlers, Guid requestId, uSyncCallbacks callbacks, List<uSyncAction> actions)
+    private async Task<PerformActionResponse> SummerizeCompleteProcess(PerformActionRequest actionRequest, HandlerActions action, List<SyncHandlerView> handlers, Guid requestId, uSyncCallbacks callbacks, List<uSyncAction> actions)
     {
         var finalSummary = GetSummaries(action, handlers, actionRequest.StepNumber + 1, actions);
-        var actionViews = actions.Select(x => x.AsActionView());
+        var actionViews = actions.Select(x => x.AsActionView()).ToList();
 
         if (callbacks is not null)
         {
             await callbacks.RaiseCallbackAsync(new SyncProgressSummary(finalSummary, "Completed", handlers.Count));
             await callbacks.RaiseCompleteAsync(requestId, "Sync complete", true, actionViews);
         }
+
+        _syncManagementCache.SaveProgress(new SyncManagementProgress
+        {
+            RequestId = requestId,
+            Action = action.ToString(),
+            Status = finalSummary,
+            Actions = actionViews,
+            Complete = true,
+            Message = "Completed"
+        });
 
         // finished.
         return new PerformActionResponse

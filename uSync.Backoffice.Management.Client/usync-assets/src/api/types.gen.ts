@@ -469,6 +469,8 @@ export type PerformActionResponse = {
     actions?: Array<USyncActionView> | null;
     complete: boolean;
     inBackground: boolean;
+    operationId?: string | null;
+    message?: string | null;
 };
 
 export enum PropertyAttributes {
@@ -570,10 +572,27 @@ export type SyncLegacyCheckResponse = {
     latestVersion: string;
 };
 
+export type SyncOperationStatusResponse = {
+    operationId: string;
+    requestId?: string | null;
+    action?: string | null;
+    operationStatus: string;
+    complete: boolean;
+    status?: Array<SyncHandlerSummary> | null;
+    actions?: Array<USyncActionView> | null;
+    message?: string | null;
+};
+
 export enum SyncProcessingMode {
     NORMAL = 'Normal',
     BACKGROUND = 'Background'
 }
+
+export type SyncRunningOperationResponse = {
+    operationId?: string | null;
+    requestId?: string | null;
+    action?: string | null;
+};
 
 export type SyncSelectableSet = {
     name: string;
@@ -1161,6 +1180,54 @@ export type ProcessUploadResponses = {
 };
 
 export type ProcessUploadResponse = ProcessUploadResponses[keyof ProcessUploadResponses];
+
+export type RunningData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/umbraco/usync/api/v1/Running';
+};
+
+export type RunningErrors = {
+    /**
+     * The resource is protected and requires an authentication token
+     */
+    401: unknown;
+};
+
+export type RunningResponses = {
+    /**
+     * OK
+     */
+    200: SyncRunningOperationResponse;
+};
+
+export type RunningResponse = RunningResponses[keyof RunningResponses];
+
+export type StatusData = {
+    body?: never;
+    path?: never;
+    query?: {
+        operationId?: string;
+    };
+    url: '/umbraco/usync/api/v1/Status';
+};
+
+export type StatusErrors = {
+    /**
+     * The resource is protected and requires an authentication token
+     */
+    401: unknown;
+};
+
+export type StatusResponses = {
+    /**
+     * OK
+     */
+    200: SyncOperationStatusResponse;
+};
+
+export type StatusResponse = StatusResponses[keyof StatusResponses];
 
 export type MergeExportFolderData = {
     body?: never;

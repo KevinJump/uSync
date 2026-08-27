@@ -7,6 +7,7 @@ import { UmbContextToken } from '@umbraco-cms/backoffice/context-api';
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api';
 import {
+	PerformActionResponse,
 	SyncActionGroup,
 	SyncHandlerSummary,
 	SyncLegacyCheckResponse,
@@ -28,6 +29,15 @@ import { UMB_MODAL_MANAGER_CONTEXT } from '@umbraco-cms/backoffice/modal';
 import { USYNC_IMPORT_MODAL } from './dialogs';
 
 /**
+ * Status-poll interval bounds while a background run is active and SignalR
+ * isn't connected. Kept modest (rather than a tight fixed interval) because
+ * each poll is an authenticated DB round-trip that can contend with the
+ * run's own writes - see the SQLite notes in the background-mode docs.
+ */
+const POLL_INTERVAL_MIN_MS = 5000;
+const POLL_INTERVAL_MAX_MS = 20000;
+
+/**
  * Context for getting and seting up actions.
  */
 export class uSyncWorkspaceContext
@@ -42,6 +52,21 @@ export class uSyncWorkspaceContext
 
 	#repository: uSyncActionRepository;
 	#signalRContext: uSyncSignalRContext | null = null;
+
+	/**
+	 * poll timer used while a background operation is running - this is the
+	 * safety net (and the page-reload reattach mechanism) alongside SignalR,
+	 * which is the fast path for live progress.
+	 */
+	#pollTimer: ReturnType<typeof setTimeout> | null = null;
+
+	/**
+	 * true when the current background run needs to trigger a file download
+	 * once it completes (export-to-file can't download until the export has
+	 * actually finished writing, which - in background mode - is not when
+	 * the enqueue call returns).
+	 */
+	#pendingDownload = false;
 
 	/**
 	 * list of actions that have been returned from the process
@@ -122,13 +147,18 @@ export class uSyncWorkspaceContext
 			if (!complete) return;
 
 			if (complete.success) {
-				this.#completed.setValue(true);
-				this.#working.setValue(false);
-				this.#inBackground.setValue(false);
-
-				this.#results.setValue(complete.actions ?? []);
+				this.#onRunComplete(complete.actions ?? []);
 			}
 		});
+
+		// on load, ask the server if a background run is already active -
+		// this is what lets the dashboard reattach after a page reload.
+		this.#checkForRunningOperation();
+	}
+
+	hostDisconnected(): void {
+		super.hostDisconnected();
+		this.#stopPolling();
 	}
 
 	/**
@@ -224,6 +254,7 @@ export class uSyncWorkspaceContext
 		var complete = false;
 		var id = '';
 		var step: number = 0;
+		var lastResponse: PerformActionResponse | undefined;
 
 		// pre-action checks, for files.
 		if (options.file && options.action === 'Import') {
@@ -259,10 +290,11 @@ export class uSyncWorkspaceContext
 
 				id = data.requestId;
 				complete = data.complete;
+				lastResponse = data;
 
 				this.#inBackground.setValue(data.inBackground);
 
-				if (complete) {
+				if (complete && !data.inBackground) {
 					this.#results.setValue(data?.actions ?? []);
 					this.getActions(this._currentSetName);
 				}
@@ -271,16 +303,148 @@ export class uSyncWorkspaceContext
 			}
 		} while (!complete);
 
-		// post action
+		if (lastResponse?.message) {
+			// the run couldn't be started (e.g. one is already in progress) -
+			// nothing happened, so don't report a completed run.
+			console.warn('[uSync]', lastResponse.message);
+			this.#working.setValue(false);
+			this.#completed.setValue(false);
+			this.#inBackground.setValue(false);
+			return;
+		}
+
+		if (lastResponse?.inBackground && lastResponse?.operationId) {
+			// enqueued - poll (and listen via SignalR) until it completes.
+			// export-to-file must wait until then too, it can't download yet.
+			this.#startPolling(lastResponse.operationId, options);
+			return;
+		}
+
+		// normal (stepped, foreground) mode - already complete.
 		if (options.file && options.action === 'Export') {
-			// post export , open the dialog offer the download.
 			await this.downloadFile();
 		}
 
-		if (!this.#inBackground.getValue()) {
-			this.#completed.setValue(true);
-			this.#working.setValue(false);
+		this.#completed.setValue(true);
+		this.#working.setValue(false);
+	}
+
+	/**
+	 * Ask the server if a background run is already active, and if so,
+	 * reattach to it (used on load, to recover from a page reload).
+	 */
+	async #checkForRunningOperation() {
+		const { data } = await this.#repository.getRunningOperation();
+		if (!data?.operationId) return;
+
+		this.#working.setValue(true);
+		this.#completed.setValue(false);
+		this.#inBackground.setValue(true);
+
+		this.#startPolling(data.operationId);
+	}
+
+	#startPolling(operationId: string, options?: SyncPerformActionOptions) {
+		this.#stopPolling();
+
+		this.#pendingDownload =
+			options?.file === true && options?.action === 'Export';
+
+		let interval = POLL_INTERVAL_MIN_MS;
+
+		const poll = async () => {
+			// SignalR is the fast path for progress/completion - polling is only
+			// the fallback (initial reattach before the socket is up, or if it
+			// drops mid-run). Every poll is an authenticated request, and on
+			// SQLite a background run can hold locks long enough that a steady
+			// stream of unrelated queries starts timing out, so we only spend
+			// that request when there's no live connection doing the job for us.
+			if (!this.#signalRContext?.getConnected()) {
+				const { data } =
+					await this.#repository.getOperationStatus(operationId);
+
+				if (data) {
+					this.#workingActions.setValue(data.status ?? []);
+
+					if (data.complete) {
+						this.#onRunComplete(
+							data.actions ?? [],
+							data.operationStatus === 'Success',
+							data.message,
+						);
+						return;
+					}
+				}
+
+				// back off while a run drags on, so a long import doesn't sustain
+				// a steady stream of extra queries against the same database.
+				interval = Math.min(interval * 1.5, POLL_INTERVAL_MAX_MS);
+			}
+
+			this.#pollTimer = setTimeout(poll, interval);
+		};
+
+		this.#pollTimer = setTimeout(poll, interval);
+	}
+
+	#stopPolling() {
+		if (this.#pollTimer) {
+			clearTimeout(this.#pollTimer);
+			this.#pollTimer = null;
 		}
+	}
+
+	/**
+	 * called once, however the completion was learned about - SignalR (fast
+	 * path, live connection) or polling (safety net, and what makes reattach
+	 * after a reload work). Idempotent, since both can fire for the same run.
+	 *
+	 * @param success false for a run that failed or went stale (e.g. the
+	 *   server crashed/restarted mid-run) - the results shown are whatever
+	 *   was captured before that happened, not a completed set.
+	 */
+	#onRunComplete(
+		actions: USyncActionView[],
+		success: boolean = true,
+		message?: string | null,
+	) {
+		if (this.#completed.getValue()) return;
+
+		this.#stopPolling();
+
+		if (!success) {
+			console.warn('[uSync]', message ?? 'The background run did not complete successfully.');
+		}
+
+		this.#results.setValue(actions);
+		this.#completed.setValue(true);
+		this.#working.setValue(false);
+		this.#inBackground.setValue(false);
+		this.getActions(this._currentSetName);
+
+		if (success && this.#pendingDownload) {
+			this.#pendingDownload = false;
+			this.downloadFile();
+		}
+	}
+
+	/**
+	 * Manually clear a stuck "running in background" state - a workaround for
+	 * when the server that was running the sync crashed or restarted and this
+	 * client is left showing it as still active. This only resets what THIS
+	 * client shows; it does not (and cannot - Umbraco's long-running-operation
+	 * service has no cancel API) force the server-side operation to end. If
+	 * the run really is still active elsewhere, starting a new one will still
+	 * be rejected until the server-side run actually finishes or its
+	 * expiration window passes (a few minutes by default).
+	 */
+	dismissBackgroundRun() {
+		this.#stopPolling();
+		this.#pendingDownload = false;
+		this.#completed.setValue(false);
+		this.#working.setValue(false);
+		this.#inBackground.setValue(false);
+		this.#workingActions.setValue([]);
 	}
 
 	async uploadFile() {

@@ -6,6 +6,8 @@ import {
 	PerformActionRequest,
 	PerformActionResponse,
 	SyncActionGroup,
+	SyncOperationStatusResponse,
+	SyncRunningOperationResponse,
 	USyncActionView,
 } from '@jumoo/uSync';
 
@@ -14,6 +16,12 @@ export interface SyncActionDataSource {
 	performAction(
 		request: PerformActionRequest,
 	): Promise<UmbDataSourceResponse<PerformActionResponse>>;
+	getOperationStatus(
+		operationId: string,
+	): Promise<UmbDataSourceResponse<SyncOperationStatusResponse>>;
+	getRunningOperation(): Promise<
+		UmbDataSourceResponse<SyncRunningOperationResponse>
+	>;
 }
 
 export class uSyncActionDataSource implements SyncActionDataSource {
@@ -51,6 +59,23 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 
 	async downloadFile() {
 		return await tryExecute(this.#host, ActionsService.download());
+	}
+
+	async getOperationStatus(
+		operationId: string,
+	): Promise<UmbDataSourceResponse<SyncOperationStatusResponse>> {
+		return await tryExecute(
+			this.#host,
+			ActionsService.status({
+				query: { operationId: operationId },
+			}),
+		);
+	}
+
+	async getRunningOperation(): Promise<
+		UmbDataSourceResponse<SyncRunningOperationResponse>
+	> {
+		return await tryExecute(this.#host, ActionsService.running());
 	}
 
 	async processUpload(fileId: string) {

@@ -182,7 +182,10 @@ internal class SyncActionService : ISyncActionService
         return string.Empty;
     }
 
-    private static Stopwatch? _timer;
+    // keyed by requestId rather than a single shared timer, so concurrent runs
+    // (and the multiple HTTP calls that make up one stepped run) each track
+    // their own elapsed time without stomping on one another.
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Guid, Stopwatch> _timers = new();
 
     /// <inheritdoc/>
     public async Task StartProcessAsync(SyncStartActionRequest request)
@@ -190,7 +193,9 @@ internal class SyncActionService : ISyncActionService
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("[uSync] - Starting {action} process", request.HandlerAction);
 
-        _timer = Stopwatch.StartNew();
+        if (request.RequestId is Guid requestId)
+            _timers[requestId] = Stopwatch.StartNew();
+
         await _uSyncService.StartBulkProcessAsync(request.HandlerAction);
 
         if (request.HandlerAction == HandlerActions.Export && request.Clean is true)
@@ -210,8 +215,12 @@ internal class SyncActionService : ISyncActionService
     {
         await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.ActionOptions.Group, request.Actions);
 
-        _timer?.Stop();
-        var elapsed = _timer?.ElapsedMilliseconds ?? 0;
+        long elapsed = 0;
+        if (_timers.TryRemove(request.RequestId, out var timer))
+        {
+            timer.Stop();
+            elapsed = timer.ElapsedMilliseconds;
+        }
 
         if (_logger.IsEnabled(LogLevel.Information))
         {
