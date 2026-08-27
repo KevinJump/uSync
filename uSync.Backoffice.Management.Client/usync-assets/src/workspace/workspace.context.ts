@@ -30,11 +30,15 @@ import { USYNC_IMPORT_MODAL } from './dialogs';
 
 /**
  * Status-poll interval bounds while a background run is active and SignalR
- * isn't connected. Kept modest (rather than a tight fixed interval) because
- * each poll is an authenticated DB round-trip that can contend with the
- * run's own writes - see the SQLite notes in the background-mode docs.
+ * isn't delivering. Starts close to real-time so the progress bar actually
+ * moves during a run - polling is now gated on message liveness rather than
+ * being the sole progress mechanism, and only kicks in when SignalR isn't
+ * doing the job, so the SQLite contention risk noted in the background-mode
+ * docs is far smaller than when this was the only path. Still backs off
+ * towards POLL_INTERVAL_MAX_MS on a long-running import so a multi-minute
+ * run doesn't sustain a steady 1s query rate the whole way through.
  */
-const POLL_INTERVAL_MIN_MS = 5000;
+const POLL_INTERVAL_MIN_MS = 1000;
 const POLL_INTERVAL_MAX_MS = 20000;
 
 /**

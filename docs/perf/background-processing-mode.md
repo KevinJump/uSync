@@ -70,8 +70,13 @@ Error **6** is `SQLITE_LOCKED` (a shared-cache table-lock conflict), not error
 `SQLITE_LOCKED`. The failing request happened to be uSync's own status-poll
 endpoint, whose fixed 2-second polling interval turned this from an
 occasional risk into a reliable repro — the poll is gated to only hit the
-server when SignalR isn't connected, and backs off from 5s up to 20s while a
-run drags on, specifically to reduce this pressure. But the underlying
+server when SignalR isn't actually delivering, and backs off from 1s up to
+20s while a run drags on, specifically to reduce this pressure. Note that on
+SQLite, the closer starting interval trades a small amount of the original
+mitigation for a progress bar that visibly updates during a run - it's still
+gated behind the liveness check rather than being the sole progress
+mechanism, but if you hit the contention below on SQLite, widening
+`POLL_INTERVAL_MIN_MS` back up is the first thing to try. But the underlying
 exposure isn't the poll: **any** backoffice request made while a large
 background import is writing is at risk of the same failure. A user clicking
 around the content tree during a multi-minute import can hit it too, just
