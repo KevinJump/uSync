@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
@@ -8,7 +9,7 @@ using Umbraco.Extensions;
 
 using uSync.Core.DataTypes;
 
-namespace uSync8.Community.DataTypeSerializers;
+namespace uSync.Community.DataTypeSerializers;
 
 public abstract class SyncDataTypeSerializerBase : ConfigurationSerializerBase
 {
@@ -19,18 +20,25 @@ public abstract class SyncDataTypeSerializerBase : ConfigurationSerializerBase
         this.entityService = entityService;
     }
 
-    protected virtual string UdiToEntityPath(Udi udi)
+    protected virtual bool TryUdiToEntityPath(Udi? udi, out string entityPath)
     {
-        if (udi != null && udi is GuidUdi guidUdi)
-        {
-            var item = entityService.Get(guidUdi.Guid);
-            if (item != null)
-            {
-                var type = Umbraco.Cms.Core.Models.ObjectTypes.GetUdiType(item.NodeObjectType);
-                return type + ":" + GetItemPath(item);
-            }
-        }
-        return string.Empty;
+        entityPath = string.Empty;
+
+        if (udi is not GuidUdi guidUdi) return false;
+
+        return TryGuidToEntityPath(guidUdi.Guid, out entityPath);
+    }
+
+    protected virtual bool TryGuidToEntityPath(Guid guid, out string entityPath)
+    {
+        entityPath = string.Empty;
+
+        var item = entityService.Get(guid);
+        if (item == null) return false;
+
+        var type = ObjectTypes.GetUdiType(item.NodeObjectType);
+        entityPath = type + ":" + GetItemPath(item);
+        return true;
     }
 
     protected virtual string GetItemPath(IEntitySlim item)
@@ -46,9 +54,24 @@ public abstract class SyncDataTypeSerializerBase : ConfigurationSerializerBase
         return path + "/" + item.Name;
     }
 
-    protected virtual Udi? PathToUdi(string entityPath)
+    protected virtual bool TryPathToUdi(string entityPath, out Udi? udi)
     {
-        if (!entityPath.Contains(':')) return null;
+        udi = null;
+
+        if (!entityPath.Contains(':')) return false;
+        var entityType = entityPath.Substring(0, entityPath.IndexOf(':'));
+
+        if (!TryPathToGuid(entityPath, out var key)) return false;
+
+        udi = Udi.Create(entityType, key);
+        return true;
+    }
+
+    protected virtual bool TryPathToGuid(string entityPath, out Guid guid)
+    {
+        guid = Guid.Empty;
+
+        if (!entityPath.Contains(':')) return false;
 
         var entityType = entityPath.Substring(0, entityPath.IndexOf(':'));
         var objectType = UdiEntityTypeHelper.ToUmbracoObjectType(entityType);
@@ -61,28 +84,24 @@ public abstract class SyncDataTypeSerializerBase : ConfigurationSerializerBase
 
         foreach (var name in names)
         {
-            next = FindItem(parentId, name, objectType);
-            if (next == null) return null;
+            if (!TryFindItem(parentId, name, objectType, out next)) return false;
 
             parentId = next.Id;
         }
 
-        if (next != null)
-            return Udi.Create(entityType, next.Key);
+        if (next == null) return false;
 
-
-        return null;
+        guid = next.Key;
+        return true;
     }
 
-    protected IEntitySlim? FindItem(int parentId, string name, UmbracoObjectTypes objectType)
+
+    protected bool TryFindItem(int parentId, string name, UmbracoObjectTypes objectType, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IEntitySlim? item)
     {
         var children = entityService.GetChildren(parentId, objectType);
-        if (children.Any())
-        {
-            return children.FirstOrDefault(x => x.Name.InvariantEquals(name));
-        }
 
-        return null;
+        item = children.FirstOrDefault(x => x.Name.InvariantEquals(name));
+        return item != null;
     }
 
 }

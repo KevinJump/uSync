@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.DataTypes;
+using uSync.Core.Extensions;
 
-namespace uSync8.Community.DataTypeSerializers.CoreTypes;
+namespace uSync.Community.DataTypeSerializers.CoreTypes;
 
 public class MNTPickerConfigSerializer : SyncDataTypeSerializerBase, IConfigurationSerializer
 {
@@ -16,64 +19,74 @@ public class MNTPickerConfigSerializer : SyncDataTypeSerializerBase, IConfigurat
 
     public string[] Editors => ["Umbraco.MultiNodeTreePicker"];
 
+    private const string _startNodeKey = "startNode";
+    private const string _idKey = "id";
+    private const string _dynamicRootKey = "dynamicRoot";
+    private const string _originKeyKey = "originKey";
+
     public override IDictionary<string, object> GetConfigurationExport(IDictionary<string, object> configuration)
     {
+        if (configuration.TryGetValue(_startNodeKey, out var startNodeValue)
+            && startNodeValue is not null
+            && startNodeValue.TryConvertToJsonObject(out var startNode))
+        {
+            TryMapNodeValue(startNode, _idKey, TryGuidToEntityPath);
+
+            if (startNode.TryGetPropertyAsObject(_dynamicRootKey, out var dynamicRoot))
+                TryMapNodeValue(dynamicRoot, _originKeyKey, TryGuidToEntityPath);
+
+            configuration[_startNodeKey] = startNode;
+        }
+
         return base.GetConfigurationExport(configuration);
     }
 
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
     {
+        if (configuration.TryGetValue(_startNodeKey, out var startNodeValue)
+            && startNodeValue is not null
+            && startNodeValue.TryConvertToJsonObject(out var startNode))
+        {
+            TryMapNodeValue(startNode, _idKey, TryPathToGuid);
+
+            if (startNode.TryGetPropertyAsObject(_dynamicRootKey, out var dynamicRoot))
+                TryMapNodeValue(dynamicRoot, _originKeyKey, TryPathToGuid);
+
+            configuration[_startNodeKey] = startNode;
+        }
+
         return base.GetConfigurationImport(configuration);
     }
 
-    //public override string SerializeConfig(object configuration)
-    //{
-    //    var MNTPMappedConfig = new MappedPathConfigBase<MultiNodePickerConfiguration>();
+    private delegate bool TryConvert<TResult>(Guid guid, out TResult result);
+    private delegate bool TryConvertBack(string value, out Guid guid);
 
-    //    if (configuration is MultiNodePickerConfiguration pickerConfig)
-    //    {
-    //        MNTPMappedConfig.Config = new MultiNodePickerConfiguration()
-    //        {
-    //            IgnoreUserStartNodes = pickerConfig.IgnoreUserStartNodes,
-    //            // Filter = pickerConfig.Filter,
-    //            MaxNumber = pickerConfig.MaxNumber,
-    //            MinNumber = pickerConfig.MinNumber,
-    //            // ShowOpen = pickerConfig.ShowOpen,
-    //            TreeSource = new MultiNodePickerConfigurationTreeSource()
-    //            {
-    //                ObjectType = pickerConfig.TreeSource.ObjectType,
-    //                StartNodeId = pickerConfig.TreeSource.StartNodeId,
-    //                StartNodeQuery = pickerConfig.TreeSource.StartNodeQuery
-    //            }
+    /// <summary>
+    ///  maps a guid property value to its entity path, if the property is present and holds a guid.
+    /// </summary>
+    private static bool TryMapNodeValue(JsonObject node, string propertyName, TryConvert<string> converter)
+    {
+        if (node.TryGetPropertyValue(propertyName, out var propertyValue) is false
+            || propertyValue is null) return false;
 
-    //        };
+        if (Guid.TryParse(propertyValue.ToString(), out var guid) is false) return false;
+        if (converter(guid, out var path) is false) return false;
 
-    //        if (pickerConfig?.TreeSource?.StartNodeId != null)
-    //        {
-    //            MNTPMappedConfig.MappedPath = UdiToEntityPath(pickerConfig.TreeSource.StartNodeId);
-    //        }
+        node[propertyName] = path;
+        return true;
+    }
 
-    //        return base.SerializeConfig(MNTPMappedConfig);
-    //    }
+    /// <summary>
+    ///  maps an entity path property value back to a guid, if the property is present and holds a path.
+    /// </summary>
+    private static bool TryMapNodeValue(JsonObject node, string propertyName, TryConvertBack converter)
+    {
+        if (node.TryGetPropertyValue(propertyName, out var propertyValue) is false
+            || propertyValue is null) return false;
 
-    //    return base.SerializeConfig(configuration);
-    //}
+        if (converter(propertyValue.ToString(), out var guid) is false) return false;
 
-
-    //public override object DeserializeConfig(string config, Type configType)
-    //{
-    //    if (configType == typeof(MultiNodePickerConfiguration))
-    //    {
-    //        var mappedConfig = config.DeserializeJson<MappedPathConfigBase<MultiNodePickerConfiguration>>();
-
-    //        if (!string.IsNullOrWhiteSpace(mappedConfig.MappedPath))
-    //        {
-    //            mappedConfig.Config.TreeSource.StartNodeId = PathToUdi(mappedConfig.MappedPath);
-    //        }
-
-    //        return mappedConfig.Config;
-    //    }
-
-    //    return base.DeserializeConfig(config, configType);
-    //}
+        node[propertyName] = guid;
+        return true;
+    }
 }
