@@ -41,6 +41,15 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		return this.#connection?.connectionId ?? null;
 	}
 
+	/**
+	 * Synchronous read of the current connection state - used by callers
+	 * (e.g. status polling) that need to decide whether to fall back to a
+	 * server round-trip right now, rather than subscribing to the observable.
+	 */
+	getConnected(): boolean {
+		return this.#connected.getValue() ?? false;
+	}
+
 	#connected = new UmbObjectState<boolean>(false);
 	public readonly connected = this.#connected.asObservable();
 

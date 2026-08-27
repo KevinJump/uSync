@@ -15,4 +15,17 @@ public class PerformActionResponse
     ///  the action is being performed in the background
     /// </summary>
     public bool InBackground { get; set; }
+
+    /// <summary>
+    ///  id of the long-running operation, when <see cref="InBackground"/> is true.
+    ///  used by the client to poll <c>Status</c> and reattach after a page reload.
+    /// </summary>
+    public string? OperationId { get; set; }
+
+    /// <summary>
+    ///  set when the request could not be started (e.g. a background run of this
+    ///  action is already in progress). <see cref="Complete"/> will be true, but
+    ///  no work has actually happened.
+    /// </summary>
+    public string? Message { get; set; }
 }

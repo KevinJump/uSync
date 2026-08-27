@@ -336,13 +336,32 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				${this.localize.termOrDefault('uSync_runningInBackground', 'uSync is running this process in background, if you navigate away from this page it will continue to run.')}
 				<br />
 				${this.localize.termOrDefault('uSync_connectionLost', 'the connection to the server has been lost, the process will continue to run in the background but you will not see updates here.')}
+				${this.#renderDismissBackgroundRun()}
 			</uui-box>`;
 		}
 
 		return html`<uui-box class="banner info">
 			<uui-icon name="icon-info"></uui-icon>
 			${this.localize.termOrDefault('uSync_runningInBackground', 'uSync is running this process in background, if you navigate away from this page it will continue to run.')}
+			${this.#renderDismissBackgroundRun()}
 		</uui-box>`;
+	}
+
+	/**
+	 * Escape hatch for when this is stuck reporting a background run that
+	 * isn't actually still running (e.g. the server crashed/restarted mid-run).
+	 * Only clears what this page shows - see uSyncWorkspaceContext.dismissBackgroundRun.
+	 */
+	#renderDismissBackgroundRun() {
+		return html`
+			<uui-button
+				look="secondary"
+				compact
+				label=${this.localize.termOrDefault('uSync_dismissBackgroundRun', 'Not actually running? Reset this view')}
+				@click=${() => this.#actionContext?.dismissBackgroundRun()}>
+				${this.localize.termOrDefault('uSync_dismissBackgroundRun', 'Not actually running? Reset this view')}
+			</uui-button>
+		`;
 	}
 
 	static styles = [
@@ -426,6 +445,11 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			.info {
 				background-color: var(--uui-color-positive);
 				color: var(--uui-color-positive-contrast);
+			}
+
+			.banner uui-button {
+				display: block;
+				margin-top: var(--uui-size-space-3);
 			}
 
 			.warning {

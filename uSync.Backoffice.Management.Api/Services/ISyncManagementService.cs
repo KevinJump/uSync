@@ -23,4 +23,15 @@ public interface ISyncManagementService
     Task<SyncFileVersionCheckResult> GetSyncFileInfo();
     Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user);
     UploadImportResult UnpackStream(Stream stream);
+
+    /// <summary>
+    ///  get the status of a background operation, so the client can poll for
+    ///  progress or reattach to a run after a page reload.
+    /// </summary>
+    Task<SyncOperationStatusResponse> GetOperationStatusAsync(Guid operationId);
+
+    /// <summary>
+    ///  get the run (if any) currently active on the server.
+    /// </summary>
+    Task<SyncRunningOperationResponse> GetRunningOperationAsync();
 }
