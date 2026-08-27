@@ -20,9 +20,6 @@
     <Project Path="uSync.AutoTemplates/uSync.AutoTemplates.csproj" />
     <Project Path="uSync.SchemaGenerator/uSync.SchemaGenerator.csproj" />
   </Folder>
-  <Folder Name="/WebSites/">
-    <Project Path="uSyncSource.Site/uSyncSource.Site.csproj" />
-  </Folder>
   <Project Path="uSync.Backoffice.Management.Api/uSync.Backoffice.Management.Api.csproj" />
   <Project Path="uSync.Backoffice.Management.Client/uSync.Backoffice.Management.Client.csproj" />
   <Project Path="uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj" />
