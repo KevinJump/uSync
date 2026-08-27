@@ -218,11 +218,11 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		} else {
 			return html`
 				<umb-body-layout>
+					${this.#renderBackgroundBanner()}
 					${this.#renderSyncFileInfo()} ${this.#renderLegacyBanner()}
 					${this.#renderSetPicker()}
 					<div class="wrapper">
 						${this.#renderActions()} ${this.#renderBanner()}
-						${this.#renderBackgroundBanner()}
 						${this.#renderProcessBox()}${this.#renderReport()}
 					</div>
 				</umb-body-layout>
@@ -332,18 +332,26 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 		if (!this._connected) {
 			return html` <uui-box class="banner warning">
-				<uui-icon name="icon-alert"></uui-icon>
-				${this.localize.termOrDefault('uSync_runningInBackground', 'uSync is running this process in background, if you navigate away from this page it will continue to run.')}
-				<br />
-				${this.localize.termOrDefault('uSync_connectionLost', 'the connection to the server has been lost, the process will continue to run in the background but you will not see updates here.')}
-				${this.#renderDismissBackgroundRun()}
+				<div class="banner-row">
+					<uui-icon name="icon-alert"></uui-icon>
+					<div class="banner-text">
+						${this.localize.termOrDefault('uSync_runningInBackground', 'uSync is running this process in background, if you navigate away from this page it will continue to run.')}
+						<br />
+						${this.localize.termOrDefault('uSync_connectionLost', 'the connection to the server has been lost, the process will continue to run in the background but you will not see updates here.')}
+					</div>
+					${this.#renderDismissBackgroundRun()}
+				</div>
 			</uui-box>`;
 		}
 
 		return html`<uui-box class="banner info">
-			<uui-icon name="icon-info"></uui-icon>
-			${this.localize.termOrDefault('uSync_runningInBackground', 'uSync is running this process in background, if you navigate away from this page it will continue to run.')}
-			${this.#renderDismissBackgroundRun()}
+			<div class="banner-row">
+				<uui-icon name="icon-info"></uui-icon>
+				<div class="banner-text">
+					${this.localize.termOrDefault('uSync_runningInBackground', 'uSync is running this process in background, if you navigate away from this page it will continue to run.')}
+				</div>
+				${this.#renderDismissBackgroundRun()}
+			</div>
 		</uui-box>`;
 	}
 
@@ -355,11 +363,12 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	#renderDismissBackgroundRun() {
 		return html`
 			<uui-button
+				class="dismiss"
 				look="secondary"
 				compact
 				label=${this.localize.termOrDefault('uSync_dismissBackgroundRun', 'Not actually running? Reset this view')}
 				@click=${() => this.#actionContext?.dismissBackgroundRun()}>
-				${this.localize.termOrDefault('uSync_dismissBackgroundRun', 'Not actually running? Reset this view')}
+				<uui-icon name="icon-remove"></uui-icon>
 			</uui-button>
 		`;
 	}
@@ -447,9 +456,33 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				color: var(--uui-color-positive-contrast);
 			}
 
-			.banner uui-button {
+			.banner-row {
+				display: flex;
+				align-items: flex-start;
+				gap: var(--uui-size-space-3);
+			}
+
+			.banner-text {
+				flex: 1 1 auto;
+			}
+
+			.banner-row uui-button.dismiss {
+				flex: 0 0 auto;
+				margin: calc(var(--uui-size-space-2) * -1) calc(var(--uui-size-space-2) * -1) 0 0;
+				/* blend into the alert - same colour as its background/text, so it
+				   doesn't draw attention unless someone's actually looking for it */
+				color: inherit;
+				--uui-button-background-color: transparent;
+				--uui-button-background-color-hover: rgb(0 0 0 / 8%);
+				--uui-button-contrast: currentColor;
+				--uui-button-contrast-hover: currentColor;
+				--uui-button-border-color: transparent;
+				--uui-button-border-color-hover: transparent;
+			}
+
+			.banner {
 				display: block;
-				margin-top: var(--uui-size-space-3);
+				margin-bottom: var(--uui-size-space-4);
 			}
 
 			.warning {
