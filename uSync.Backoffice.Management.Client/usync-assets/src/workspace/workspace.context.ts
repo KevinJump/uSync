@@ -38,6 +38,20 @@ const POLL_INTERVAL_MIN_MS = 5000;
 const POLL_INTERVAL_MAX_MS = 20000;
 
 /**
+ * How long to go without a SignalR message before treating the connection as
+ * not actually delivering for this run, and falling back to polling.
+ *
+ * A "connected" socket is not the same as "receiving messages for this run" -
+ * under a load-balanced backoffice without a SignalR backplane (or sticky
+ * sessions), the socket can be happily connected to a server that isn't the
+ * one running the job, so it never delivers anything and `getConnected()`
+ * alone would leave the UI hung forever on a run that already finished.
+ * Comfortably longer than the gap between handler steps on a healthy
+ * single-server run, so the normal (SignalR-only) path is unaffected.
+ */
+const SIGNALR_STALE_MS = 15000;
+
+/**
  * Context for getting and seting up actions.
  */
 export class uSyncWorkspaceContext
@@ -59,6 +73,13 @@ export class uSyncWorkspaceContext
 	 * which is the fast path for live progress.
 	 */
 	#pollTimer: ReturnType<typeof setTimeout> | null = null;
+
+	/**
+	 * timestamp of the last SignalR add/update/complete message seen for the
+	 * current run - used to detect a socket that's "connected" but not
+	 * actually delivering (see SIGNALR_STALE_MS).
+	 */
+	#lastSignalRMessageAt = 0;
 
 	/**
 	 * true when the current background run needs to trigger a file download
@@ -143,8 +164,24 @@ export class uSyncWorkspaceContext
 			console.debug('SignalR connected', connected);
 		});
 
+		// a "connected" socket only tells us it's connected to *some* server -
+		// under a load-balanced backoffice it may not be the one running the
+		// job. Track actual message arrival separately so the poll fallback can
+		// notice a connection that isn't delivering (see SIGNALR_STALE_MS).
+		this.observe(this.#signalRContext.add, (add) => {
+			if (!add) return;
+			this.#lastSignalRMessageAt = Date.now();
+		});
+
+		this.observe(this.#signalRContext.update, (update) => {
+			if (!update) return;
+			this.#lastSignalRMessageAt = Date.now();
+		});
+
 		this.observe(this.#signalRContext.complete, (complete) => {
 			if (!complete) return;
+
+			this.#lastSignalRMessageAt = Date.now();
 
 			if (complete.success) {
 				this.#onRunComplete(complete.actions ?? []);
@@ -350,16 +387,28 @@ export class uSyncWorkspaceContext
 		this.#pendingDownload =
 			options?.file === true && options?.action === 'Export';
 
+		// seed this so the very first poll still waits the normal interval
+		// rather than firing immediately just because no message has arrived
+		// yet for a run that only just started.
+		this.#lastSignalRMessageAt = Date.now();
+
 		let interval = POLL_INTERVAL_MIN_MS;
 
 		const poll = async () => {
 			// SignalR is the fast path for progress/completion - polling is only
-			// the fallback (initial reattach before the socket is up, or if it
-			// drops mid-run). Every poll is an authenticated request, and on
-			// SQLite a background run can hold locks long enough that a steady
-			// stream of unrelated queries starts timing out, so we only spend
-			// that request when there's no live connection doing the job for us.
-			if (!this.#signalRContext?.getConnected()) {
+			// the fallback (initial reattach before the socket is up, if it drops
+			// mid-run, or - under a load-balanced backoffice without a SignalR
+			// backplane/sticky sessions - if it's connected to a server that
+			// isn't the one running the job and so never delivers anything for
+			// this run). Every poll is an authenticated request, and on SQLite a
+			// background run can hold locks long enough that a steady stream of
+			// unrelated queries starts timing out, so we only spend that request
+			// when nothing is actually delivering progress for us right now.
+			const signalRDelivering =
+				this.#signalRContext?.getConnected() &&
+				Date.now() - this.#lastSignalRMessageAt < SIGNALR_STALE_MS;
+
+			if (!signalRDelivering) {
 				const { data } =
 					await this.#repository.getOperationStatus(operationId);
 

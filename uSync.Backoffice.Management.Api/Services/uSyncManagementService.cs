@@ -211,9 +211,16 @@ internal class uSyncManagementService : ISyncManagementService
         var requestId = GetRequestId(actionRequest);
         actionRequest.RequestId = requestId.ToString();
 
+        // the operationId doesn't exist yet when RunAsync is called (it's the
+        // return value) but the background delegate can start running before
+        // RunAsync returns it - so it's handed to ProcessAllActions as a Task
+        // that's only completed once we actually have the id, rather than as a
+        // plain value that could be read before it's assigned.
+        var operationIdSource = new TaskCompletionSource<Guid>(TaskCreationOptions.RunContinuationsAsynchronously);
+
         var enqueueAttempt = await _longRunningOperationService.RunAsync(
             GetOperationType(action),
-            ct => ProcessAllActions(actionRequest, user, ct),
+            ct => ProcessAllActions(actionRequest, user, operationIdSource.Task, ct),
             allowConcurrentExecution: false);
 
         if (enqueueAttempt.Success is false)
@@ -228,8 +235,10 @@ internal class uSyncManagementService : ISyncManagementService
         }
 
         var operationId = enqueueAttempt.Result;
+        operationIdSource.SetResult(operationId);
+
         _syncManagementCache.RegisterOperation(operationId, requestId);
-        _syncManagementCache.SaveProgress(new SyncManagementProgress
+        await _syncManagementCache.SaveProgressAsync(new SyncManagementProgress
         {
             RequestId = requestId,
             OperationId = operationId,
@@ -245,8 +254,13 @@ internal class uSyncManagementService : ISyncManagementService
         };
     }
 
-    public async Task ProcessAllActions(PerformActionRequest request, IUser? user, CancellationToken cancellationToken)
+    public async Task ProcessAllActions(PerformActionRequest request, IUser? user, Task<Guid> operationIdTask, CancellationToken cancellationToken)
     {
+        // resolves as soon as PerformBackgroundActionAsync has the id back from
+        // RunAsync - virtually instant, but see the comment at that call site
+        // for why this can't just be a plain captured value.
+        var operationId = await operationIdTask;
+
         var result = default(PerformActionResponse);
 
         // this is a break should something get stuck in a loop.
@@ -258,7 +272,7 @@ internal class uSyncManagementService : ISyncManagementService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            result = await PerformActionInternalAsync(count == 0, request, user);
+            result = await PerformActionInternalAsync(count == 0, request, user, operationId);
             request.RequestId = result.RequestId;
             request.StepNumber++;
             count++;
@@ -268,8 +282,12 @@ internal class uSyncManagementService : ISyncManagementService
     public async Task<SyncOperationStatusResponse> GetOperationStatusAsync(Guid operationId)
     {
         var operationStatus = await _longRunningOperationService.GetStatusAsync(operationId);
-        var requestId = _syncManagementCache.GetRequestIdForOperation(operationId);
-        var progress = requestId is not null ? _syncManagementCache.GetProgress(requestId.Value) : null;
+
+        // local cache first (the executing server), falling back to the shared
+        // long-running-operation row when this server didn't run it itself -
+        // e.g. a status poll landing on a different server behind a load balancer.
+        var progress = await _syncManagementCache.GetProgressForOperationAsync(operationId);
+        var requestId = progress?.RequestId;
 
         // GetStatusAsync returns the raw stored status - unlike GetByTypeAsync it does NOT
         // treat an expired Enqueued/Running row as Stale. That matters here specifically:
@@ -329,7 +347,11 @@ internal class uSyncManagementService : ISyncManagementService
         if (active is null) return new SyncRunningOperationResponse();
 
         var (action, operation) = active.Value;
-        var requestId = _syncManagementCache.GetRequestIdForOperation(operation.Id);
+
+        // local cache first, falling back to the shared row so a "what's running?"
+        // check from a different server can still resolve the requestId.
+        var requestId = _syncManagementCache.GetRequestIdForOperation(operation.Id)
+            ?? (await _syncManagementCache.GetProgressForOperationAsync(operation.Id))?.RequestId;
 
         return new SyncRunningOperationResponse
         {
@@ -375,7 +397,7 @@ internal class uSyncManagementService : ISyncManagementService
         return false;
     }
 
-    private async Task<PerformActionResponse> PerformActionInternalAsync(bool isFirstRequest, PerformActionRequest actionRequest, IUser? user)
+    private async Task<PerformActionResponse> PerformActionInternalAsync(bool isFirstRequest, PerformActionRequest actionRequest, IUser? user, Guid? operationId = null)
     {
         if (Enum.TryParse(actionRequest.Action, out HandlerActions action) is false)
             throw new ArgumentException($"Invalid action {actionRequest.Action}");
@@ -410,7 +432,7 @@ internal class uSyncManagementService : ISyncManagementService
         if (actionRequest.StepNumber >= handlers.Count)
         {
             var actions = await PerformFinalSteps(requestId, action, handlerOptions, callbacks, user?.Username);
-            return await SummerizeCompleteProcess(actionRequest, action, handlers, requestId, callbacks, actions);
+            return await SummerizeCompleteProcess(actionRequest, action, handlers, requestId, callbacks, actions, operationId);
         }
 
 
@@ -427,9 +449,10 @@ internal class uSyncManagementService : ISyncManagementService
 
         var actionViews = allActions.Where(x => x.Change != Core.ChangeType.Hidden).Select(x => x.AsActionView()).ToList();
 
-        _syncManagementCache.SaveProgress(new SyncManagementProgress
+        await _syncManagementCache.SaveProgressAsync(new SyncManagementProgress
         {
             RequestId = requestId,
+            OperationId = operationId,
             Action = action.ToString(),
             Status = summaries,
             Actions = actionViews,
@@ -446,7 +469,7 @@ internal class uSyncManagementService : ISyncManagementService
         };
     }
 
-    private async Task<PerformActionResponse> SummerizeCompleteProcess(PerformActionRequest actionRequest, HandlerActions action, List<SyncHandlerView> handlers, Guid requestId, uSyncCallbacks callbacks, List<uSyncAction> actions)
+    private async Task<PerformActionResponse> SummerizeCompleteProcess(PerformActionRequest actionRequest, HandlerActions action, List<SyncHandlerView> handlers, Guid requestId, uSyncCallbacks callbacks, List<uSyncAction> actions, Guid? operationId = null)
     {
         var finalSummary = GetSummaries(action, handlers, actionRequest.StepNumber + 1, actions);
         var actionViews = actions.Select(x => x.AsActionView()).ToList();
@@ -457,9 +480,10 @@ internal class uSyncManagementService : ISyncManagementService
             await callbacks.RaiseCompleteAsync(requestId, "Sync complete", true, actionViews);
         }
 
-        _syncManagementCache.SaveProgress(new SyncManagementProgress
+        await _syncManagementCache.SaveProgressAsync(new SyncManagementProgress
         {
             RequestId = requestId,
+            OperationId = operationId,
             Action = action.ToString(),
             Status = finalSummary,
             Actions = actionViews,

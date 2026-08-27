@@ -2,12 +2,12 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Events;
-using Umbraco.Cms.Core.HostedServices;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Sync;
@@ -32,7 +32,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
     private readonly ISyncConfigService _uSyncConfig;
     private readonly ISyncFileService _syncFileService;
     private readonly ISyncService _uSyncService;
-    private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+    private readonly ILongRunningOperationService _longRunningOperationService;
+    private readonly IServerRegistrationService _serverRegistrationService;
 
     /// <summary>
     /// Generate a new uSyncApplicationStartingHandler object
@@ -45,7 +46,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         ISyncConfigService uSyncConfigService,
         ISyncFileService syncFileService,
         ISyncService uSyncService,
-        IBackgroundTaskQueue backgroundTaskQueue)
+        ILongRunningOperationService longRunningOperationService,
+        IServerRegistrationService serverRegistrationService)
     {
         _runtimeState = runtimeState;
         _serverRegistrar = serverRegistrar;
@@ -58,7 +60,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
 
         _syncFileService = syncFileService;
         _uSyncService = uSyncService;
-        _backgroundTaskQueue = backgroundTaskQueue;
+        _longRunningOperationService = longRunningOperationService;
+        _serverRegistrationService = serverRegistrationService;
     }
 
     /// <summary>
@@ -83,27 +86,67 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
 
             return;
         }
-        
-        if (_uSyncConfig.Settings.BackgroundStartup || _uSyncConfig.Settings.ProcessingMode == SyncProcessingMode.Background)
-        {
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("uSync: Running startup in background");
 
-            _backgroundTaskQueue.QueueBackgroundWorkItem(
-                cancellationToken =>
-                {
-                    using (ExecutionContext.SuppressFlow())
-                    {
-                        Task.Run(async () => await InituSyncAsync());
-                        return Task.CompletedTask;
-                    }
-                });
-        }
-        else
-        {
-            await InituSyncAsync();
-        }
+        WarnIfLoadBalancedWithoutBackgroundMode();
 
+        // the role check above is NOT sufficient for a load-balanced backoffice:
+        // Umbraco's documented setup for that topology pins every server to
+        // SchedulingPublisher via a custom IServerRoleAccessor ("This will ensure
+        // that all servers are treated as backoffice servers"), so on that setup
+        // every server would otherwise run the startup import concurrently.
+        // ILongRunningOperationService.RunAsync elects a single winner across the
+        // cluster (it takes a DB write lock before checking for a running
+        // operation of the same type), so wrapping the actual work in it makes
+        // this safe regardless of topology - on a single server it just runs.
+        var runInBackground = _uSyncConfig.Settings.BackgroundStartup || _uSyncConfig.Settings.ProcessingMode == SyncProcessingMode.Background;
+
+        if (runInBackground && _logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("uSync: Running startup in background");
+
+        var enqueueAttempt = await _longRunningOperationService.RunAsync(
+            "uSync:Startup",
+            _ => InituSyncAsync(),
+            allowConcurrentExecution: false,
+            runInBackground: runInBackground);
+
+        if (enqueueAttempt.Success is false && _logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("uSync: Startup is already running (on this or another server) - skipping.");
+        }
+    }
+
+    /// <summary>
+    ///  Normal processing mode drives a run as a sequence of client requests that
+    ///  rely on server-side state accumulated on whichever server handled the
+    ///  previous request - that breaks the moment two requests for the same run
+    ///  land on different servers, which is exactly what a load-balanced
+    ///  backoffice (multiple active servers, no sticky sessions) does. There's no
+    ///  reliable way to detect "the backoffice is load balanced" directly - every
+    ///  server in that setup reports ServerRole.SchedulingPublisher by design -
+    ///  so this uses the number of currently active servers as an honest proxy
+    ///  instead, and only warns; it doesn't change behaviour.
+    /// </summary>
+    private void WarnIfLoadBalancedWithoutBackgroundMode()
+    {
+        if (_uSyncConfig.Settings.ProcessingMode != SyncProcessingMode.Normal) return;
+        if (!_logger.IsEnabled(LogLevel.Warning)) return;
+
+        try
+        {
+            var activeServers = _serverRegistrationService.GetActiveServers(refresh: false).Count();
+            if (activeServers <= 1) return;
+
+            _logger.LogWarning(
+                "uSync is running in {mode} processing mode with {serverCount} active backoffice servers. " +
+                "This mode does not work correctly behind a load-balanced backoffice - set uSync:Settings:ProcessingMode " +
+                "to Background. See the background-processing-mode docs for details.",
+                SyncProcessingMode.Normal, activeServers);
+        }
+        catch (Exception ex)
+        {
+            // this is a best-effort warning - never let it stop uSync starting.
+            _logger.LogDebug(ex, "uSync: could not check active server count for the load-balancing warning.");
+        }
     }
 
     /// <summary>
