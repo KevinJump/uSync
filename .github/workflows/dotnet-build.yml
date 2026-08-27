@@ -5,7 +5,7 @@ permissions:
   
 on:
   pull_request:
-    branches: [v16/main]
+    branches: [v16/main, v17/main]
 
 env:
   config: Release

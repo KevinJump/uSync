@@ -5,7 +5,7 @@ permissions:
   
 on:
   push:
-    branches: [v16/main]
+    branches: [v16/main, v17/main]
 
 env:
   config: Release
