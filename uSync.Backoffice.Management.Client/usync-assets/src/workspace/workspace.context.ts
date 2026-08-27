@@ -419,6 +419,16 @@ export class uSyncWorkspaceContext
 				if (data) {
 					this.#workingActions.setValue(data.status ?? []);
 
+					// usync-progress-box only ever renders a message from the
+					// SignalR update push - without this, the box under the
+					// handler icons stays blank/stale for a run whose socket
+					// isn't delivering. Only publish while there's still a
+					// message worth showing; the completion path below drives
+					// its own "Completed"/error state via complete.
+					if (data.message && !data.complete) {
+						this.#signalRContext?.setPolledUpdate(data.message);
+					}
+
 					if (data.complete) {
 						this.#onRunComplete(
 							data.actions ?? [],
