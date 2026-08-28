@@ -457,7 +457,7 @@ internal class uSyncManagementService : ISyncManagementService
             Status = summaries,
             Actions = actionViews,
             Complete = false,
-            Message = "Processing " + action.ToString()
+            Message = "Processing " + handlerOptions.Handler
         });
 
         return new PerformActionResponse
@@ -619,7 +619,7 @@ internal class uSyncManagementService : ISyncManagementService
     ///  take a zip file as a stream expand it over the current uSync folder. 
     /// </summary>
     public UploadImportResult UnpackStream(Stream stream)
-        => _syncActionService.UnpackImportFromStream(stream);
+        => _syncActionService.UnpackImportFromStreamAsync(stream).GetAwaiter().GetResult();
 
     public async Task<SyncFileVersionCheckResult> GetSyncFileInfo()
         => await _syncVersionFileService.GetSyncFileInfo(_configService.GetWorkingFolder());
