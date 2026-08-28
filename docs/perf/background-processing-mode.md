@@ -70,8 +70,13 @@ Error **6** is `SQLITE_LOCKED` (a shared-cache table-lock conflict), not error
 `SQLITE_LOCKED`. The failing request happened to be uSync's own status-poll
 endpoint, whose fixed 2-second polling interval turned this from an
 occasional risk into a reliable repro — the poll is gated to only hit the
-server when SignalR isn't connected, and backs off from 5s up to 20s while a
-run drags on, specifically to reduce this pressure. But the underlying
+server when SignalR isn't actually delivering, and backs off from 1s up to
+20s while a run drags on, specifically to reduce this pressure. Note that on
+SQLite, the closer starting interval trades a small amount of the original
+mitigation for a progress bar that visibly updates during a run - it's still
+gated behind the liveness check rather than being the sole progress
+mechanism, but if you hit the contention below on SQLite, widening
+`POLL_INTERVAL_MIN_MS` back up is the first thing to try. But the underlying
 exposure isn't the poll: **any** backoffice request made while a large
 background import is writing is at risk of the same failure. A user clicking
 around the content tree during a multi-minute import can hit it too, just
@@ -130,3 +135,54 @@ end (there is no public cancel API for it), so if the server-side row hasn't
 actually expired yet, a new run started right after dismissing may still be
 briefly rejected as "already running" until the expiration window above
 passes.
+
+## Load-balanced backoffice
+
+As of Umbraco 17, [load balancing the backoffice](https://docs.umbraco.com/umbraco-cms/17.latest/run-in-production/infrastructure-and-ops/server-setup/load-balancing/load-balancing-backoffice)
+is an officially supported topology. uSync supports it, but **only in
+`Background` mode.**
+
+### Why `Normal` mode doesn't work
+
+`Normal` mode drives a run as a sequence of client requests, each carrying a
+`requestId` and `stepNumber`, with the accumulated results held in an
+in-process cache on whichever server handled the previous step. If request
+N+1 lands on a different server than request N — which is exactly what
+happens under a round-robin load balancer with no sticky sessions — the run's
+accumulated results are gone. There is no supported way to make this safe
+without persisting the full result set between every step, which isn't worth
+the cost for every non-load-balanced install. Use `Background` mode instead.
+
+If you run `Normal` mode with more than one active backoffice server, uSync
+logs a warning at startup — switch `uSync:Settings:ProcessingMode` to
+`Background` to remove it.
+
+### What `Background` mode needs, in addition to the above
+
+- **The uSync folder on shared or replicated storage.** uSync reads and
+  writes it (exports, imports, the uploaded-zip workflow) using physical
+  paths — if each server has its own local copy, a file written on one server
+  is invisible to the others.
+- **`umbracoBuilder.LoadBalanceIsolatedCaches()`** in your composer, as
+  required by Umbraco's own backoffice load-balancing docs — without it,
+  repository caches are per-server and changes made by an import on one
+  server won't be reflected on another until its cache expires.
+- **SignalR is optional.** Progress and completion are pushed live over
+  SignalR when it's working, and fall back to polling the `Status` endpoint
+  when it isn't — including when the browser's socket is connected but to a
+  *different* server than the one running the job, and so never receives
+  anything for that run (the client detects this by tracking how long it's
+  been since the last SignalR message, not just whether the socket is
+  "connected"). A SignalR backplane (SQL Server, Redis) plus sticky sessions,
+  or Azure SignalR, gives you live progress from any server; without either,
+  uSync still works correctly, just via polling.
+- **Progress reported cross-server is summary-only until the run
+  completes.** A status request served by a different server than the one
+  running the job reads the run's progress from the shared
+  `umbracoLongRunningOperation` row rather than local memory — that row is
+  written with just the handler summaries on every step (to keep each write
+  small), and gains the full results list only on the write that completes
+  the run.
+- **A run still can't be cancelled**, and a **recycled app pool still loses
+  it** (see above) — neither of those change under load balancing, they're
+  just as true on a single server.
