@@ -457,7 +457,7 @@ internal class uSyncManagementService : ISyncManagementService
             Status = summaries,
             Actions = actionViews,
             Complete = false,
-            Message = "Processing " + handlerOptions.Handler
+            Message = "Processing " + actionRequest.StepNumber
         });
 
         return new PerformActionResponse
