@@ -1,6 +1,4 @@
-﻿using Lucene.Net.Queries.Function.ValueSources;
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +19,6 @@ namespace uSync.Core.Serialization.Serializers;
 [SyncSerializer("D0E0769D-CCAE-47B4-AD34-4182C587B08A", "Template Serializer", uSyncConstants.Serialization.Template)]
 public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer<ITemplate>
 {
-    private readonly IShortStringHelper _shortStringHelper;
     private readonly IFileSystem? _viewFileSystem;
 
     private readonly ITemplateService _templateService;
@@ -34,6 +31,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     public TemplateSerializer(
         IEntityService entityService,
         ILogger<TemplateSerializer> logger,
+        // shortStringHelper is no longer used, but is kept so we don't break the constructor signature.
         IShortStringHelper shortStringHelper,
         FileSystems fileSystems,
         IConfiguration configuration,
@@ -42,8 +40,6 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         IUserIdKeyResolver userIdKeyResolver)
         : base(entityService, logger)
     {
-        _shortStringHelper = shortStringHelper;
-
         _viewFileSystem = fileSystems.MvcViewsFileSystem;
         _configuration = configuration;
         _capabilityChecker = capabilityChecker;
@@ -87,14 +83,16 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         var alias = node.GetAlias();
         var name = node.Element("Name").ValueOrDefault(string.Empty);
 
-        var contentAttempt = GetContentForTemplate(node, options);
-        if (!contentAttempt) return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, contentAttempt.Exception?.Message ?? "Failed to get content");
-
         var details = new List<uSyncChange>();
 
         var item = await FindTemplateFromNodeAsync(node);
         if (item is null)
         {
+            // we only need the content when we are creating the template, when we are updating
+            // it either comes from the node (below) or it is already on disk.
+            var contentAttempt = await GetContentForTemplateAsync(node, options);
+            if (!contentAttempt) return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, contentAttempt.Exception?.Message ?? "Failed to get content");
+
             var userKey = await _userIdKeyResolver.GetAsync(options.UserId);
             var attempt = await _templateService.CreateAsync(
                 name,
@@ -152,8 +150,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, details);
     }
 
-    private Attempt<string?> GetContentForTemplate(XElement node, SyncSerializerOptions options)
+    private async Task<Attempt<string?>> GetContentForTemplateAsync(XElement node, SyncSerializerOptions options)
     {
+        // if the setup is configured this way, we get template content from the xml file directly. 
         if (ShouldGetContentFromNode(node, options))
         {
             if (logger.IsEnabled(LogLevel.Debug))
@@ -162,6 +161,32 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             return Attempt.Succeed(GetContentFromConfig(node));
         }
 
+        // if not, try and fetch the content the way umbraco does (via the template service)
+        var templateFileName = node.GetAlias();
+        if (templateFileName.EndsWith(".cshtml", StringComparison.InvariantCultureIgnoreCase) is false)
+            templateFileName = $"{templateFileName}.cshtml";
+
+        // note: the template service returns Stream.Null (not null) when the file is missing,
+        // and an empty file tells us nothing - so both mean 'look somewhere else'.
+        var stream = await _templateService.GetFileContentStreamAsync(templateFileName);
+        if (stream is not null && stream != Stream.Null)
+        {
+            await using (stream)
+            {
+                using var sr = new StreamReader(stream);
+                var fileContent = await sr.ReadToEndAsync();
+
+                if (string.IsNullOrWhiteSpace(fileContent) is false)
+                {
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Reading {path} contents from template service", templateFileName);
+
+                    return Attempt.Succeed(fileContent);
+                }
+            }
+        }
+
+        // if not - then old-school, attempt to get content from the viewFileSystem
         var templatePath = ViewPath(node.GetAlias());
         if (templatePath is not null && _viewFileSystem?.FileExists(templatePath) is true)
         {
@@ -171,7 +196,8 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             return Attempt.Succeed(GetContentFromFile(templatePath));
         }
 
-        // isn't on disk, but might be compiled. --> 
+        // if we get here, we've failed to get the content from anywhere, so it might be missing or its 
+        // compiled into the site, and in some dll (although the template service should fetch this?)
 
         if (ViewsAreCompiled(options) is true)
         {
@@ -179,8 +205,14 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             // if this finds the view it tells us that the view is somewhere else ? 
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("Failed to find content, but UsingRazorViews so if Umbraco creates anyway, we will then delete the file");
-            
-            return Attempt.Succeed($"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->");
+
+            // internally Umbraco parses the content for the master (from the Layout value) so we
+            // need to fake that. 
+            var master = node.Element("Parent")?.ValueOrDefault(string.Empty);
+            var layout = string.IsNullOrWhiteSpace(master) ? "null" : $"\"{master}.cshtml\"";
+
+            return Attempt.Succeed($"@{{\n    Layout = {layout};\n}}\n" +
+                $"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->");
         }
 
         // template is missing and the views are not compiled , then we can't create.
@@ -197,37 +229,28 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     /// <returns></returns>
     private bool ShouldGetContentFromNode(XElement node, SyncSerializerOptions options)
     {
-        if (_capabilityChecker != null
-            && _configuration != null
-            && _capabilityChecker.HasRuntimeMode)
+        // no content in the file, so there is nothing to take from it.
+        if (node.Element("Contents") is null) return false;
+
+        // on a version of Umbraco that has runtime modes, we don't import the content
+        // in Production, because the views will be compiled into the site.
+        if (_capabilityChecker.HasRuntimeMode && ViewsAreCompiled(options))
         {
-            if (node.Element("Contents") != null)
-            {
-                if (ViewsAreCompiled(options))
-                {
-                    if (logger.IsEnabled(LogLevel.Debug))
-                        logger.LogDebug("Template contents will not be imported because site is running in Production mode");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Template contents will not be imported because site is running in Production mode");
 
-                    return false;
-                }
-
-                // else (we have content - not running in Production) 
-                return true;
-            }
-
-            // else (we don't have content it doesn't matter)
             return false;
         }
 
-        // default 
-        return node.Element("Contents") != null;
-        // && options.GetSetting(uSyncConstants.Conventions.IncludeContent, false);
+        // note: we don't check the IncludeContent setting here - that setting controls
+        // whether we *export* the content, if it's in the file we will import it.
+        return true;
     }
 
     public static string GetContentFromConfig(XElement node)
         => node.Element("Contents").ValueOrDefault(string.Empty);
 
-    public string GetContentFromFile(string templatePath)
+    private string GetContentFromFile(string templatePath)
     {
         try
         {
@@ -238,29 +261,18 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                 return System.IO.File.ReadAllText(templateFilePath);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
+            // any failure here is not fatal, we fall back to the filesystem provider below.
             logger.LogWarning(ex, "Error reading template, will read from filesystem provider instead");
         }
-        
+
         // via the file system, which does work, but occasionaly it locks.
-        var content = "";
-        using (var stream = _viewFileSystem?.OpenFile(templatePath))
-        {
-            if (stream is null) return content;
+        using var stream = _viewFileSystem?.OpenFile(templatePath);
+        if (stream is null) return string.Empty;
 
-            using (var sr = new StreamReader(stream))
-            {
-                content = sr.ReadToEnd();
-                sr.Close();
-                sr.Dispose();
-            }
-
-            stream.Close();
-            stream.Dispose();
-        }
-
-        return content;
+        using var sr = new StreamReader(stream);
+        return sr.ReadToEnd();
     }
 
     public override async Task<SyncAttempt<ITemplate>> DeserializeSecondPassAsync(ITemplate item, XElement node, SyncSerializerOptions options)
@@ -390,19 +402,10 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     public override string ItemAlias(ITemplate item)
         => item.Alias;
 
-    /// <summary>
-    ///  we clean the content out of the template,
-    ///  We don't care if the content has changed during a normal serialization
-    /// </summary>
-    protected override XElement CleanseNode(XElement node)
-    {
-        node.Element("Content")?.Remove();
-        return base.CleanseNode(node);
-    }
-
-
+    // Umbraco names the view file from the alias verbatim (see TemplateRepository.SetVirtualPath)
+    // so we have to do the same, or we look for/delete the wrong file for aliases with spaces.
     private string? ViewPath(string alias)
-        => _viewFileSystem?.GetRelativePath(alias.Replace(" ", "") + ".cshtml");
+        => _viewFileSystem?.GetRelativePath(alias + ".cshtml");
 
     private bool ViewsAreCompiled(SyncSerializerOptions options)
         => _configuration.IsUmbracoRunningInProductionMode()
