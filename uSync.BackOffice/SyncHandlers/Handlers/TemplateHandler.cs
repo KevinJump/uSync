@@ -107,7 +107,8 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
     {
         if (_viewFileSystem is null) return string.Empty;
 
-        var templateFileName = _viewFileSystem.GetRelativePath(alias.Replace(" ", "") + ".cshtml");
+        // Umbraco names the view file from the alias verbatim, so we have to do the same.
+        var templateFileName = _viewFileSystem.GetRelativePath(alias + ".cshtml");
         if (templateFileName is null) return string.Empty;
         if (_viewFileSystem.FileExists(templateFileName) is false) return string.Empty;
 
