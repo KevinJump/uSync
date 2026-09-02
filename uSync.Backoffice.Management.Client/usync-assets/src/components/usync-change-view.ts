@@ -1,51 +1,68 @@
-import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
+import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 import {
-	LitElement,
 	classMap,
 	css,
 	customElement,
 	html,
 	property,
+	repeat,
 } from '@umbraco-cms/backoffice/external/lit';
-import { ChangeType, USyncActionView } from '@jumoo/uSync';
-import { diffWords } from '@umbraco-cms/backoffice/utils';
+import {
+	ChangeDetailType,
+	ChangeType,
+	type USyncActionView,
+	type USyncChange,
+} from '@jumoo/uSync';
+import './usync-change-detail.js';
 
 /**
  * shows the change details for an item.
  */
 @customElement('usync-change-view')
-export class uSyncChangeView extends UmbElementMixin(LitElement) {
+export class uSyncChangeView extends UmbLitElement {
 	@property({ type: Object })
 	item?: USyncActionView;
 
+	#renderable() {
+		return (this.item?.details ?? []).filter(
+			(detail) => detail.change !== ChangeDetailType.NO_CHANGE,
+		);
+	}
+
 	render() {
-		if (this.item?.change == ChangeType.CREATE) {
+		if (this.item?.change === ChangeType.CREATE) {
 			return this.render_create();
 		}
 
-		if (this.item?.details.length ?? 0 > 0) {
-			return this.renderChangeTable();
+		// note: this has to test the *renderable* details, not the raw count -
+		// an unchanged item still arrives with a single `NoChange` detail, and
+		// branching on the raw length would render an empty list instead of
+		// the "no changes" message.
+		const details = this.#renderable();
+		if (details.length > 0) {
+			return this.renderDetails(details);
 		} else {
 			return this.renderNoChanges();
 		}
 	}
 
-	renderChangeTable() {
+	renderDetails(details: Array<USyncChange>) {
+		// with a single change there's nothing to scan past, so open it
+		// straight away; with more than one, start collapsed and let the user
+		// open the ones they care about.
+		const startOpen = details.length <= 1;
+
 		return html`
-			<uui-table>
-				<uui-table-head>
-					<uui-table-head-cell>
-						<umb-localize key="uSync_changeAction">Action</umb-localize>
-					</uui-table-head-cell>
-					<uui-table-head-cell>
-						<umb-localize key="uSync_changeItem">Item</umb-localize>
-					</uui-table-head-cell>
-					<uui-table-head-cell>
-						<umb-localize key="uSync_changeDiffrence">Difference</umb-localize>
-					</uui-table-head-cell>
-				</uui-table-head>
-				${this.render_details()}
-			</uui-table>
+			<div class="detail-list">
+				${repeat(
+					details,
+					(detail, index) => `${index}:${detail.path}:${detail.name}`,
+					(detail) =>
+						html`<usync-change-detail
+							.detail=${detail}
+							?open=${startOpen}></usync-change-detail>`,
+				)}
+			</div>
 		`;
 	}
 
@@ -74,7 +91,7 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 
 	renderMessage() {
 		const message =
-			(this.item?.message?.length ?? 0 > 0)
+			(this.item?.message?.length ?? 0) > 0
 				? this.item?.message
 				: this.item?.change == ChangeType.IMPORT
 					? 'No changes were made but the item was imported'
@@ -84,50 +101,10 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 		return html`<div class="${classMap(classes)}">${message}</div> `;
 	}
 
-	#getJsonOrString(value: string | null | undefined) {
-		try {
-			return JSON.stringify(JSON.parse(value ?? ''), null, 1);
-		} catch {
-			return value ?? '';
-		}
-	}
-
-	render_details() {
-		var changesHtml = this.item?.details.map((detail) => {
-			const oldValue = this.#getJsonOrString(detail.oldValue);
-			const newValue = this.#getJsonOrString(detail.newValue);
-			const changes = diffWords(oldValue, newValue);
-
-			const changeHtml = changes.map((change: any) => {
-				if (change.added) {
-					return html`<ins>${change.value}</ins>`;
-				} else if (change.removed) {
-					return html`<del>${change.value}</del>`;
-				} else {
-					return html`<span>${change.value}</span>`;
-				}
-			});
-
-			return html`
-				<uui-table-row>
-					<uui-table-cell>${detail.name}</uui-table-cell>
-					<uui-table-cell>${detail.change}</uui-table-cell>
-					<uui-table-cell class="detail-data">
-						<pre>${changeHtml}</pre>
-					</uui-table-cell>
-				</uui-table-row>
-			`;
-		});
-
-		return changesHtml;
-	}
-
-	render_changes() {}
-
 	static styles = css`
 		:host {
 			display: block;
-			margin: var(--uui-size-space-4) 0;
+			margin: 0;
 		}
 
 		.change-box {
@@ -147,23 +124,18 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 			margin-top: var(--uui-size-space-2);
 		}
 
-		uui-table-cell {
-			vertical-align: top;
-		}
-
-		uui-table-cell pre {
-			margin: 0;
-			padding: 0;
-		}
-
-		pre ins {
-			color: var(--uui-color-positive);
-		}
-
-		pre del {
-			color: var(--uui-color-danger);
+		.detail-list {
+			display: flex;
+			flex-direction: column;
+			border-top: 1px solid var(--uui-color-border);
 		}
 	`;
 }
 
 export default uSyncChangeView;
+
+declare global {
+	interface HTMLElementTagNameMap {
+		'usync-change-view': uSyncChangeView;
+	}
+}
