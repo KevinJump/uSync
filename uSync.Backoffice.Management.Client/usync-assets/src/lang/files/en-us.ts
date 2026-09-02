@@ -45,6 +45,45 @@ export default {
 		changeAction: 'Action',
 		changeItem: 'Item',
 		changeDiffrence: 'Difference',
+
+		changeProperty: 'Property',
+		changeRawXml: 'Raw XML',
+		changeError: 'Error',
+		changeWarning: 'Warning',
+
+		diffOneChange: '1 change',
+		diffChangeCount: '{0} changes',
+		diffChangeCapped: '{0} of {1} changes',
+		diffMoreChanges: '+{0} more changes',
+		diffMoreChangesAtLeast: '+{0} or more changes',
+		diffLineCount: '+{0} / -{1} lines',
+		diffShowUnchanged: 'Show {0} unchanged lines',
+		diffHideUnchanged: 'Hide unchanged lines',
+
+		diffValueChanged: 'Value changed',
+		diffValueAdded: 'Value added',
+		diffValueRemoved: 'Value removed',
+		diffReordered: 'Items reordered',
+
+		diffMaskedShort: 'Hidden value',
+		diffMasked: 'This value is hidden and cannot be compared',
+		diffTooLargeShort: 'Too large to compare',
+		diffTooLarge: 'This value is too large to compare, showing the raw values instead',
+		diffDegraded:
+			'This comparison was too large to fully calculate, so it has been simplified',
+
+		diffAdded: 'Added',
+		diffRemoved: 'Removed',
+		diffChanged: 'Changed',
+		diffOldValue: 'Old value',
+		diffNewValue: 'New value',
+
+		diffShowRaw: 'Show raw values',
+		diffHideRaw: 'Hide raw values',
+		diffPath: 'Path: {0}',
+		diffCopyPath: 'Copy path',
+		diffExpandedNote: 'This value contains encoded JSON, which has been expanded',
+
 		changeCreate: 'This item does not exist in Umbraco and is being created',
 		noChangesImport: 'No changes were made to this item',
 		noChangesReport: 'No changes detected',
