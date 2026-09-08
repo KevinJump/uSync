@@ -1,0 +1,184 @@
+name: Release to NuGet
+
+# Publishing is triggered by pushing a version tag:
+#
+#   git tag v17.4.0 && git push origin v17.4.0
+#
+# NOTE: "branches" and "tags" under push: are OR'd, not AND'd - a tag filter cannot
+# be restricted to a branch in the trigger itself. The tag has to be on a release
+# branch (v17/main, v18/main, ...), so that is enforced as a step below instead.
+
+permissions:
+  contents: read
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  config: Release
+  out_folder: ./build-out/
+  solution_name: ./uSync.slnx
+  test_project: ./uSync.Tests/uSync.Tests.csproj
+  client_folder: ./uSync.Backoffice.Management.Client/usync-assets
+  nuget_source: https://api.nuget.org/v3/index.json
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    permissions:
+      contents: read
+      # required for trusted publishing - this is what lets the job request the
+      # short lived OIDC token that NuGet/login exchanges for a push key.
+      id-token: write
+
+    # This is load bearing: the trusted publishing policy on nuget.org names this
+    # environment, and the token exchange is rejected if the job doesn't run in an
+    # environment of exactly this name. Don't remove or rename it without updating
+    # the policy to match.
+    #
+    # Environment protection rules (required reviewers, wait timers) can be added on
+    # this environment in the repo settings if a manual approval gate before publish
+    # is wanted - nothing enforces one by default, so pushing the tag publishes.
+    # Publishing to NuGet cannot be undone; a version can be delisted but never
+    # replaced or reused.
+    environment: nuget
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # full history, the branch containment check below needs it
+          fetch-depth: 0
+
+      - name: check the tag looks like a version
+        id: version
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if ! printf '%s' "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::Tag '$GITHUB_REF_NAME' is not v{major}.{minor}.{patch}[-suffix]"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing $version"
+
+      - name: check the tag is on a release branch
+        shell: bash
+        run: |
+          # explicit, so this doesn't depend on exactly which refs checkout brought down.
+          # if the branches are missing the grep below finds nothing and we fail closed.
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --quiet
+          branches=$(git branch -r --contains "$GITHUB_SHA" --format='%(refname:short)')
+          echo "Tagged commit is on:"
+          echo "$branches" | sed 's/^/  /'
+          if ! printf '%s\n' "$branches" | grep -qE '^origin/(v[0-9]+/)?main$'; then
+            echo "::error::Tag $GITHUB_REF_NAME is not on main or v{major}/main - refusing to publish"
+            exit 1
+          fi
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+
+      # the client project's build runs `npm run build` via an MSBuild target,
+      # so node needs to be available before the dotnet build/pack steps below.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: npm
+          cache-dependency-path: ${{ env.client_folder }}/package-lock.json
+
+      - name: Stamp version on NPM Package
+        working-directory: ${{ env.client_folder }}
+        run: npm version ${{ steps.version.outputs.version }}
+
+      - name: npm install
+        working-directory: ${{ env.client_folder }}
+        run: npm ci
+
+      - name: npm build
+        working-directory: ${{ env.client_folder }}
+        run: npm run build
+
+      - name: restore
+        run: dotnet restore ${{ env.solution_name }} --locked-mode
+
+      - name: build
+        run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
+
+      # tags can be pushed straight from a build-files commit that never went through
+      # a PR, so this is the only gate the release actually goes through - worth
+      # running even though dotnet-build.yml already covers every merged PR.
+      - name: test
+        run: dotnet test ${{ env.test_project }} -c ${{ env.config }} --no-build
+
+      - name: package uSync.Core
+        run: dotnet pack ./uSync.Core/uSync.Core.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync.AutoTemplates
+        run: dotnet pack ./uSync.AutoTemplates/uSync.AutoTemplates.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync.BackOffice
+        run: dotnet pack ./uSync.BackOffice/uSync.BackOffice.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync.Backoffice.Management.Api
+        run: dotnet pack ./uSync.Backoffice.Management.Api/uSync.Backoffice.Management.Api.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync.Backoffice.Management.Client
+        run: dotnet pack ./uSync.Backoffice.Management.Client/uSync.Backoffice.Management.Client.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync.BackOffice.Targets
+        run: dotnet pack ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync.Community.Contrib
+        run: dotnet pack ./uSync.Community.Contrib/uSync.Community.Contrib.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync.Community.DataTypeSerializers
+        run: dotnet pack ./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync.Extend
+        run: dotnet pack ./uSync.Extend/uSync.Extend.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync.History
+        run: dotnet pack ./uSync.History/uSync.History.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      - name: package uSync (meta package)
+        run: dotnet pack ./uSync/uSync.csproj -c ${{ env.config }} --output ${{ env.out_folder }} /p:version=${{ steps.version.outputs.version }}
+
+      # keep a copy regardless of what happens on the push
+      - name: upload packages as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-release-${{ steps.version.outputs.version }}
+          path: ${{ env.out_folder }}
+
+      # Trusted publishing: exchanges this job's OIDC token for a short lived NuGet
+      # key, so there is no long lived secret in the repo to leak or rotate. It only
+      # works if a matching policy exists on nuget.org for this repo + workflow, and
+      # "user" must be the nuget.org account/org that owns that policy.
+      - name: nuget login
+        id: nuget_login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER || 'Jumoo' }}
+
+      # --skip-duplicate so re-running the workflow for an already-published version
+      # is a no-op rather than a failure.
+      #
+      # `dotnet nuget push "<dir>/*.nupkg"` does not reliably glob-expand on this
+      # runner, so the .nupkg files are enumerated explicitly instead.
+      - name: push to nuget
+        env:
+          NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
+        run: |
+          Get-ChildItem -Path "${{ env.out_folder }}" -Filter *.nupkg | ForEach-Object {
+            dotnet nuget push $_.FullName --api-key "$env:NUGET_API_KEY" --source ${{ env.nuget_source }} --skip-duplicate
+          }
