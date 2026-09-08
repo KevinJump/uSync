@@ -27,5 +27,8 @@
     "prettier": "^3.9.6",
     "typescript": "^6.0.3",
     "vite": "^8.2.1"
+  },
+  "overrides": {
+    "js-yaml": "^4.3.1"
   }
 }
