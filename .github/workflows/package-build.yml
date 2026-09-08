@@ -16,6 +16,7 @@ jobs:
     runs-on: windows-latest
     outputs:
       version_string: ${{ steps.gitversion.outputs.fullSemVer }}
+      major_minor_patch: ${{ steps.gitversion.outputs.majorMinorPatch }}
 
     steps:
       - name: Checkout
@@ -128,3 +129,33 @@ jobs:
         with:
           name: Nuget Build Output
           path: ${{env.OUT_FOLDER}}
+
+      - name: Pack for nightly feed
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/v17/main' }}
+        shell: pwsh
+        env:
+          nightly_version: ${{ needs.version.outputs.major_minor_patch }}-build.${{ github.run_number }}
+          nightly_out: ./nightly-out/
+        run: |
+          $projects = @(
+            "./uSync.Core/uSync.Core.csproj",
+            "./uSync.Backoffice/uSync.Backoffice.csproj",
+            "./uSync.Backoffice.Management.Api/uSync.Backoffice.Management.Api.csproj",
+            "./uSync.Backoffice.Management.Client/uSync.Backoffice.Management.Client.csproj",
+            "./uSync.Backoffice.Targets/uSync.Backoffice.Targets.csproj",
+            "./uSync.Community.Contrib/uSync.Community.Contrib.csproj",
+            "./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj"
+          )
+          foreach ($project in $projects) {
+            dotnet pack $project -c ${{ env.config }} --output $env:nightly_out /p:version=$env:nightly_version
+          }
+
+      - name: Publish to nightly feed
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/v17/main' }}
+        uses: Jumoo/nightly-feed-config@main
+        with:
+          packages: ./nightly-out/
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
