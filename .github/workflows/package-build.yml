@@ -150,9 +150,17 @@ jobs:
             dotnet pack $project -c ${{ env.config }} --output $env:nightly_out /p:version=$env:nightly_version
           }
 
+      - name: Checkout nightly-feed-config
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/v17/main' }}
+        uses: actions/checkout@v4
+        with:
+          repository: Jumoo/nightly-feed-config
+          token: ${{ secrets.NIGHTLY_FEED_PAT }}
+          path: .nightly-feed-config
+
       - name: Publish to nightly feed
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/v17/main' }}
-        uses: Jumoo/nightly-feed-config@main
+        uses: ./.nightly-feed-config
         with:
           packages: ./nightly-out/
         env:
