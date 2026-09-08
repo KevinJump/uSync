@@ -186,7 +186,7 @@ public class TemplateSerializerTests
         // assert: both imported, and the content we sent for the child parses back to the parent
         // alias using Umbraco's own parser - which is how the master template actually gets set.
         var childContent = created["childOfMaster"];
-        var parsedMaster = new TemplateContentParserService().MasterTemplateAlias(childContent);
+        var parsedMaster = new TemplateContentParserService().LayoutTemplateAlias(childContent);
 
         Assert.Multiple(() =>
         {
@@ -212,7 +212,7 @@ public class TemplateSerializerTests
             BuildTemplateNode(Guid.NewGuid(), "master", "Master"), RazorViewOptions());
 
         var content = created["master"];
-        var parsedMaster = new TemplateContentParserService().MasterTemplateAlias(content);
+        var parsedMaster = new TemplateContentParserService().LayoutTemplateAlias(content);
 
         Assert.Multiple(() =>
         {
