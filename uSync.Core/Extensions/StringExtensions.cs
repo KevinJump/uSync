@@ -16,14 +16,22 @@ public static class StringExtensions
     /// <summary>
     ///  convert a file name to one that isn't going to cause us any downlevel problems.
     /// </summary>
+    /// <remarks>
+    ///  paths aren't always parsed on the OS they came from (e.g. a Windows-style path
+    ///  loaded on Linux), so we split on both separators here rather than using
+    ///  Path.GetFileName/GetDirectoryName, which only recognise the current OS's separator.
+    /// </remarks>
     public static string ToAppSafeFileName(this string value)
     {
-        var filename = Path.GetFileName(value);
+        var separatorIndex = value.LastIndexOfAny(['\\', '/']);
+        var directory = separatorIndex >= 0 ? value[..(separatorIndex + 1)] : string.Empty;
+        var filename = separatorIndex >= 0 ? value[(separatorIndex + 1)..] : value;
+
         if (_badNames.InvariantContains(filename))
         {
-            return Path.Combine(
-                Path.GetDirectoryName(value) ?? string.Empty,
-                $"__{Path.GetFileNameWithoutExtension(value)}__{Path.GetExtension(value)}");
+            var extension = Path.GetExtension(filename);
+            var nameWithoutExtension = filename[..^extension.Length];
+            return $"{directory}__{nameWithoutExtension}__{extension}";
         }
         return value;
     }
