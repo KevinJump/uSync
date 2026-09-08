@@ -16,7 +16,7 @@ env:
 
 jobs:
   version:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     outputs:
       version_string: ${{ steps.gitversion.outputs.fullSemVer }}
       major_minor_patch: ${{ steps.gitversion.outputs.majorMinorPatch }}
@@ -45,7 +45,7 @@ jobs:
           echo "Full Version: ${{ steps.gitversion.outputs.fullSemVer }}"
 
   build-project:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     needs: version
 
@@ -75,7 +75,7 @@ jobs:
         run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
 
   package-up:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     needs: [build-project, version]
 
