@@ -17,7 +17,7 @@
     "generate-client": "node scripts/generate-openapi.js https://localhost:44398/umbraco/swagger/uSync.History/swagger.json?urls.primaryName=uSync+Management+Api"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.97.3",
+    "@hey-api/openapi-ts": "^0.99.0",
     "@jumoo/translate": "^17.2.3",
     "@jumoo/usync": "^17.0.4",
     "@rollup/plugin-node-resolve": "^15.3.1",
@@ -30,5 +30,8 @@
     "typescript": "^5.9.3",
     "vite": "^8.0.16",
     "vite-plugin-checker": "^0.12.0"
+  },
+  "overrides": {
+    "js-yaml": "^4.3.1"
   }
 }
