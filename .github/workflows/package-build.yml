@@ -7,6 +7,10 @@ on:
   push:
     branches: ["*/main"]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   config: Release
 
@@ -89,6 +93,12 @@ jobs:
       - name: version
         run: |
           echo "Version: ${{ needs.version.outputs.version_string}}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ./uSync.Backoffice.Management.Client/usync-assets/package-lock.json
 
       - name: Stamp version on NPM Package
         working-directory: ./uSync.Backoffice.Management.Client/usync-assets
