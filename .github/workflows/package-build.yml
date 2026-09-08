@@ -1,8 +1,8 @@
-name: v16 - Build and Package.
+name: "Build and Package - nightly builds"
 permissions:
   contents: read
   pull-requests: write
-  
+
 on:
   push:
     branches: ["*/main"]
