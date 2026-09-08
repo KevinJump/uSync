@@ -143,6 +143,8 @@ jobs:
             "./uSync.Backoffice.Management.Api/uSync.Backoffice.Management.Api.csproj",
             "./uSync.Backoffice.Management.Client/uSync.Backoffice.Management.Client.csproj",
             "./uSync.Backoffice.Targets/uSync.Backoffice.Targets.csproj",
+            "./uSync.History/uSync.History.csproj",
+            "./uSync/uSync.csproj",
             "./uSync.Community.Contrib/uSync.Community.Contrib.csproj",
             "./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj"
           )
