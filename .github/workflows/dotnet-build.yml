@@ -15,7 +15,7 @@ env:
 
 jobs:
   build-project:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     env:
       solution_name: ./uSync.slnx
