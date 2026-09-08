@@ -48,6 +48,13 @@ public class SyncFinalActionRequest
 public class SyncStartActionRequest
 {
     /// <summary>
+    ///  request Id - used to key the elapsed-time timer for this run, so
+    ///  concurrent runs (and the multiple HTTP calls of a single stepped run)
+    ///  don't stomp on each other's start time.
+    /// </summary>
+    public Guid? RequestId { get; set; }
+
+    /// <summary>
     ///  current handler action (e.g import, export)
     /// </summary>
     public HandlerActions HandlerAction { get; set; } = HandlerActions.None;

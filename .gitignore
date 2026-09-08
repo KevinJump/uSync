@@ -261,3 +261,6 @@ $RECYCLE.BIN/
 /uSync.*.slnx
 /uSync.Backoffice.Management.Client/usync-assets/tsconfig.dist.tsbuildinfo
 /uSync.Backoffice.Management.Client/usync-assets/.npmrc
+
+# local Claude Code plans/scratch - not for the repo
+/.claude/

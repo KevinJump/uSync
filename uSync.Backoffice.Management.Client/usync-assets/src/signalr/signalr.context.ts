@@ -41,6 +41,31 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		return this.#connection?.connectionId ?? null;
 	}
 
+	/**
+	 * Synchronous read of the current connection state - used by callers
+	 * (e.g. status polling) that need to decide whether to fall back to a
+	 * server round-trip right now, rather than subscribing to the observable.
+	 */
+	getConnected(): boolean {
+		return this.#connected.getValue() ?? false;
+	}
+
+	/**
+	 * Publish an update message sourced from status polling rather than a
+	 * live SignalR push - shares the same `update` state/observable that
+	 * `usync-progress-box` already renders, so a background run whose socket
+	 * isn't delivering (e.g. pinned to a different server under a
+	 * load-balanced backoffice) still shows *something* under the handler
+	 * icons instead of leaving the message blank/stale for the whole run.
+	 * Coarser than a real push - polling only knows the per-handler-step
+	 * message ("Processing Import"/"Completed"), not per-item progress - so
+	 * count/total are left at a fixed 0/1 rather than implying granularity
+	 * we don't have.
+	 */
+	setPolledUpdate(message: string): void {
+		this.#update.setValue({ message, count: 0, total: 1 });
+	}
+
 	#connected = new UmbObjectState<boolean>(false);
 	public readonly connected = this.#connected.asObservable();
 
