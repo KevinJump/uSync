@@ -71,5 +71,8 @@
 		"typescript": "^5.9.3",
 		"vite": "^8.2.1",
 		"vite-plugin-dts": "^5.0.3"
+	},
+	"overrides": {
+		"js-yaml": "^4.3.1"
 	}
 }
