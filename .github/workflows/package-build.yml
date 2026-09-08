@@ -72,7 +72,7 @@ jobs:
         run: dotnet test ${{ env.solution_name }}
 
       - name: Generate AppSettings Schema
-        run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
+        run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project}}
 
   package-up:
     runs-on: windows-latest
