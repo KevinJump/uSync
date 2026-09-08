@@ -11,7 +11,7 @@ export default defineConfig({
 		...defaultPlugins,
 		{
 			name: '@hey-api/client-fetch',
-			runtimeConfigPath: '../hey-api',
+			runtimeConfigPath: './src/hey-api',
 			exportFromIndex: true,
 			throwOnError: true,
 		},
