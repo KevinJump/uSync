@@ -9,7 +9,6 @@ on:
 
 env:
   config: Release
-  out_folder: ./build-out/
 
 jobs:
   version:
@@ -76,6 +75,9 @@ jobs:
 
     needs: [build-project, version]
 
+    env:
+      solution_name: ./uSync.slnx
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -102,33 +104,6 @@ jobs:
 
       - name: restore
         run: dotnet restore ${{ env.solution_name}} --locked-mode
-
-      - name: package uSync.Core
-        run: dotnet pack ./uSync.Core/uSync.Core.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Backoffice
-        run: dotnet pack ./uSync.Backoffice/uSync.Backoffice.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Backoffice.Management.Api
-        run: dotnet pack ./uSync.Backoffice.Management.Api/uSync.Backoffice.Management.Api.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Backoffice.Management.Client
-        run: dotnet pack ./uSync.Backoffice.Management.Client/uSync.Backoffice.Management.Client.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Backoffice.Targets
-        run: dotnet pack ./uSync.Backoffice.Targets/uSync.Backoffice.Targets.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Community.Contrib
-        run: dotnet pack ./uSync.Community.Contrib/uSync.Community.Contrib.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Community.DataTypeSerializers
-        run: dotnet pack ./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: Upload nuget file as build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Nuget Build Output
-          path: ${{env.OUT_FOLDER}}
 
       - name: Pack for nightly feed
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/v17/main' }}
