@@ -1,11 +1,10 @@
-name: "Build and Package - nightly builds"
+name: "Prerelease - push a nightly build"
 permissions:
   contents: read
   pull-requests: write
 
 on:
-  push:
-    branches: ["*/main"]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -116,10 +115,9 @@ jobs:
         run: dotnet restore ${{ env.solution_name}} --locked-mode
 
       - name: Pack for nightly feed
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/v17/main' }}
         shell: pwsh
         env:
-          nightly_version: ${{ needs.version.outputs.major_minor_patch }}-build.${{ github.run_number }}
+          nightly_version: ${{ needs.version.outputs.major_minor_patch }}-prerelease.${{ github.run_number }}
           nightly_out: ./nightly-out/
         run: |
           $projects = @(
@@ -138,7 +136,6 @@ jobs:
           }
 
       - name: Checkout nightly-feed-config
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/v17/main' }}
         uses: actions/checkout@v4
         with:
           repository: Jumoo/nightly-feed-config
@@ -146,7 +143,6 @@ jobs:
           path: .nightly-feed-config
 
       - name: Publish to nightly feed
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/v17/main' }}
         uses: ./.nightly-feed-config
         with:
           packages: ./nightly-out/
