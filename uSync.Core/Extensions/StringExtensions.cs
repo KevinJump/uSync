@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using Umbraco.Extensions;
 
@@ -9,21 +11,69 @@ namespace uSync.Core
     {
 
         /// <summary>
-        ///  things can't be called web.config or app.config it causes issues on build and publish 
+        ///  things can't be called web.config or app.config it causes issues on build and publish
         /// </summary>
         private static readonly string[] BadNames = new[]
         {
             "app.config", "web.config"
         };
 
+        /// <summary>
+        ///  the windows reserved device names (and their unicode superscript variants).
+        /// </summary>
+        /// <remarks>
+        ///  built once (not regenerated per call) since this is invoked per-file during export.
+        /// </remarks>
+        private static readonly string[] WindowsReservedNames = BuildWindowsReservedNames();
+
+        private static string[] BuildWindowsReservedNames()
+        {
+            var names = new List<string> { "CON", "PRN", "AUX", "NUL" };
+            for (var i = 1; i <= 9; i++)
+            {
+                names.Add($"COM{i}");
+                names.Add($"LPT{i}");
+            }
+
+            // superscript variants Windows also reserves: COM¹ COM² COM³ / LPT¹ LPT² LPT³
+            foreach (var sup in new[] { '¹', '²', '³' })
+            {
+                names.Add($"COM{sup}");
+                names.Add($"LPT{sup}");
+            }
+
+            return names.ToArray();
+        }
+
+        /// <summary>
+        ///  the windows reserved device names (and their unicode superscript variants),
+        ///  generated rather than hand-typed so nothing gets missed. Computed once and cached.
+        /// </summary>
+        public static IEnumerable<string> GetWindowsReservedNames() => WindowsReservedNames;
+
         public static string ToAppSafeFileName(this string value)
+            => value.ToAppSafeFileName(Enumerable.Empty<string>());
+
+        /// <summary>
+        ///  as <see cref="ToAppSafeFileName(string)"/>, but also treats <paramref name="additionalBadNames"/>
+        ///  as unsafe file names (in addition to the built-in ones), so callers can extend the
+        ///  blocklist via configuration.
+        /// </summary>
+        public static string ToAppSafeFileName(this string value, IEnumerable<string> additionalBadNames)
         {
             var filename = Path.GetFileName(value);
-            if (BadNames.InvariantContains(filename))
+            var filenameWithoutExtension = Path.GetFileNameWithoutExtension(value);
+
+            var isBadName = BadNames.InvariantContains(filename)
+                || (additionalBadNames != null && (
+                    additionalBadNames.InvariantContains(filename)
+                    || additionalBadNames.InvariantContains(filenameWithoutExtension)));
+
+            if (isBadName)
             {
                 return Path.Combine(
                     Path.GetDirectoryName(value),
-                    $"__{Path.GetFileNameWithoutExtension(value)}__{Path.GetExtension(value)}");
+                    $"__{filenameWithoutExtension}__{Path.GetExtension(value)}");
             }
             return value;
         }

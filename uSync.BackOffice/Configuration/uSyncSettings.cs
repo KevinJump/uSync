@@ -211,7 +211,7 @@ namespace uSync.BackOffice.Configuration
         public bool DisableNotificationSuppression { get; set; } = false;
 
         /// <summary>
-        ///  trigger all the notifications in a background thread, 
+        ///  trigger all the notifications in a background thread,
         /// </summary>
         /// <remarks>
         ///  uSync will process imports faster, but any notification events will
@@ -219,5 +219,22 @@ namespace uSync.BackOffice.Configuration
         /// </remarks>
         [DefaultValue(false)]
         public bool BackgroundNotifications { get; set; } = false;
+
+        /// <summary>
+        ///  Additional file names (without path) that uSync should treat as unsafe
+        ///  and rename on export, appended to the built-in list ("app.config",
+        ///  "web.config").
+        /// </summary>
+        public string[] AdditionalBadNames { get; set; } = [];
+
+        /// <summary>
+        ///  When true, also treats the Windows reserved device names as unsafe
+        ///  file names on export (CON, PRN, AUX, NUL, COM1-9, LPT1-9, and their
+        ///  Unicode superscript variants COM¹-COM³/LPT¹-LPT³). Off by default
+        ///  because these names are only unsafe on Windows filesystems and most
+        ///  uSync deployments run on Linux, where they're ordinary filenames.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool IncludeWindowsReservedNames { get; set; } = false;
     }
 }
