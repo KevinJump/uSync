@@ -294,11 +294,28 @@ public class uSyncSettings
     public SyncProcessingMode ProcessingMode { get; set; } = SyncProcessingMode.Normal;
 
     /// <summary>
-    ///  location of the 'production' folder to use when in production mode, 
+    ///  location of the 'production' folder to use when in production mode,
     ///  or when creating the production mode files.
     /// </summary>
     [DefaultValue("uSync/production")]
     public string ProductionFolder { get; set; } = "uSync/production";
+
+    /// <summary>
+    ///  Additional file names (without path) that uSync should treat as unsafe
+    ///  and rename on export, appended to the built-in list ("app.config",
+    ///  "web.config").
+    /// </summary>
+    public string[] AdditionalBadNames { get; set; } = [];
+
+    /// <summary>
+    ///  When true, also treats the Windows reserved device names as unsafe
+    ///  file names on export (CON, PRN, AUX, NUL, COM1-9, LPT1-9, and their
+    ///  Unicode superscript variants COM¹-COM³/LPT¹-LPT³). Off by default
+    ///  because these names are only unsafe on Windows filesystems and most
+    ///  uSync deployments run on Linux, where they're ordinary filenames.
+    /// </summary>
+    [DefaultValue(false)]
+    public bool IncludeWindowsReservedNames { get; set; } = false;
 }
 
 /// <summary>

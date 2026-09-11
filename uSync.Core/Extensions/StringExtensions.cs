@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Umbraco.Extensions;
 
 namespace uSync.Core;
@@ -6,12 +7,45 @@ namespace uSync.Core;
 public static class StringExtensions
 {
     /// <summary>
-    ///  things can't be called web.config or app.config it causes issues on build and publish 
+    ///  things can't be called web.config or app.config it causes issues on build and publish
     /// </summary>
     private static readonly string[] _badNames = [
         "app.config",
         "web.config"
     ];
+
+    /// <summary>
+    ///  the windows reserved device names (and their unicode superscript variants).
+    /// </summary>
+    /// <remarks>
+    ///  built once (not regenerated per call) since this is invoked per-file during export.
+    /// </remarks>
+    private static readonly string[] _windowsReservedNames = BuildWindowsReservedNames();
+
+    private static string[] BuildWindowsReservedNames()
+    {
+        var names = new List<string> { "CON", "PRN", "AUX", "NUL" };
+        for (var i = 1; i <= 9; i++)
+        {
+            names.Add($"COM{i}");
+            names.Add($"LPT{i}");
+        }
+
+        // superscript variants Windows also reserves: COM¹ COM² COM³ / LPT¹ LPT² LPT³
+        foreach (var sup in new[] { '¹', '²', '³' })
+        {
+            names.Add($"COM{sup}");
+            names.Add($"LPT{sup}");
+        }
+
+        return [.. names];
+    }
+
+    /// <summary>
+    ///  the windows reserved device names (and their unicode superscript variants),
+    ///  generated rather than hand-typed so nothing gets missed. Computed once and cached.
+    /// </summary>
+    public static IEnumerable<string> GetWindowsReservedNames() => _windowsReservedNames;
 
     /// <summary>
     ///  convert a file name to one that isn't going to cause us any downlevel problems.
@@ -22,15 +56,29 @@ public static class StringExtensions
     ///  Path.GetFileName/GetDirectoryName, which only recognise the current OS's separator.
     /// </remarks>
     public static string ToAppSafeFileName(this string value)
+        => value.ToAppSafeFileName([]);
+
+    /// <summary>
+    ///  as <see cref="ToAppSafeFileName(string)"/>, but also treats <paramref name="additionalBadNames"/>
+    ///  as unsafe file names (in addition to the built-in ones), so callers can extend the
+    ///  blocklist via configuration.
+    /// </summary>
+    public static string ToAppSafeFileName(this string value, IEnumerable<string> additionalBadNames)
     {
         var separatorIndex = value.LastIndexOfAny(['\\', '/']);
         var directory = separatorIndex >= 0 ? value[..(separatorIndex + 1)] : string.Empty;
         var filename = separatorIndex >= 0 ? value[(separatorIndex + 1)..] : value;
 
-        if (_badNames.InvariantContains(filename))
+        var extension = Path.GetExtension(filename);
+        var nameWithoutExtension = filename[..^extension.Length];
+
+        var isBadName = _badNames.InvariantContains(filename)
+            || (additionalBadNames != null && (
+                additionalBadNames.InvariantContains(filename)
+                || additionalBadNames.InvariantContains(nameWithoutExtension)));
+
+        if (isBadName)
         {
-            var extension = Path.GetExtension(filename);
-            var nameWithoutExtension = filename[..^extension.Length];
             return $"{directory}__{nameWithoutExtension}__{extension}";
         }
         return value;
