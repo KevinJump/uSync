@@ -1,17 +1,12 @@
-name: Build and Package
+name: "Prerelease - push a nightly build"
 permissions:
   contents: read
   pull-requests: write
 
-# NOTE: uSync releases from "v{major}/main" - a branch per Umbraco major. Plain "main"
-# is kept in the filter so a re-created main, or a branch that hasn't been moved over
-# yet, still builds.
+# Manual only: dotnet-build.yml already builds and tests every PR, so we don't
+# need a full build+pack run on every merge to main too.
 on:
-  push:
-    branches: [ "main", "*/main" ]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,7 +27,7 @@ jobs:
       # so the version carries a date + run number rather than GitVersion's own
       # prerelease scheme - makes it obvious which nightly a given package build
       # is, and when it was built.
-      version_string: ${{ steps.gitversion.outputs.majorMinorPatch }}-build.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}
+      version_string: ${{ steps.gitversion.outputs.majorMinorPatch }}-prerelease.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}
 
     steps:
       - name: Checkout
@@ -62,7 +57,7 @@ jobs:
 
       - name: Display version
         run: |
-          echo "Full Version: ${{ steps.gitversion.outputs.majorMinorPatch }}-build.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}"
+          echo "Full Version: ${{ steps.gitversion.outputs.majorMinorPatch }}-prerelease.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}"
 
   build-project:
     runs-on: windows-latest
@@ -175,11 +170,11 @@ jobs:
       - name: package uSync (meta package)
         run: dotnet pack ./uSync/uSync.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
 
-      # NOTE: this workflow builds artifacts on every push to a release branch for
-      # review. Full releases to nuget.org happen separately, in release.yml,
-      # triggered by pushing a v{version} tag. The publish-nightly job below pushes
-      # these same build-every-commit packages to the Jumoo nightly feed instead,
-      # so testers can track main without waiting for a tagged release.
+      # NOTE: this workflow only ever runs on manual dispatch. Full releases to
+      # nuget.org happen separately, in release.yml, triggered by pushing a
+      # v{version} tag. The publish-nightly job below pushes these packages to
+      # the Jumoo nightly feed instead, so testers can try a branch without
+      # waiting for a tagged release.
       - name: Upload nuget file as build artifact
         uses: actions/upload-artifact@v7
         with:
