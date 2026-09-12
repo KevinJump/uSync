@@ -1064,9 +1064,9 @@ namespace uSync.BackOffice.SyncHandlers
             var targetFolder = GetDirectoryForItem(item,folders, config);
 
             var filename = GetPath(targetFolder, item, config.GuidNames, config.UseFlatStructure)
-                .ToAppSafeFileName();
+                .ToAppSafeFileName(GetAdditionalBadNames());
 
-            // 
+            //
             if (IsLockedAtRoot(folders, filename.Substring(targetFolder.Length+1)))
             {
                 // if we have lock roots on, then this item will not export 
@@ -1686,7 +1686,7 @@ namespace uSync.BackOffice.SyncHandlers
             var targetFolder = GetDirectoryForItem(item,folders,config);
 
             var filename = GetPath(targetFolder, item, config.GuidNames, config.UseFlatStructure)
-                .ToAppSafeFileName();
+                .ToAppSafeFileName(GetAdditionalBadNames());
 
             if (IsLockedAtRoot(folders, filename.Substring(targetFolder.Length + 1)))
             {
@@ -2269,6 +2269,37 @@ namespace uSync.BackOffice.SyncHandlers
             => new EventMessage("Blocked", "You cannot make this change, root level items are locked", EventMessageType.Error);
 
 
+        /// <summary>
+        ///  cache of the merged additional-bad-names list, so it's built once per settings
+        ///  value rather than once per file during export (this runs per node).
+        /// </summary>
+        private uSyncSettings _additionalBadNamesSettings;
+        private string[] _additionalBadNamesCache;
+
+        /// <summary>
+        ///  additional file names (beyond the built-in app.config/web.config) that
+        ///  should be treated as unsafe on export, per uSyncSettings.
+        /// </summary>
+        private IEnumerable<string> GetAdditionalBadNames()
+        {
+            var settings = uSyncConfig.Settings;
+
+            // settings is replaced (not mutated) on config reload, so reference equality
+            // is enough to know the cached list is still valid.
+            if (!ReferenceEquals(settings, _additionalBadNamesSettings))
+            {
+                var additionalBadNames = settings.AdditionalBadNames ?? [];
+
+                _additionalBadNamesCache = settings.IncludeWindowsReservedNames
+                    ? additionalBadNames.Concat(global::uSync.Core.StringExtensions.GetWindowsReservedNames()).ToArray()
+                    : additionalBadNames;
+
+                _additionalBadNamesSettings = settings;
+            }
+
+            return _additionalBadNamesCache;
+        }
+
         private bool HasRootFolders()
             => syncFileService.AnyFolderExists(uSyncConfig.GetFolders()[..^1]);
 
@@ -2281,7 +2312,7 @@ namespace uSync.BackOffice.SyncHandlers
                     item,
                     DefaultConfig.GuidNames,
                     DefaultConfig.UseFlatStructure)
-                    .ToAppSafeFileName();
+                    .ToAppSafeFileName(GetAdditionalBadNames());
 
                 if (syncFileService.FileExists(filename))
                     return true;
