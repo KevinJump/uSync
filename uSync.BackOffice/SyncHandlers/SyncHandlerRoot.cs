@@ -931,12 +931,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         var targetFolder = folders.Last();
 
         var filename = (await GetPathAsync(targetFolder, item, config.GuidNames, config.UseFlatStructure))
-            .ToAppSafeFileName();
+            .ToAppSafeFileName(GetAdditionalBadNames());
 
-        // 
+        //
         if (IsLockedAtRoot(folders, filename.Substring(targetFolder.Length + 1)))
         {
-            // if we have lock roots on, then this item will not export 
+            // if we have lock roots on, then this item will not export
             // because exporting would mean the root was no longer used.
             return [uSyncAction.SetAction(true, syncFileService.GetSiteRelativePath(filename),
                 type: typeof(TObject).ToString(),
@@ -1543,7 +1543,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         var targetFolder = folders.Last();
         var filename = (await GetPathAsync(targetFolder, item, config.GuidNames, config.UseFlatStructure))
-            .ToAppSafeFileName();
+            .ToAppSafeFileName(GetAdditionalBadNames());
 
         if (IsLockedAtRoot(folders, filename.Substring(targetFolder.Length + 1)))
             return;
@@ -2146,7 +2146,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 item,
                 DefaultConfig.GuidNames,
                 DefaultConfig.UseFlatStructure))
-                .ToAppSafeFileName();
+                .ToAppSafeFileName(GetAdditionalBadNames());
 
             if (syncFileService.FileExists(filename))
                 return true;
@@ -2154,6 +2154,37 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
 
         return false;
+    }
+
+    /// <summary>
+    ///  cache of the merged additional-bad-names list, so it's built once per settings
+    ///  value rather than once per file during export (this runs per node).
+    /// </summary>
+    private uSyncSettings? _additionalBadNamesSettings;
+    private string[] _additionalBadNamesCache = [];
+
+    /// <summary>
+    ///  additional file names (beyond the built-in app.config/web.config) that
+    ///  should be treated as unsafe on export, per uSyncSettings.
+    /// </summary>
+    private IEnumerable<string> GetAdditionalBadNames()
+    {
+        var settings = uSyncConfig.Settings;
+
+        // settings is replaced (not mutated) on config reload, so reference equality
+        // is enough to know the cached list is still valid.
+        if (!ReferenceEquals(settings, _additionalBadNamesSettings))
+        {
+            var additionalBadNames = settings.AdditionalBadNames ?? [];
+
+            _additionalBadNamesCache = settings.IncludeWindowsReservedNames
+                ? [.. additionalBadNames, .. global::uSync.Core.StringExtensions.GetWindowsReservedNames()]
+                : additionalBadNames;
+
+            _additionalBadNamesSettings = settings;
+        }
+
+        return _additionalBadNamesCache;
     }
 
     #endregion
