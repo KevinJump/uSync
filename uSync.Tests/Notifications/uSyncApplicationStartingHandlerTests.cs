@@ -64,10 +64,12 @@ public class uSyncApplicationStartingHandlerTests : UmbracoIntegrationTest
 
         builder.WithCollectionBuilder<SyncHandlerCollectionBuilder>()
             .Clear()
-            .Add<LanguageHandler>();
+            .Add<LanguageHandler>()
+            .Add<RelationTypeHandler>();
         builder.WithCollectionBuilder<SyncSerializerCollectionBuilder>()
             .Clear()
-            .Add<LanguageSerializer>();
+            .Add<LanguageSerializer>()
+            .Add<RelationTypeSerializer>();
     }
 
     [SetUp]
@@ -103,6 +105,13 @@ public class uSyncApplicationStartingHandlerTests : UmbracoIntegrationTest
     [Test]
     public async Task StartupExport_DoesNotExportSaveGroup_WhenStartupRequestsAnotherGroup()
     {
+        var relationKey = new Guid("2d21fba0-51f6-4c88-8c71-8c8b6c5073fb");
+        GetRequiredService<IRelationService>().Save(
+            new RelationType("Startup export relation", "startupExportRelation", false, null, null, false)
+            {
+                Key = relationKey
+            });
+
         var settings = GetRequiredService<ISyncConfigService>().Settings;
         settings.ExportAtStartup = "Content";
         settings.ExportOnSave = "Settings";
@@ -110,6 +119,14 @@ public class uSyncApplicationStartingHandlerTests : UmbracoIntegrationTest
         await StartAsync();
 
         Assert.That(ExportedLanguageCodes(), Does.Not.Contain("en-GB"));
+        var exportedRelation = Directory.Exists(_exportFolder)
+            ? Directory.GetFiles(_exportFolder, "*.config", SearchOption.AllDirectories)
+                .Select(path => XDocument.Load(path).Root)
+                .SingleOrDefault(node => node?.Name.LocalName == "RelationType"
+                    && node.Attribute("Key")?.Value == relationKey.ToString())
+            : null;
+        Assert.That(exportedRelation?.Element("Info")?.Element("Name")?.Value,
+            Is.EqualTo("Startup export relation"));
     }
 
     [Test]
