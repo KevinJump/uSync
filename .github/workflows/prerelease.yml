@@ -111,6 +111,14 @@ jobs:
         working-directory: ./uSync.Backoffice.Management.Client/usync-assets
         run: npm run build
 
+      - name: npm install history client
+        working-directory: ./uSync.History/history-client
+        run: npm ci
+
+      - name: npm build history client
+        working-directory: ./uSync.History/history-client
+        run: npm run build
+
       - name: restore
         run: dotnet restore ${{ env.solution_name}} --locked-mode
 
