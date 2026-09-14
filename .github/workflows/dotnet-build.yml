@@ -1,4 +1,4 @@
-name: "pr - build and test"
+name: "PR - Build and Test"
 permissions:
   contents: read
 
@@ -40,7 +40,7 @@ jobs:
       - name: test
         run: dotnet test ${{ env.solution_name }}
 
-      - name: generate appsettings schema
+      - name: Generate AppSettings Schema
         run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }}
 
   history-package:
