@@ -24,6 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
@@ -31,7 +32,7 @@ jobs:
           cache-dependency-path: "**/packages.lock.json"
 
       - name: restore
-        run: dotnet restore ${{ env.solution_name}} --locked-mode
+        run: dotnet restore ${{ env.solution_name }} --locked-mode
 
       - name: build
         run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
@@ -40,7 +41,7 @@ jobs:
         run: dotnet test ${{ env.solution_name }}
 
       - name: generate appsettings schema
-        run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project}}
+        run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }}
 
   history-package:
     name: history package smoke check
@@ -69,7 +70,13 @@ jobs:
         run: npm run build
 
       - name: package history without publishing
-        run: dotnet pack ./uSync.History/uSync.History.csproj -c ${{ env.config }} --output ./build-out/history-smoke -p:Version=0.0.0-smoke -p:RestoreLockedMode=true -p:ContinuousIntegrationBuild=true
+        run: >-
+          dotnet pack ./uSync.History/uSync.History.csproj
+          -c ${{ env.config }}
+          --output ./build-out/history-smoke
+          -p:Version=0.0.0-smoke
+          -p:RestoreLockedMode=true
+          -p:ContinuousIntegrationBuild=true
 
       - name: verify packaged history assets
         shell: pwsh
