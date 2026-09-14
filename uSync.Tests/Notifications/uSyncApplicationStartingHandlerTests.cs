@@ -140,6 +140,19 @@ public class uSyncApplicationStartingHandlerTests : UmbracoIntegrationTest
         Assert.That(ExportedLanguageCodes(), Does.Contain("en-GB"));
     }
 
+    [Test]
+    public async Task StartupExport_DoesNotUseSaveGroup_WhenSyncFolderExists()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ExportAtStartup = "None";
+        settings.ExportOnSave = "Settings";
+        Directory.CreateDirectory(_exportFolder);
+
+        await StartAsync();
+
+        Assert.That(ExportedLanguageCodes(), Is.Empty);
+    }
+
     private Task StartAsync()
     {
         var handler = ActivatorUtilities.CreateInstance<uSyncApplicationStartingHandler>(Services);
