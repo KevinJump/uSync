@@ -659,7 +659,9 @@ namespace uSync.Core.Serialization.Serializers
         protected void ClearAliases()
         {
             aliasCache = null;
-            _appCache.ClearByKey($"usync_{this.Id}");
+            // was ClearByKey (O(n) scan of the whole shared RuntimeCache) - the key here is
+            // exact (this.Id is a single content type), so a direct removal is correct.
+            _appCache.Clear($"usync_{this.Id}");
         }
 
         protected void RemoveAlias(string alias)
@@ -675,7 +677,9 @@ namespace uSync.Core.Serialization.Serializers
 
         private void RefreshAliasCache()
         {
-            _appCache.ClearByKey($"usync_{this.Id}");
+            // was ClearByKey (O(n) scan of the whole shared RuntimeCache) - the key here is
+            // exact (this.Id is a single content type), so a direct removal is correct.
+            _appCache.Clear($"usync_{this.Id}");
             _appCache.GetCacheItem($"usync_{this.Id}", () => { return aliasCache; });
         }
 
