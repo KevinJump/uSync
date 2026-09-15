@@ -94,7 +94,9 @@ jobs:
         with:
           node-version: "lts/*"
           cache: npm
-          cache-dependency-path: ${{ env.client_folder }}/package-lock.json
+          cache-dependency-path: |
+            ${{ env.client_folder }}/package-lock.json
+            ./uSync.History/history-client/package-lock.json
 
       - name: Stamp version on NPM Package
         working-directory: ${{ env.client_folder }}
@@ -106,6 +108,16 @@ jobs:
 
       - name: npm build
         working-directory: ${{ env.client_folder }}
+        run: npm run build
+
+      # uSync.History has no MSBuild target that builds its client automatically -
+      # wwwroot is gitignored, so this has to run before the pack steps below.
+      - name: npm install history client
+        working-directory: ./uSync.History/history-client
+        run: npm ci
+
+      - name: npm build history client
+        working-directory: ./uSync.History/history-client
         run: npm run build
 
       - name: restore

@@ -109,7 +109,9 @@ jobs:
         with:
           node-version: "lts/*"
           cache: npm
-          cache-dependency-path: ./uSync.Backoffice.Management.Client/usync-assets/package-lock.json
+          cache-dependency-path: |
+            ./uSync.Backoffice.Management.Client/usync-assets/package-lock.json
+            ./uSync.History/history-client/package-lock.json
 
       - name: version
         run: |
@@ -125,6 +127,16 @@ jobs:
 
       - name: npm build
         working-directory: ./uSync.Backoffice.Management.Client/usync-assets
+        run: npm run build
+
+      # uSync.History has no MSBuild target that builds its client automatically -
+      # wwwroot is gitignored, so this has to run before the pack step below.
+      - name: npm install history client
+        working-directory: ./uSync.History/history-client
+        run: npm ci
+
+      - name: npm build history client
+        working-directory: ./uSync.History/history-client
         run: npm run build
 
       - name: restore
