@@ -51,7 +51,7 @@ jobs:
     environment: nuget
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # full history, the branch containment check below needs it
           fetch-depth: 0
@@ -82,18 +82,21 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 9.0.x
+          global-json-file: global.json
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
-      # build client assets before dotnet evaluates the static web assets
-      - uses: actions/setup-node@v4
+      # the client project's build runs `npm run build` via an MSBuild target,
+      # so node needs to be available before the dotnet build/pack steps below.
+      - uses: actions/setup-node@v7
         with:
           node-version: "lts/*"
           cache: npm
-          cache-dependency-path: ${{ env.client_folder }}/package-lock.json
+          cache-dependency-path: |
+            ${{ env.client_folder }}/package-lock.json
+            ./uSync.History/history-client/package-lock.json
 
       - name: Stamp version on NPM Package
         working-directory: ${{ env.client_folder }}
@@ -107,6 +110,8 @@ jobs:
         working-directory: ${{ env.client_folder }}
         run: npm run build
 
+      # uSync.History has no MSBuild target that builds its client automatically -
+      # wwwroot is gitignored, so this has to run before the pack steps below.
       - name: npm install history client
         working-directory: ./uSync.History/history-client
         run: npm ci
@@ -162,7 +167,7 @@ jobs:
 
       # keep a copy regardless of what happens on the push
       - name: upload packages as build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nuget-release-${{ steps.version.outputs.version }}
           path: ${{ env.out_folder }}

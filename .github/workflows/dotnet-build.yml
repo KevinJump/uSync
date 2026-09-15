@@ -1,44 +1,77 @@
-name: "PR - Build and Test"
+name: PR Project Build and Test
+
 permissions:
   contents: read
+  pull-requests: write
 
+# NOTE: uSync releases from "v{major}/main" - a branch per Umbraco major. Plain "main"
+# is kept in the filter so a re-created main, or a branch that hasn't been moved over
+# yet, still builds.
 on:
   pull_request:
-    branches: ["*/main"]
+    branches: [ "main", "*/main" ]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
   config: Release
+  out_folder: ./build-out/
+  solution_name: ./uSync.slnx
+  test_project: ./uSync.Tests/uSync.Tests.csproj
+  schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
 jobs:
   build-project:
     runs-on: windows-latest
 
-    env:
-      solution_name: ./uSync.slnx
-      test_project: ./uSync.Tests/uSync.tests.csproj
-      schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 9.0.x
+          global-json-file: global.json
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
+      # the client project's build runs `npm run build` via an MSBuild target,
+      # so node needs to be available before the dotnet build step below.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "lts/*"
+          cache: npm
+          cache-dependency-path: |
+            ./uSync.Backoffice.Management.Client/usync-assets/package-lock.json
+            ./uSync.History/history-client/package-lock.json
+
+      # unlike uSync.Backoffice.Management.Client, uSync.History has no MSBuild target
+      # that builds its client automatically - wwwroot is gitignored, so without this
+      # the dotnet build below packages whatever (if anything) happens to already be
+      # on disk.
+      - name: npm install history client
+        working-directory: ./uSync.History/history-client
+        run: npm ci
+
+      - name: npm build history client
+        working-directory: ./uSync.History/history-client
+        run: npm run build
+
+      # -p:Configuration matters here: uSync.Extend is excluded from the Debug solution
+      # configuration (<Build Solution="Debug|*" Project="false" /> in uSync.slnx), so a
+      # restore with no configuration defaults to Debug and silently skips it, leaving no
+      # project.assets.json for the Release build below to pick up.
       - name: restore
-        run: dotnet restore ${{ env.solution_name }} --locked-mode
+        run: dotnet restore ${{ env.solution_name }} --locked-mode -p:Configuration=${{ env.config }}
 
       - name: build
-        run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
+        run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} --no-restore -p:ContinuousIntegrationBuild=true
 
       - name: test
-        run: dotnet test ${{ env.solution_name }}
+        run: dotnet test ${{ env.test_project }} -c ${{ env.config }}
 
       - name: Generate AppSettings Schema
         run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }}
@@ -48,18 +81,17 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@v7
         with:
-          node-version: "24"
-          package-manager-cache: false
+          node-version: "lts/*"
+          cache: npm
+          cache-dependency-path: ./uSync.History/history-client/package-lock.json
 
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          global-json-file: global.json
 
       - name: npm install history client
         working-directory: ./uSync.History/history-client
@@ -78,6 +110,8 @@ jobs:
           -p:RestoreLockedMode=true
           -p:ContinuousIntegrationBuild=true
 
+      # catches missing/empty/truncated/stale packaged assets - e.g. wwwroot left over
+      # from a previous build, or a lazy-loaded chunk the pack step failed to pick up.
       - name: verify packaged history assets
         shell: pwsh
         run: |
