@@ -160,12 +160,15 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         {
             using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
             {
-                if (IsExportAtStartupEnabled() || (IsExportOnSaveOn() && !HasSyncFolders()))
+                var exportAtStartup = IsExportAtStartupEnabled();
+                if (exportAtStartup || (IsExportOnSaveOn() && !HasSyncFolders()))
                 {
 
                     var options = new SyncHandlerOptions
                     {
-                        Group = _uSyncConfig.Settings.ExportOnSave
+                        Group = exportAtStartup
+                            ? _uSyncConfig.Settings.ExportAtStartup
+                            : _uSyncConfig.Settings.ExportOnSave
                     };
 
                     if (_logger.IsEnabled(LogLevel.Information))
