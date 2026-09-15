@@ -56,22 +56,23 @@ public abstract class SyncHandlerBase<TObject>
         => Task.FromResult(entityService.GetChildren(item.Id).Any());
 
     /// <summary>
-    ///  given a folder we calculate what items we can remove, because they are 
+    ///  given a folder we calculate what items we can remove, because they are
     ///  not in one the the files in the folder.
     /// </summary>
+    [Obsolete("Use the overload that takes a HandlerSettings, will be removed in v20")]
     protected override async Task<IEnumerable<uSyncAction>> CleanFolderAsync(string cleanFile, bool reportOnly, bool flat)
+        => await CleanFolderAsync(cleanFile, reportOnly, flat, new HandlerSettings());
+
+    /// <summary>
+    ///  given a folder we calculate what items we can remove, because they are
+    ///  not in one the the files in the folder - honoring the handler's <see cref="HandlerSettings"/>
+    ///  (e.g Include/ExcludeContentTypes) so items that were never in scope for this sync are not
+    ///  removed just because they weren't sent.
+    /// </summary>
+    protected override async Task<IEnumerable<uSyncAction>> CleanFolderAsync(string cleanFile, bool reportOnly, bool flat, HandlerSettings config)
     {
         var folder = Path.GetDirectoryName(cleanFile);
         if (folder is null || syncFileService.DirectoryExists(folder) is false) return [];
-
-
-        // get the keys for every item in this folder. 
-
-        // this would works on the flat folder structure too, 
-        // there we are being super defensive, so if an item
-        // is anywhere in the folder it won't get removed
-        // even if the folder is wrong
-        // be a little slower (not much though)
 
         // we cache this, (it is cleared on an ImportAll)
         var keys = await GetFolderKeysAsync(folder, flat);
@@ -86,9 +87,9 @@ public abstract class SyncHandlerBase<TObject>
 
             // keys should aways have at least one entry (the key from cleanFile)
             // if it doesn't then something might have gone wrong.
-            // because we are being defensive when it comes to deletes, 
+            // because we are being defensive when it comes to deletes,
             // we only then do deletes when we know we have loaded some keys!
-            return await DeleteMissingItemsAsync(parentKey.Value, keys, reportOnly);
+            return await DeleteMissingItemsAsync(parentKey.Value, keys, reportOnly, config);
         }
         else
         {
@@ -121,7 +122,7 @@ public abstract class SyncHandlerBase<TObject>
         foreach (var clean in cleans)
         {
             if (!string.IsNullOrWhiteSpace(clean.FileName))
-                results.AddRange(await CleanFolderAsync(clean.FileName, false, config.UseFlatStructure));
+                results.AddRange(await CleanFolderAsync(clean.FileName, false, config.UseFlatStructure, config));
         }
 
         return results;
@@ -129,10 +130,23 @@ public abstract class SyncHandlerBase<TObject>
 
     /// <inheritdoc/>
     protected override async Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly)
+#pragma warning disable CS0618
         => await DeleteMissingItemsAsync(parent?.Key ?? Guid.Empty, keysToKeep, reportOnly);
+#pragma warning restore CS0618
 
     /// <inheritdoc/>
+    [Obsolete("Use the overload that takes a HandlerSettings, will be removed in v20")]
     protected override async Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(Guid key, IEnumerable<Guid> keysToKeep, bool reportOnly)
+        => await DeleteMissingItemsAsync(key, keysToKeep, reportOnly, new HandlerSettings());
+
+    /// <summary>
+    ///  Remove any items that are not listed in the GUIDs to keep, but skip any item that the
+    ///  handler's own <see cref="SyncHandlerRoot{TObject, TContainer}.ShouldImportAsync"/> rules
+    ///  (e.g Include/ExcludeContentTypes) say would never have been imported in the first place -
+    ///  so a partial sync (e.g uSync.Publisher sending only some content types) doesn't delete
+    ///  items it never sent.
+    /// </summary>
+    protected override async Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(Guid key, IEnumerable<Guid> keysToKeep, bool reportOnly, HandlerSettings config)
     {
         var items = (await GetChildItemsAsync(key)).ToArray();
 
@@ -145,34 +159,37 @@ public abstract class SyncHandlerBase<TObject>
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("DeleteMissingItems: Found {item} that is not in file list (Reporting: {reportOnly})", item.Id, reportOnly);
 
-            var name = String.Empty;
-            if (item is IEntitySlim slim) name = slim.Name;
-
-            if (string.IsNullOrEmpty(name) || !reportOnly)
+            // we always need the actual item here (even when reporting) so we can run it through
+            // ShouldImportAsync - otherwise a report can say an item 'will be deleted' when the
+            // handler's own rules (e.g ExcludeContentTypes) would in fact leave it alone.
+            var actualItem = await GetFromServiceAsync(item.Key);
+            if (actualItem == null)
             {
-                var actualItem = await GetFromServiceAsync(item.Key);
-                if (actualItem == null)
-                {
-                    if (logger.IsEnabled(LogLevel.Debug))
-                        logger.LogDebug("Actual Item {id} can't be found", item.Id);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Actual Item {id} can't be found", item.Id);
 
-                    continue;
-                }
-
-                name = GetItemName(actualItem);
-
-                // actually do the delete if we are really not reporting
-                if (!reportOnly)
-                {
-                    if (logger.IsEnabled(LogLevel.Debug))
-                        logger.LogDebug("Deleting item: {id} {name} as part of a 'clean' import", actualItem.Id, name);
-
-                    await DeleteViaServiceAsync(actualItem);
-                }
+                continue;
             }
 
-            // for reporting - we use the entity name,
-            // this stops an extra lookup - which we may not need later
+            var name = GetItemName(actualItem);
+
+            if (await ShouldImportDeletedItemAsync(actualItem, config) is false)
+            {
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("DeleteMissingItems: Skipping {id} {name} - handler rules mean it would never have been imported, so it was never sent", item.Id, name);
+
+                continue;
+            }
+
+            // actually do the delete if we are really not reporting
+            if (!reportOnly)
+            {
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Deleting item: {id} {name} as part of a 'clean' import", actualItem.Id, name);
+
+                await DeleteViaServiceAsync(actualItem);
+            }
+
             actions.Add(
                 uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty, item.Key, this.Alias));
         }

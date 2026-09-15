@@ -389,7 +389,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             var folderName = Path.GetFileName(item.filePath);
             callback?.Invoke($"Cleaning {folderName}", item.Index, cleanMarkers.Count);
 
-            var cleanActions = await CleanFolderAsync(item.filePath, false, config.UseFlatStructure);
+            var cleanActions = await CleanFolderAsync(item.filePath, false, config.UseFlatStructure, config);
             if (cleanActions.Any())
             {
                 actions.AddRange(cleanActions);
@@ -611,18 +611,19 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
     /// <summary>
-    ///  given a folder we calculate what items we can remove, because they are 
+    ///  given a folder we calculate what items we can remove, because they are
     ///  not in one the files in the folder.
     /// </summary>
+    [Obsolete("Use the overload that takes a HandlerSettings, so a handler can apply its import rules (e.g Include/ExcludeContentTypes) when deciding what is missing. Will be removed in v20")]
     protected virtual async Task<IEnumerable<uSyncAction>> CleanFolderAsync(string cleanFile, bool reportOnly, bool flat)
     {
         var folder = Path.GetDirectoryName(cleanFile);
         if (string.IsNullOrWhiteSpace(folder) is true || syncFileService.DirectoryExists(folder) is false)
             return [];
 
-        // get the keys for every item in this folder. 
+        // get the keys for every item in this folder.
 
-        // this would works on the flat folder structure too, 
+        // this would works on the flat folder structure too,
         // there we are being super defensive, so if an item
         // is anywhere in the folder it won't get removed
         // even if the folder is wrong
@@ -641,7 +642,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             // keys should aways have at least one entry (the key from cleanFile)
             // if it doesn't then something might have gone wrong.
-            // because we are being defensive when it comes to deletes, 
+            // because we are being defensive when it comes to deletes,
             // we only then do this if we know we have loaded some keys!
             return await DeleteMissingItemsAsync(parent, keys, reportOnly);
         }
@@ -653,7 +654,20 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
     /// <summary>
-    ///  pre-populates the cache folder key list. 
+    ///  given a folder we calculate what items we can remove, because they are
+    ///  not in one the files in the folder - this overload passes the handler's
+    ///  <see cref="HandlerSettings"/> through to <see cref="DeleteMissingItemsAsync(Guid, IEnumerable{Guid}, bool, HandlerSettings)"/>
+    ///  so a handler can apply its own import rules (e.g Include/ExcludeContentTypes) when
+    ///  deciding what counts as 'missing' - stopping a partial sync (e.g uSync.Publisher sending
+    ///  only some content types) from deleting items it never sent in the first place.
+    /// </summary>
+    protected virtual async Task<IEnumerable<uSyncAction>> CleanFolderAsync(string cleanFile, bool reportOnly, bool flat, HandlerSettings config)
+#pragma warning disable CS0618 // handlers that don't know about config based filtering fall back to the legacy behavior.
+        => await CleanFolderAsync(cleanFile, reportOnly, flat);
+#pragma warning restore CS0618
+
+    /// <summary>
+    ///  pre-populates the cache folder key list.
     /// </summary>
     /// <remarks>
     ///  this means if we are calling the process multiple times, 
@@ -751,11 +765,27 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <param name="keysToKeep">list of GUIDs of items we don't want to delete</param>
     /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
     /// <returns>list of delete actions</returns>
+    [Obsolete("Use the overload that takes a HandlerSettings, so a handler can apply its import rules (e.g Include/ExcludeContentTypes) to skip items it never sent. Will be removed in v20")]
     protected virtual Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(Guid key, IEnumerable<Guid> keysToKeep, bool reportOnly)
         => Task.FromResult(Enumerable.Empty<uSyncAction>());
 
     /// <summary>
-    ///  Get the files we are going to import from a folder. 
+    /// Remove any items that are not listed in the GUIDs to keep, applying the handler's
+    /// <see cref="HandlerSettings"/> (e.g Include/ExcludeContentTypes) so items that were
+    /// never in scope for this sync are not treated as 'missing' and removed.
+    /// </summary>
+    /// <param name="key">parent item that all keys will be under</param>
+    /// <param name="keysToKeep">list of GUIDs of items we don't want to delete</param>
+    /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
+    /// <param name="config">handler settings for the sync that triggered this clean</param>
+    /// <returns>list of delete actions</returns>
+    protected virtual async Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(Guid key, IEnumerable<Guid> keysToKeep, bool reportOnly, HandlerSettings config)
+#pragma warning disable CS0618 // handlers that don't know about config based filtering fall back to the legacy behavior.
+        => await DeleteMissingItemsAsync(key, keysToKeep, reportOnly);
+#pragma warning restore CS0618
+
+    /// <summary>
+    ///  Get the files we are going to import from a folder.
     /// </summary>
     protected virtual IEnumerable<string> GetImportFiles(string folder)
         => syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}").OrderBy(x => x);
@@ -807,7 +837,32 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
     /// <summary>
-    ///  Check to see if this element should be exported. 
+    ///  check whether an existing item that is missing from an import (and so is a candidate for
+    ///  removal by a 'clean' delete) would actually have been imported in the first place.
+    /// </summary>
+    /// <remarks>
+    ///  re-uses the same <see cref="ShouldImportAsync(XElement, HandlerSettings)"/> rules that apply
+    ///  when the item's own file is imported (e.g Include/ExcludeContentTypes, IgnoreAliases) - so a
+    ///  handler that is configured to skip some items doesn't delete items it was never sent in the
+    ///  first place (e.g a partial sync from uSync.Publisher).
+    /// </remarks>
+    protected async Task<bool> ShouldImportDeletedItemAsync(TObject item, HandlerSettings config)
+    {
+        try
+        {
+            var attempt = await serializer.SerializeAsync(item, new SyncSerializerOptions(config.Settings));
+            if (attempt.Item is null) return true;
+            return await ShouldImportAsync(attempt.Item, config);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error while checking if a missing item should have been imported.");
+            return true;
+        }
+    }
+
+    /// <summary>
+    ///  Check to see if this element should be exported.
     /// </summary>
     virtual protected Task<bool> ShouldExportAsync(XElement node, HandlerSettings config) => Task.FromResult(true);
 
@@ -1333,7 +1388,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             if (action.Change == ChangeType.Clean)
             {
-                actions.AddRange(await CleanFolderAsync(filename, true, settings.UseFlatStructure));
+                actions.AddRange(await CleanFolderAsync(filename, true, settings.UseFlatStructure, settings));
             }
             else if (action.Change > ChangeType.NoChange)
             {
