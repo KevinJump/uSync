@@ -88,8 +88,7 @@ jobs:
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
-      # the client project's build runs `npm run build` via an MSBuild target,
-      # so node needs to be available before the dotnet build/pack steps below.
+      # build client assets before dotnet evaluates the static web assets
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
@@ -106,6 +105,14 @@ jobs:
 
       - name: npm build
         working-directory: ${{ env.client_folder }}
+        run: npm run build
+
+      - name: npm install history client
+        working-directory: ./uSync.History/history-client
+        run: npm ci
+
+      - name: npm build history client
+        working-directory: ./uSync.History/history-client
         run: npm run build
 
       - name: restore
