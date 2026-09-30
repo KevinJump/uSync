@@ -26,8 +26,11 @@ env:
   schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
 jobs:
+  # Linux rather than Windows: nothing in the build needs Windows, and the ubuntu
+  # runners start and build noticeably faster. It also means a path whose casing
+  # doesn't match the repo fails here, on the PR, rather than in a release.
   build-project:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v7
@@ -38,8 +41,7 @@ jobs:
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
-      # the client project's build runs `npm run build` via an MSBuild target,
-      # so node needs to be available before the dotnet build step below.
+      # node is needed for the history client build below.
       - uses: actions/setup-node@v7
         with:
           node-version: "lts/*"
@@ -48,10 +50,9 @@ jobs:
             ./uSync.Backoffice.Management.Client/usync-assets/package-lock.json
             ./uSync.History/history-client/package-lock.json
 
-      # unlike uSync.Backoffice.Management.Client, uSync.History has no MSBuild target
-      # that builds its client automatically - wwwroot is gitignored, so without this
-      # the dotnet build below packages whatever (if anything) happens to already be
-      # on disk.
+      # uSync.History has no MSBuild target that builds its client automatically -
+      # wwwroot is gitignored, so without this the dotnet build below packages
+      # whatever (if anything) happens to already be on disk.
       - name: npm install history client
         working-directory: ./uSync.History/history-client
         run: npm ci
@@ -71,14 +72,14 @@ jobs:
         run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} --no-restore -p:ContinuousIntegrationBuild=true
 
       - name: test
-        run: dotnet test ${{ env.test_project }} -c ${{ env.config }}
+        run: dotnet test ${{ env.test_project }} -c ${{ env.config }} --no-build
 
       - name: Generate AppSettings Schema
-        run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }}
+        run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }} --no-build
 
   history-package:
     name: history package smoke check
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v7
