@@ -1,5 +1,6 @@
 ﻿using Jumoo.Json;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using System.Reflection;
@@ -7,8 +8,10 @@ using System.Xml.Linq;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Services.Changes;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
@@ -46,6 +49,26 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     }
 
     protected virtual Guid GetDefaultListType() => Guid.Empty;
+
+    protected override async Task<Attempt<TObject?>> FindOrCreateAsync(XElement node)
+    {
+        var attempt = await base.FindOrCreateAsync(node);
+
+        // before Umbraco 18.2 a content type loaded from the cache keeps its property types'
+        // dirty state from when they were created, so a variance-only change on import is
+        // not seen as structural and the published cache goes stale. clear it before we make
+        // our changes (18.2+ does this itself).
+        if (attempt.Success && attempt.Result is not null && attempt.Result.Id > 0)
+        {
+            foreach (var group in attempt.Result.PropertyGroups)
+                group.ResetDirtyProperties(false);
+
+            foreach (var propertyType in attempt.Result.PropertyTypes)
+                propertyType.ResetDirtyProperties(false);
+        }
+
+        return attempt;
+    }
 
     #region Serialization 
 
@@ -1386,6 +1409,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             return;
         }
 
+        var compositionsChanged = item.Id > 0 && item.IsPropertyDirty(nameof(item.ContentTypeComposition));
+
         var attempt = item.Id <= 0
             ? await _baseService.CreateAsync(item, Constants.Security.SuperUserKey)
             : await _baseService.UpdateAsync(item, Constants.Security.SuperUserKey);
@@ -1396,7 +1421,24 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 $"Could not save {typeof(TObject).Name} {item.Alias}: {attempt.Result}");
         }
 
+        if (compositionsChanged)
+            RefreshComposedOf(item);
+
         //if (item.IsDirty()) _baseService.Save(item);
+    }
+
+    /// <summary>
+    ///  before Umbraco 18.2 a composition change only refreshes the cache for the type itself,
+    ///  so types composed of it (e.g. its children) keep a stale published content type.
+    /// </summary>
+    private void RefreshComposedOf(TObject item)
+    {
+        var composedOf = _baseService.GetComposedOf(item.Id).Where(x => x.Id != item.Id).ToArray();
+        if (composedOf.Length == 0) return;
+
+        StaticServiceProvider.Instance.GetRequiredService<DistributedCache>()
+            .RefreshByPayload(ContentTypeCacheRefresher.UniqueId,
+                composedOf.Select(x => new ContentTypeCacheRefresher.JsonPayload(typeof(TObject).Name, x.Id, ContentTypeChangeTypes.RefreshOther)));
     }
 
     public override async Task SaveAsync(IEnumerable<TObject> items)
