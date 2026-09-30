@@ -1246,24 +1246,33 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     {
         foreach (var move in moves)
         {
-            if (move.Value is null)
-            {
-                // moving the property out of all groups. MovePropertyType(alias, null)
-                // removes it from its current group but does *not* re-add it to the
-                // 'no group' collection, leaving it orphaned - so the change does not
-                // stick until a second import. We re-home it explicitly. (issue #1009)
-                var property = item.PropertyTypes.FirstOrDefault(x => x.Alias.InvariantEquals(move.Key));
-                item.MovePropertyType(move.Key, null!);
-                if (property is not null && item.PropertyTypes.Any(x => x.Alias.InvariantEquals(move.Key)) is false)
-                    item.AddPropertyType(property);
-            }
-            else
-            {
-                item.MovePropertyType(move.Key, move.Value);
-            }
-
+            MovePropertyType(item, move.Key, move.Value);
             yield return uSyncChange.Update($"{move.Key}/Tab/{move.Value}", move.Key, "", move.Value ?? "(No group)");
         }
+    }
+
+    /// <summary>
+    ///  move a property into a group, or out of all groups when <paramref name="groupAlias"/> is null.
+    /// </summary>
+    internal static void MovePropertyType(IContentTypeBase item, string alias, string? groupAlias)
+    {
+        if (groupAlias is not null)
+        {
+            item.MovePropertyType(alias, groupAlias);
+            return;
+        }
+
+        // before Umbraco 17.7, MovePropertyType(alias, null) removes the property from its
+        // group but does *not* re-add it to the 'no group' collection, leaving it orphaned,
+        // so the change does not stick until a second import. We re-home it explicitly.
+        // on 17.7+ core does this itself and the check below finds nothing to do. (#1009)
+        var property = item.PropertyTypes.FirstOrDefault(x => x.Alias.InvariantEquals(alias));
+
+        // the parameter is only annotated string? from 17.7, and we build against 17.3.
+        item.MovePropertyType(alias, null!);
+
+        if (property is not null && item.PropertyTypes.Any(x => x.Alias.InvariantEquals(alias)) is false)
+            item.AddPropertyType(property);
     }
 
     private List<uSyncChange> RemoveProperties(IContentTypeBase item, XElement properties)
