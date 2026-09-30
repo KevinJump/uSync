@@ -13,7 +13,7 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     rollupOptions: {
-      external: [/^@umbraco/, /^@jumoo\/uSync/],
+      external: [/^@umbraco/, /^@jumoo\/usync/i],
       onwarn: () => {},
     },
   },
