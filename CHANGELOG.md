@@ -9,6 +9,42 @@ re-export), see [`changes/format.md`](changes/format.md).
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 History is backfilled from the v18 release history starting at `v18.0.0`.
 
+## [18.1.5] - 2026-09-30
+
+### Fixed
+
+- **Imported block values no longer show as having pending changes.** When an
+  invariant block editor holds culture-variant elements, Umbraco re-serializes
+  the value on publish and decides whether there are pending changes by
+  comparing the draft and published values as strings. The draft uSync wrote
+  differed in three ways: `editorAlias` was null, properties were in
+  alphabetical order, and values were not sorted by culture. On import, uSync
+  now sets each value's property type, sorts values by culture, and uses
+  Umbraco's property order. Export output is unchanged. (#1098)
+
+- **The published cache stays current after content type imports on Umbraco
+  18.0–18.1.** These versions have two cache bugs
+  ([umbraco/Umbraco-CMS#23433][u23433], [#23445][u23445]). After a composition
+  changes, uSync now refreshes the content types that use it. When a content
+  type is loaded for import, uSync clears its property types' stale dirty
+  state, so a variance-only change is treated as a structural one. Umbraco
+  18.2 fixes both bugs, and from 18.2 on the workarounds have no effect.
+  (#1102)
+
+- **Culture codes are exported in standard casing.** A language stored as
+  `da-dk` could export as a mix of `da-dk` and `da-DK`, and files changed when
+  Umbraco was upgraded. uSync now always writes the standard casing (`da-DK`),
+  so output is the same on every version. Existing files with lower-case
+  culture codes still import, but they may report as changed until they are
+  re-exported. (#1101)
+
+- The uSync History package's backoffice client now loads the uSync client by
+  its package name (`@jumoo/usync`), so it resolves on case-sensitive file
+  systems. (#1105)
+
+[u23433]: https://github.com/umbraco/Umbraco-CMS/issues/23433
+[u23445]: https://github.com/umbraco/Umbraco-CMS/issues/23445
+
 ## [18.1.0] - 2026-08-12
 
 ### Added
