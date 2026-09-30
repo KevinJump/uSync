@@ -166,13 +166,16 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         var cultures = options.GetCultures();
 
+        // culture codes are written in standard casing (en-US). a language stored as 'en-us'
+        // would otherwise export differently depending on the Umbraco version (18.2+
+        // normalise culture names when loading content, but not property values).
         var title = new XElement(uSyncConstants.Xml.NodeName, new XAttribute("Default", item.Name ?? item.Id.ToString()));
         foreach (var culture in item.AvailableCultures.OrderBy(x => x))
         {
             if (cultures.IsValidOrBlank(culture))
             {
                 title.Add(new XElement(uSyncConstants.Xml.Name, item.GetCultureName(culture),
-                    new XAttribute("Culture", culture)));
+                    new XAttribute("Culture", culture.EnsureCultureCode()!)));
             }
         }
         info.Add(title);
@@ -253,7 +256,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 // or b) it is a valid culture/segment. 
                 if (!string.IsNullOrWhiteSpace(value.Culture) && cultures.IsValid(value.Culture))
                 {
-                    valueNode.Add(new XAttribute("Culture", value.Culture ?? string.Empty));
+                    valueNode.Add(new XAttribute("Culture", value.Culture.EnsureCultureCode() ?? string.Empty));
                     validNode = true;
                 }
 
@@ -282,7 +285,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                         if (!property.Values.Any(x => (x.Culture ?? "").Equals(culture, StringComparison.OrdinalIgnoreCase)))
                         {
                             elements.Add(new XElement("Value",
-                                new XAttribute("Culture", culture),
+                                new XAttribute("Culture", culture.EnsureCultureCode()!),
                                 new XCData(string.Empty)));
                         }
                     }
@@ -489,8 +492,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 if (activeCultures.IsValid(culture) is false) continue;
 
                 // v14: if the culture is missing we need to add it
+                // SetCultureName normalises the casing, so match it here.
                 if (item.CultureInfos?.TryGetValue(culture, out var cultureInfo) is false)
-                    item.CultureInfos.Add(new ContentCultureInfos(culture));
+                    item.CultureInfos.Add(new ContentCultureInfos(culture.EnsureCultureCode()!));
 
                 var cultureName = cultureNode.ValueOrDefault(string.Empty);
                 var currentCultureName = item.GetCultureName(culture) ?? "";
