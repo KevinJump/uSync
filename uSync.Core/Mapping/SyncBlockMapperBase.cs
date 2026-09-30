@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
@@ -36,11 +37,25 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         _logger = logger;
     }
 
+    /// <summary>
+    ///  serializer options for imported block values, these keep the property order Umbraco uses. 
+    /// </summary>
+    /// <remarks>
+    ///  when an invariant block editor contains culture variant elements, Umbraco re-serializes 
+    ///  the value on publish (merging each culture) and then does a string compare against the 
+    ///  draft to work out if the item has pending changes. so the draft we save has to be exactly 
+    ///  what Umbraco would write (#1097), our default options sort properties alphabetically.
+    /// </remarks>
+    private static readonly JsonSerializerOptions _importOptions = new(JsonTextExtensions._flatOptions)
+    {
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+    };
+
     public override async Task<string?> GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options)
-        => await ProcessBlockValuesAsync(value, GetImportProperty, options);
+        => await ProcessBlockValuesAsync(value, GetImportProperty, options, isImport: true);
 
     public override async Task<string?> GetExportValueAsync(object value, string editorAlias)
-        => await ProcessBlockValuesAsync(value?.ToString() ?? string.Empty, GetExportProperty, new());
+        => await ProcessBlockValuesAsync(value?.ToString() ?? string.Empty, GetExportProperty, new(), isImport: false);
 
     private static string? GetStringValue(object? value)
     {
@@ -82,7 +97,7 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         return result.ConvertToJsonNode()?.ExpandAllJsonInToken() ?? result;
     }
 
-    private async Task<string?> ProcessBlockValuesAsync(string value, Func<object?, IPropertyType?, SyncSerializerOptions, Task<object?>> GetValueMethod, SyncSerializerOptions options)
+    private async Task<string?> ProcessBlockValuesAsync(string value, Func<object?, IPropertyType?, SyncSerializerOptions, Task<object?>> GetValueMethod, SyncSerializerOptions options, bool isImport)
     {
         var blockValue = SyncBlockMapperBase<TBlockValue>.GetBlockValue(value);
         if (blockValue == null) return value;
@@ -96,7 +111,7 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         {
             MigrateBlock(contentItem);
 
-            await ProcessBlockData(contentItem, GetValueMethod, options);
+            await ProcessBlockData(contentItem, GetValueMethod, options, isImport);
         }
 
         if (blockValue.Expose.Count == 0)
@@ -105,10 +120,13 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
             blockValue.Expose = [.. blockValue.ContentData.Select(x => new BlockItemVariation(x.Key, null, null))];
         }
 
+        if (isImport)
+            return JsonSerializer.Serialize(blockValue, _importOptions);
+
         return blockValue.SerializeJsonString(true);
     }
 
-    private async Task ProcessBlockData(BlockItemData? blockItem, Func<object?, IPropertyType?, SyncSerializerOptions, Task<object?>> GetValueMethod, SyncSerializerOptions options)
+    private async Task ProcessBlockData(BlockItemData? blockItem, Func<object?, IPropertyType?, SyncSerializerOptions, Task<object?>> GetValueMethod, SyncSerializerOptions options, bool isImport)
     {
         if (blockItem == null) return;
 
@@ -123,7 +141,15 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
             var mappedValue = await GetValueMethod(value.Value, property, options);
             if (mappedValue != null)
                 value.Value = mappedValue;
+
+            // the property type is what populates editorAlias when the value is serialized.
+            if (isImport) value.PropertyType = property;
         }
+
+        // Umbraco sorts values by culture when it saves or publishes a block value, 
+        // so we do the same, or the draft won't match the published value.
+        if (isImport)
+            blockItem.Values = [.. blockItem.Values.OrderBy(x => x.Culture, StringComparer.OrdinalIgnoreCase)];
     }
 
 #pragma warning disable CS0618 // Type or member is obsolete (post v18, we will need to have our own model?)
