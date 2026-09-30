@@ -119,6 +119,13 @@ jobs:
 
       # the version is set here, not at pack time, so the assemblies carry it and the
       # pack steps below can reuse this build instead of rebuilding every project.
+      #
+      # InformationalVersion is set explicitly because the GitVersion step exports its
+      # own values as environment variables for the rest of this job, including
+      # "informationalVersion" (e.g. 17.4.4-ci.123+Branch...). MSBuild reads environment
+      # variables as properties, case-insensitively, so without this the assemblies (and
+      # the version shown on the uSync dashboard) carry GitVersion's value, not the
+      # nightly one.
       - name: build
         run: >-
           dotnet build ${{ env.solution_name }}
@@ -126,6 +133,7 @@ jobs:
           --no-restore
           -p:ContinuousIntegrationBuild=true
           -p:Version=${{ steps.version.outputs.version }}
+          -p:InformationalVersion=${{ steps.version.outputs.version }}
 
       - name: test
         run: dotnet test ${{ env.test_project }} -c ${{ env.config }} --no-build
