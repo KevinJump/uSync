@@ -27,7 +27,11 @@ jobs:
       # so the version carries a date + run number rather than GitVersion's own
       # prerelease scheme - makes it obvious which nightly a given package build
       # is, and when it was built.
-      version_string: ${{ steps.gitversion.outputs.majorMinorPatch }}-prerelease.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}
+      #
+      # v18/main builds are "-prerelease.{date}.{run}". Any other branch is
+      # "-branch.{branch}.{date}.{run}", so a branch build on the feed can't be
+      # mistaken for a main nightly, and sorts below them ("branch" < "prerelease").
+      version_string: ${{ steps.gitversion.outputs.majorMinorPatch }}-${{ steps.nightly_date.outputs.label }}.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}
 
     steps:
       - name: Checkout
@@ -50,14 +54,22 @@ jobs:
           useConfigFile: true
           configFilePath: ./GitVersion.yml
 
-      - name: Determine build date
+      - name: Determine build date and label
         id: nightly_date
         shell: bash
-        run: echo "date=$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "date=$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_REF" = "refs/heads/v18/main" ]; then
+            echo "label=prerelease" >> "$GITHUB_OUTPUT"
+          else
+            # semver prerelease identifiers are [0-9A-Za-z-] only.
+            branch=$(echo "$GITHUB_REF_NAME" | sed 's/[^0-9A-Za-z-]/-/g')
+            echo "label=branch.$branch" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Display version
         run: |
-          echo "Full Version: ${{ steps.gitversion.outputs.majorMinorPatch }}-prerelease.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}"
+          echo "Full Version: ${{ steps.gitversion.outputs.majorMinorPatch }}-${{ steps.nightly_date.outputs.label }}.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}"
 
   build-project:
     runs-on: windows-latest
@@ -185,8 +197,8 @@ jobs:
       # NOTE: this workflow only ever runs on manual dispatch. Full releases to
       # nuget.org happen separately, in release.yml, triggered by pushing a
       # v{version} tag. The publish-nightly job below pushes these packages to
-      # the Jumoo nightly feed instead, so testers can try a branch without
-      # waiting for a tagged release.
+      # the Jumoo nightly feed instead, so testers can try a build (from main or
+      # a feature branch) without waiting for a tagged release.
       - name: Upload nuget file as build artifact
         uses: actions/upload-artifact@v7
         with:
@@ -198,8 +210,8 @@ jobs:
 
     needs: package-up
 
-    # Nightly feed is only fed from the current active major version branch.
-    if: github.ref == 'refs/heads/v18/main'
+    # Any branch can publish to the nightly feed - this workflow is manual only,
+    # and branch builds carry a "-branch.{name}" label (see the version job).
 
     steps:
       - name: Download nuget build artifact
