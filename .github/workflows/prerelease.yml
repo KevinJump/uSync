@@ -18,25 +18,26 @@ env:
   solution_name: ./uSync.slnx
   test_project: ./uSync.Tests/uSync.Tests.csproj
   schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
+  client_folder: ./uSync.Backoffice.Management.Client/usync-assets
+  history_client_folder: ./uSync.History/history-client
 
 jobs:
-  version:
-    runs-on: windows-latest
-    outputs:
-      # These builds are only ever pushed to the nightly feed, never to nuget.org,
-      # so the version carries a date + run number rather than GitVersion's own
-      # prerelease scheme - makes it obvious which nightly a given package build
-      # is, and when it was built.
-      #
-      # v18/main builds are "-prerelease.{date}.{run}". Any other branch is
-      # "-branch.{branch}.{date}.{run}", so a branch build on the feed can't be
-      # mistaken for a main nightly, and sorts below them ("branch" < "prerelease").
-      version_string: ${{ steps.gitversion.outputs.majorMinorPatch }}-${{ steps.nightly_date.outputs.label }}.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}
+  # One job on purpose: the solution is built once, with the nightly version
+  # stamped in, and then tested and packed from that same build (--no-build).
+  # Splitting it into build / pack / publish jobs meant three runner start-ups,
+  # three checkouts and restores, and a second full build just to pack.
+  #
+  # Linux rather than Windows: nothing in the build needs Windows, and the ubuntu
+  # runners start and build noticeably faster. Project paths are case sensitive
+  # here, so the folder names below have to match the repo exactly.
+  nightly:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          # GitVersion needs the full history
           fetch-depth: 0
 
       - name: Install GitVersion
@@ -47,70 +48,35 @@ jobs:
         with:
           versionSpec: "5.x"
 
-      - name: Determine Version with GitVersion (MSBuild in Proj will do this)
+      - name: Determine Version with GitVersion
         id: gitversion
         uses: gittools/actions/gitversion/execute@v3
         with:
           useConfigFile: true
           configFilePath: ./GitVersion.yml
 
-      - name: Determine build date and label
-        id: nightly_date
-        shell: bash
+      # These builds are only ever pushed to the nightly feed, never to nuget.org,
+      # so the version carries a date + run number rather than GitVersion's own
+      # prerelease scheme - makes it obvious which nightly a given package build
+      # is, and when it was built.
+      #
+      # v18/main builds are "-prerelease.{date}.{run}". Any other branch is
+      # "-branch.{branch}.{date}.{run}", so a branch build on the feed can't be
+      # mistaken for a main nightly, and sorts below them ("branch" < "prerelease").
+      - name: Determine nightly version
+        id: version
         run: |
-          echo "date=$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          date=$(date -u +%Y%m%d)
           if [ "$GITHUB_REF" = "refs/heads/v18/main" ]; then
-            echo "label=prerelease" >> "$GITHUB_OUTPUT"
+            label=prerelease
           else
             # semver prerelease identifiers are [0-9A-Za-z-] only.
-            branch=$(echo "$GITHUB_REF_NAME" | sed 's/[^0-9A-Za-z-]/-/g')
-            echo "label=branch.$branch" >> "$GITHUB_OUTPUT"
+            label="branch.$(echo "$GITHUB_REF_NAME" | sed 's/[^0-9A-Za-z-]/-/g')"
           fi
+          version="${{ steps.gitversion.outputs.majorMinorPatch }}-$label.$date.$GITHUB_RUN_NUMBER"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Full Version: $version"
 
-      - name: Display version
-        run: |
-          echo "Full Version: ${{ steps.gitversion.outputs.majorMinorPatch }}-${{ steps.nightly_date.outputs.label }}.${{ steps.nightly_date.outputs.date }}.${{ github.run_number }}"
-
-  build-project:
-    runs-on: windows-latest
-
-    needs: version
-
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
-          cache: true
-          cache-dependency-path: "**/packages.lock.json"
-
-      # the client project's build runs `npm run build` via an MSBuild target,
-      # so node needs to be available before the dotnet build step below.
-      - uses: actions/setup-node@v7
-        with:
-          node-version: "lts/*"
-          cache: npm
-          cache-dependency-path: ./uSync.Backoffice.Management.Client/usync-assets/package-lock.json
-
-      - name: restore
-        run: dotnet restore ${{ env.solution_name }} --locked-mode
-
-      - name: build
-        run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
-
-      - name: test
-        run: dotnet test ${{ env.test_project }} -c ${{ env.config }}
-
-      - name: Generate AppSettings Schema
-        run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }}
-
-  package-up:
-    runs-on: windows-latest
-
-    needs: [build-project, version]
-
-    steps:
-      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
@@ -122,100 +88,82 @@ jobs:
           node-version: "lts/*"
           cache: npm
           cache-dependency-path: |
-            ./uSync.Backoffice.Management.Client/usync-assets/package-lock.json
-            ./uSync.History/history-client/package-lock.json
+            ${{ env.client_folder }}/package-lock.json
+            ${{ env.history_client_folder }}/package-lock.json
 
-      - name: version
-        run: |
-          echo "Version: ${{ needs.version.outputs.version_string}}"
-
+      # Neither client project has an MSBuild target that runs npm (the one in
+      # uSync.Backoffice.Management.Client is commented out), and both wwwroot
+      # folders are gitignored, so the clients have to be built before dotnet build.
       - name: Stamp version on NPM Package
-        working-directory: ./uSync.Backoffice.Management.Client/usync-assets
-        run: npm version ${{ needs.version.outputs.version_string }}
+        working-directory: ${{ env.client_folder }}
+        run: npm version ${{ steps.version.outputs.version }}
 
-      - name: npm install
-        working-directory: ./uSync.Backoffice.Management.Client/usync-assets
-        run: npm ci
+      - name: build uSync client
+        working-directory: ${{ env.client_folder }}
+        run: |
+          npm ci
+          npm run build
 
-      - name: npm build
-        working-directory: ./uSync.Backoffice.Management.Client/usync-assets
-        run: npm run build
+      - name: build history client
+        working-directory: ${{ env.history_client_folder }}
+        run: |
+          npm ci
+          npm run build
 
-      # uSync.History has no MSBuild target that builds its client automatically -
-      # wwwroot is gitignored, so this has to run before the pack step below.
-      - name: npm install history client
-        working-directory: ./uSync.History/history-client
-        run: npm ci
-
-      - name: npm build history client
-        working-directory: ./uSync.History/history-client
-        run: npm run build
-
+      # -p:Configuration matters here: uSync.Extend is excluded from the Debug solution
+      # configuration (<Build Solution="Debug|*" Project="false" /> in uSync.slnx), so a
+      # restore with no configuration defaults to Debug and silently skips it, leaving no
+      # project.assets.json for the Release build below to pick up.
       - name: restore
-        run: dotnet restore ${{ env.solution_name }} --locked-mode
+        run: dotnet restore ${{ env.solution_name }} --locked-mode -p:Configuration=${{ env.config }}
 
-      # matches release.yml's build step, so nightly and release packages are built
-      # the same way (deterministic/reproducible outputs) rather than just sharing
-      # a project list. The pack steps below rely on this build's outputs already
-      # being up to date, the same way release.yml's pack steps do.
+      # the version is set here, not at pack time, so the assemblies carry it and the
+      # pack steps below can reuse this build instead of rebuilding every project.
       - name: build
-        run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
+        run: >-
+          dotnet build ${{ env.solution_name }}
+          -c ${{ env.config }}
+          --no-restore
+          -p:ContinuousIntegrationBuild=true
+          -p:Version=${{ steps.version.outputs.version }}
 
-      - name: package uSync.Core
-        run: dotnet pack ./uSync.Core/uSync.Core.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
+      - name: test
+        run: dotnet test ${{ env.test_project }} -c ${{ env.config }} --no-build
 
-      - name: package uSync.AutoTemplates
-        run: dotnet pack ./uSync.AutoTemplates/uSync.AutoTemplates.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
+      - name: Generate AppSettings Schema
+        run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }} --no-build
 
-      - name: package uSync.BackOffice
-        run: dotnet pack ./uSync.BackOffice/uSync.BackOffice.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Backoffice.Management.Api
-        run: dotnet pack ./uSync.Backoffice.Management.Api/uSync.Backoffice.Management.Api.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Backoffice.Management.Client
-        run: dotnet pack ./uSync.Backoffice.Management.Client/uSync.Backoffice.Management.Client.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.BackOffice.Targets
-        run: dotnet pack ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Community.Contrib
-        run: dotnet pack ./uSync.Community.Contrib/uSync.Community.Contrib.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Community.DataTypeSerializers
-        run: dotnet pack ./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.Extend
-        run: dotnet pack ./uSync.Extend/uSync.Extend.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync.History
-        run: dotnet pack ./uSync.History/uSync.History.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: package uSync (meta package)
-        run: dotnet pack ./uSync/uSync.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
+      - name: pack
+        run: |
+          set -euo pipefail
+          projects=(
+            uSync.Core
+            uSync.AutoTemplates
+            uSync.BackOffice
+            uSync.Backoffice.Management.Api
+            uSync.Backoffice.Management.Client
+            uSync.BackOffice.Targets
+            uSync.Community.Contrib
+            uSync.Community.DataTypeSerializers
+            uSync.Extend
+            uSync.History
+            uSync
+          )
+          for project in "${projects[@]}"; do
+            dotnet pack "./$project/$project.csproj" \
+              -c ${{ env.config }} \
+              --no-build \
+              --output ${{ env.out_folder }} \
+              -p:Version=${{ steps.version.outputs.version }}
+          done
 
       # NOTE: this workflow only ever runs on manual dispatch. Full releases to
       # nuget.org happen separately, in release.yml, triggered by pushing a
-      # v{version} tag. The publish-nightly job below pushes these packages to
-      # the Jumoo nightly feed instead, so testers can try a build (from main or
-      # a feature branch) without waiting for a tagged release.
+      # v{version} tag. The steps below push these packages to the Jumoo nightly
+      # feed instead, so testers can try a build (from main or a feature branch)
+      # without waiting for a tagged release.
       - name: Upload nuget file as build artifact
         uses: actions/upload-artifact@v7
-        with:
-          name: Nuget Build Output
-          path: ${{ env.out_folder }}
-
-  publish-nightly:
-    runs-on: windows-latest
-
-    needs: package-up
-
-    # Any branch can publish to the nightly feed - this workflow is manual only,
-    # and branch builds carry a "-branch.{name}" label (see the version job).
-
-    steps:
-      - name: Download nuget build artifact
-        uses: actions/download-artifact@v6
         with:
           name: Nuget Build Output
           path: ${{ env.out_folder }}
@@ -232,6 +180,8 @@ jobs:
           token: ${{ secrets.NIGHTLY_FEED_PAT }}
           path: .nightly-feed-config
 
+      # Any branch can publish to the nightly feed - this workflow is manual only,
+      # and branch builds carry a "-branch.{name}" label (see the version step).
       - name: Publish to nightly feed
         uses: ./.nightly-feed-config
         with:
