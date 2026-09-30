@@ -105,6 +105,31 @@ public class BlockListMapperPublishTests
         Assert.That(draft, Is.EqualTo(published));
     }
 
+    [Test]
+    public async Task InvariantBlock_SavedByUmbraco_IsNotChangedByImport()
+    {
+        // an ordinary invariant block, stored as Umbraco writes it on a backoffice save. 
+        // the import value has to be identical, or uSync reports and saves a change.
+        var elementType = BuildElementType(variesByCulture: false);
+        var mappers = BuildMapperCollection(elementType);
+
+        var blockKey = Guid.NewGuid();
+        var blockValue = new BlockListValue([new BlockListLayoutItem(blockKey)])
+        {
+            ContentData = [new BlockItemData(blockKey, elementType.Key, elementType.Alias)
+            {
+                Values = [.. elementType.PropertyTypes.Select(p => new BlockPropertyValue { Alias = p.Alias, Value = $"{p.Alias} value", PropertyType = p })]
+            }],
+            Expose = [new BlockItemVariation(blockKey, null, null)]
+        };
+
+        var source = _jsonSerializer.Serialize(blockValue);
+
+        var imported = (await mappers.GetImportValueAsync(source, _blockListPropertyType, new SyncSerializerOptions()))?.ToString();
+
+        Assert.That(imported, Is.EqualTo(source));
+    }
+
     private async Task<string> ImportAsync(string value)
         => (await _mappers.GetImportValueAsync(value, _blockListPropertyType, new SyncSerializerOptions()))?.ToString();
 
@@ -145,22 +170,24 @@ public class BlockListMapperPublishTests
         return _jsonSerializer.Serialize(blockValue);
     }
 
-    private static IContentType BuildElementType()
+    private static IContentType BuildElementType(bool variesByCulture = true)
     {
+        var variation = variesByCulture ? ContentVariation.Culture : ContentVariation.Nothing;
+
         var elementType = new ContentType(ShortStringHelper, -1)
         {
             Alias = "imageBlock",
             Name = "Image Block",
             Key = Guid.NewGuid(),
             IsElement = true,
-            Variations = ContentVariation.Culture
+            Variations = variation
         };
 
         elementType.AddPropertyType(new PropertyType(ShortStringHelper, UmbConstants.PropertyEditors.Aliases.TextBox, ValueStorageType.Nvarchar)
         {
             Alias = "alt",
             Name = "Alt",
-            Variations = ContentVariation.Culture
+            Variations = variation
         });
 
         elementType.AddPropertyType(new PropertyType(ShortStringHelper, UmbConstants.PropertyEditors.Aliases.TextBox, ValueStorageType.Nvarchar)
