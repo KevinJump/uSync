@@ -125,7 +125,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             if (activeCultures.IsValid(culture))
             {
                 published.Add(new XElement("Published", item.IsCulturePublished(culture),
-                    new XAttribute("Culture", culture)));
+                    new XAttribute("Culture", culture.EnsureCultureCode()!)));
             }
         }
         return published;
@@ -151,7 +151,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                     if (cultures.IsValidOrBlank(schedule.Culture))
                     {
                         node.Add(new XElement("ContentSchedule",
-                            new XElement("Culture", schedule.Culture),
+                            new XElement("Culture", schedule.Culture.EnsureCultureCode()),
                             new XElement("Action", schedule.Action),
                             new XElement("Date", schedule.Date.ToString("s"))));
                     }
