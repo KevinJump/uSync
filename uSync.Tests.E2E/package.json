@@ -1,0 +1,21 @@
+{
+	"name": "usync-e2e-tests",
+	"description": "Playwright end-to-end tests for the uSync backoffice",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "playwright test",
+		"test:ui": "playwright test --ui",
+		"test:debug": "playwright test --debug",
+		"report": "playwright show-report"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.56.0",
+		"@types/node": "^24.0.0",
+		"@umbraco/json-models-builders": "2.0.45",
+		"@umbraco/playwright-testhelpers": "^17.0.36",
+		"dotenv": "^17.0.0",
+		"tslib": "^2.8.1",
+		"typescript": "^5.9.3"
+	}
+}
