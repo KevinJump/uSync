@@ -176,11 +176,11 @@ jobs:
           name: Nuget Build Output
           path: ${{ env.out_folder }}
 
-      # KevinJump/uSync isn't in the Jumoo org, so nightly-feed-config's
-      # organization-level Actions access doesn't reach it and `uses:
-      # Jumoo/nightly-feed-config@main` can't resolve with the job's own
-      # GITHUB_TOKEN. Check the action out locally with a PAT scoped to just
-      # that repo, then reference it by local path instead.
+      # nightly-feed-config is private, and its organization-level Actions
+      # access only reaches private repos in the Jumoo org. This repo is public
+      # (and outside the org), so `uses: Jumoo/nightly-feed-config@main` can't
+      # resolve with the job's own GITHUB_TOKEN. Check the action out locally
+      # with a PAT scoped to just that repo, then reference it by local path.
       - name: Checkout nightly-feed-config
         uses: actions/checkout@v4
         with:
