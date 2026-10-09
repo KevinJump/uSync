@@ -12,13 +12,13 @@ public class uSyncSettings
     /// <summary>
     /// Location where all uSync files are saved by default
     /// </summary>
-    [DefaultValue("uSync/v14/")]
+    [DefaultValue("uSync/v17/")]
     public string RootFolder { get; set; } = $"uSync/v{uSync.Version.Major}/";
 
     /// <summary>
     ///  collection of folders uSync looks in when performing imports.
     /// </summary>
-    [DefaultValue("uSync/Root/, uSync/v14/")]
+    [DefaultValue(new[] { "uSync/Root/", "uSync/v17/" })]
     public string[] Folders { get; set; } = [];
 
     /// <summary>
@@ -183,13 +183,13 @@ public class uSyncSettings
     /// <summary>
     /// Disable the default dashboard (so people can't accidently press the buttons).
     /// </summary>
-    [DefaultValue("false")]
+    [DefaultValue(false)]
     public bool DisableDashboard { get; set; } = false;
 
     /// <summary>
     ///  summarize results (for when there are loads and loads of items)
     /// </summary>
-    [DefaultValue("false")]
+    [DefaultValue(false)]
     public bool SummaryDashboard { get; set; } = false;
 
     /// <summary>
@@ -221,7 +221,7 @@ public class uSyncSettings
     ///  if the notifications are not suppressed, then if an item fails to import
     ///  it doesn't stop other items from being imported. 
     /// </remarks>
-    [DefaultValue("true")]
+    [DefaultValue(true)]
     public bool DisableNotificationSuppression { get; set; } = true;
 
     /// <summary>
