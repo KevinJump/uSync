@@ -32,6 +32,14 @@ export enum ChangeType {
     REMOVED = 'Removed'
 }
 
+export type Exception = {
+    message?: string;
+    stackTrace?: string | null;
+    source?: string | null;
+    helpLink?: string | null;
+    hResult?: number;
+};
+
 export type HandlerSettings = {
     enabled: boolean;
     actions: Array<string>;
@@ -155,13 +163,7 @@ export type USyncAction = {
     success: boolean;
     itemType: string;
     message?: string | null;
-    exception?: {
-        message?: string;
-        stackTrace?: string | null;
-        source?: string | null;
-        helpLink?: string | null;
-        hResult?: number;
-    } | null;
+    exception?: Exception | null;
     change: ChangeType;
     fileName?: string | null;
     name: string;
