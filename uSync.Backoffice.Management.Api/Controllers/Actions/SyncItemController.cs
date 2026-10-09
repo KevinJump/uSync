@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 
 using uSync.BackOffice;
-using uSync.Backoffice.Management.Api.Extensions;
 using uSync.BackOffice.Models;
 
 namespace uSync.Backoffice.Management.Api.Controllers.Actions;
@@ -26,6 +25,6 @@ public class SyncItemController : uSyncControllerBase
     public async Task<IActionResult> ImportSingle([FromBody] uSyncActionView action)
     {
         var result = await _syncService.ImportSingleItemAsync(action.Key, action.Handler);
-        return Ok(result.ToActionView());
+        return Ok(result.AsActionView());
     }
 }
