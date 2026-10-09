@@ -21,16 +21,11 @@ public class ConfigSyncApiSwaggerGenOptions : IConfigureOptions<SwaggerGenOption
           });
 
         options.OperationFilter<uSyncClientOperationSecurityFilter>();
-        options.DocumentFilter<uSyncClientExceptionSchemaFilter>();
+
     }
 }
 
 public class uSyncClientOperationSecurityFilter : BackOfficeSecurityRequirementsOperationFilterBase
-{
-    protected override string ApiName => uSyncClient.Api.ApiName;
-}
-
-public class uSyncClientExceptionSchemaFilter : SyncExceptionSchemaDocumentFilterBase
 {
     protected override string ApiName => uSyncClient.Api.ApiName;
 }

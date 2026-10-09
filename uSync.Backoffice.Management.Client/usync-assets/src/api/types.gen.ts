@@ -32,14 +32,6 @@ export enum ChangeType {
     REMOVED = 'Removed'
 }
 
-export type Exception = {
-    message?: string;
-    stackTrace?: string | null;
-    source?: string | null;
-    helpLink?: string | null;
-    hResult?: number;
-};
-
 export type HandlerSettings = {
     enabled: boolean;
     actions: Array<string>;
@@ -156,22 +148,6 @@ export type SyncSelectableSet = {
 export type UploadImportResult = {
     success: boolean;
     errors: Array<string>;
-};
-
-export type USyncAction = {
-    handlerAlias?: string | null;
-    success: boolean;
-    itemType: string;
-    message?: string | null;
-    exception?: Exception | null;
-    change: ChangeType;
-    fileName?: string | null;
-    name: string;
-    path?: string | null;
-    requiresPostProcessing: boolean;
-    detailMessage?: string | null;
-    details?: Array<USyncChange> | null;
-    key: string;
 };
 
 export type USyncActionView = {
@@ -378,7 +354,7 @@ export type ImportSingleResponses = {
     /**
      * OK
      */
-    200: USyncAction;
+    200: USyncActionView;
 };
 
 export type ImportSingleResponse = ImportSingleResponses[keyof ImportSingleResponses];
