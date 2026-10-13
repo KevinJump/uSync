@@ -37,19 +37,6 @@ export type EntityTagHeaderValue = {
     isWeak: boolean;
 };
 
-export type Exception = {
-    targetSite?: MethodBase;
-    message: null | string;
-    data: null | {
-        [key: string]: unknown;
-    };
-    innerException?: Exception;
-    helpLink?: null | string;
-    source?: null | string;
-    hResult: number | string;
-    stackTrace?: null | string;
-};
-
 export type FileContentResult = {
     fileContents: string;
     contentType: null | string;
@@ -80,8 +67,6 @@ export enum HandlerStatus {
     ERROR = 'Error'
 }
 
-export type MethodBase = unknown;
-
 export type PerformActionRequest = {
     requestId: string;
     action: string;
@@ -96,8 +81,8 @@ export type PerformActionResponse = {
     actions?: null | Array<USyncActionView>;
     complete: boolean;
     inBackground: boolean;
-    operationId?: string | null;
-    message?: string | null;
+    operationId?: null | string;
+    message?: null | string;
 };
 
 export type StringSegment = {
@@ -157,13 +142,13 @@ export type SyncLegacyCheckResponse = {
 
 export type SyncOperationStatusResponse = {
     operationId: string;
-    requestId?: string | null;
-    action?: string | null;
+    requestId?: null | string;
+    action?: null | string;
     operationStatus: string;
     complete: boolean;
-    status?: Array<SyncHandlerSummary> | null;
-    actions?: Array<USyncActionView> | null;
-    message?: string | null;
+    status?: null | Array<SyncHandlerSummary>;
+    actions?: null | Array<USyncActionView>;
+    message?: null | string;
 };
 
 export enum SyncProcessingMode {
@@ -172,9 +157,9 @@ export enum SyncProcessingMode {
 }
 
 export type SyncRunningOperationResponse = {
-    operationId?: string | null;
-    requestId?: string | null;
-    action?: string | null;
+    operationId?: null | string;
+    requestId?: null | string;
+    action?: null | string;
 };
 
 export type SyncSelectableSet = {
@@ -185,22 +170,6 @@ export type SyncSelectableSet = {
 export type UploadImportResult = {
     success: boolean;
     errors: Array<string>;
-};
-
-export type USyncAction = {
-    handlerAlias?: null | string;
-    success: boolean;
-    itemType: string;
-    message?: null | string;
-    exception?: null | Exception;
-    change: ChangeType;
-    fileName?: null | string;
-    name: string;
-    path?: null | string;
-    requiresPostProcessing: boolean;
-    detailMessage?: null | string;
-    details?: null | Array<USyncChange>;
-    key: string;
 };
 
 export type USyncActionView = {
@@ -273,6 +242,7 @@ export type USyncSettings = {
     failOnMissingParent: boolean;
     failOnDuplicates: boolean;
     cacheFolderKeys: boolean;
+    cacheImportState: boolean;
     showVersionCheckWarning: boolean;
     enableHistory: boolean;
     defaultExtension: string;
@@ -288,6 +258,8 @@ export type USyncSettings = {
     folderMode: SyncFolderMode;
     processingMode: SyncProcessingMode;
     productionFolder: string;
+    additionalBadNames: Array<string>;
+    includeWindowsReservedNames: boolean;
 };
 
 export type GetActionsBySetData = {
@@ -356,7 +328,7 @@ export type PostImportResponses = {
     /**
      * OK
      */
-    200: USyncAction;
+    200: USyncActionView;
 };
 
 export type PostImportResponse = PostImportResponses[keyof PostImportResponses];
@@ -409,29 +381,6 @@ export type PostProcessUploadResponses = {
 
 export type PostProcessUploadResponse = PostProcessUploadResponses[keyof PostProcessUploadResponses];
 
-export type GetSyncFileInfoData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/umbraco/usync/api/v1/SyncFileInfo';
-};
-
-export type GetSyncFileInfoErrors = {
-    /**
-     * The resource is protected and requires an authentication token
-     */
-    401: unknown;
-};
-
-export type GetSyncFileInfoResponses = {
-    /**
-     * OK
-     */
-    200: SyncFileVersionCheckResult;
-};
-
-export type GetSyncFileInfoResponse = GetSyncFileInfoResponses[keyof GetSyncFileInfoResponses];
-
 export type GetRunningData = {
     body?: never;
     path?: never;
@@ -479,6 +428,29 @@ export type GetStatusResponses = {
 };
 
 export type GetStatusResponse = GetStatusResponses[keyof GetStatusResponses];
+
+export type GetSyncFileInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/umbraco/usync/api/v1/SyncFileInfo';
+};
+
+export type GetSyncFileInfoErrors = {
+    /**
+     * The resource is protected and requires an authentication token
+     */
+    401: unknown;
+};
+
+export type GetSyncFileInfoResponses = {
+    /**
+     * OK
+     */
+    200: SyncFileVersionCheckResult;
+};
+
+export type GetSyncFileInfoResponse = GetSyncFileInfoResponses[keyof GetSyncFileInfoResponses];
 
 export type PostMergeExportData = {
     body?: never;

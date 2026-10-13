@@ -21,10 +21,10 @@ public class SyncItemController : uSyncControllerBase
 
     [HttpPost("Import")]
     [MapToApiVersion("1.0")]
-    [ProducesResponseType(typeof(uSyncAction), 200)]
+    [ProducesResponseType(typeof(uSyncActionView), 200)]
     public async Task<IActionResult> ImportSingle([FromBody] uSyncActionView action)
     {
         var result = await _syncService.ImportSingleItemAsync(action.Key, action.Handler);
-        return Ok(result);
+        return Ok(result.AsActionView());
     }
 }

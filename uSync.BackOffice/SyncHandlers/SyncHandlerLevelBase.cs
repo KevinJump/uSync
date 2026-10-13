@@ -44,7 +44,9 @@ public abstract class SyncHandlerLevelBase<TObject>
 
     /// <inheritdoc/>
     protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
-        => [.. (await base.GetMergedItemsAsync(folders, options)).OrderBy(x => x.Level)];
+        => [.. (await base.GetMergedItemsAsync(folders, options))
+                .OrderBy(x => x.Level)
+                .ThenBy(x => x.Node.GetItemSortOrder())];
 
     /// <inheritdoc/>
     override protected string GetItemPath(TObject item, bool useGuid, bool isFlat)
