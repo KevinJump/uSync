@@ -579,7 +579,7 @@ namespace uSync.BackOffice.Services
                         value: new OrderedNodeInfo(
                             filename: file,
                             node: element,
-                            level: (element.GetLevel() * 1000) + element.GetItemSortOrder(),
+                            level: element.GetLevel(),
                             path: path,
                             isRoot: true));
                 }
