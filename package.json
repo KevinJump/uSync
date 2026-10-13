@@ -7,7 +7,9 @@
     "install-client": "cd ./uSync.Backoffice.Management.Client/usync-assets/ && npm install",
     "watch-client": "cd ./uSync.Backoffice.Management.Client/usync-assets/ && npm run watch",
     "build-client": "cd ./uSync.Backoffice.Management.Client/usync-assets/ && npm run build",
-    "generate-api": "cd ./uSync.Backoffice.Management.Client/usync-assets/ && npm run generate"
+    "generate-api": "cd ./uSync.Backoffice.Management.Client/usync-assets/ && npm run generate",
+    "install-e2e": "cd ./uSync.Tests.E2E/ && npm install && npx playwright install chromium",
+    "test-e2e": "cd ./uSync.Tests.E2E/ && npm test"
   },
   "keywords": [],
   "author": "",

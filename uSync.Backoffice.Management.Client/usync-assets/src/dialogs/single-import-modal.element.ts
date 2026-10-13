@@ -7,7 +7,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { css, html } from 'lit';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../workspace';
-import { USyncAction } from '../api';
+import { USyncActionView } from '../api';
 import { when } from '@umbraco-cms/backoffice/external/lit';
 
 @customElement('usync-import-single-modal')
@@ -21,7 +21,7 @@ export default class SyncImportSingleModalElement extends UmbModalBaseElement<
 	importState: UUIButtonState;
 
 	@state()
-	result?: USyncAction;
+	result?: USyncActionView;
 
 	constructor() {
 		super();
