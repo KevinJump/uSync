@@ -710,7 +710,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     protected void ClearAliases()
     {
         aliasCache = null;
-        _appCache.ClearByKey($"usync_{this.Id}");
+        _appCache.Clear($"usync_{this.Id}");
     }
 
     protected void RemoveAlias(string alias)
@@ -726,7 +726,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     private void RefreshAliasCache()
     {
-        _appCache.ClearByKey($"usync_{this.Id}");
+        _appCache.Clear($"usync_{this.Id}");
         _appCache.GetCacheItem($"usync_{this.Id}", () => { return aliasCache; });
     }
 

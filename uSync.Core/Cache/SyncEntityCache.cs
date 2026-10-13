@@ -47,7 +47,7 @@ public class SyncEntityCache
 
     public void AddName(int id, Guid guid, string name)
     {
-        nameCache.ClearByKey(id.ToString());
+        nameCache.Clear(id.ToString());
         nameCache.GetCacheItem(id.ToString(), () =>
         {
             return new CachedName(guid, name);
@@ -99,7 +99,7 @@ public class SyncEntityCache
         }
         else
         {
-            keyCache.ClearByKey(id.ToString());
+            keyCache.Clear(id.ToString());
             return null;
         }
     }
@@ -123,7 +123,7 @@ public class SyncEntityCache
         }
         else
         {
-            keyCache.ClearByKey(id.ToString());
+            keyCache.Clear(id.ToString());
             return null;
         }
     }
