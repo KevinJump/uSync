@@ -76,7 +76,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
             var results = new List<OrderedNodeInfo>();
             foreach (var item in items)
             {
-                if (item.Level > 1000)
+                if (item.Level > 1)
                 {
                     results.Add(item);
                     continue;
