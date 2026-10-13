@@ -1,0 +1,79 @@
+# Based on templates/dependabot.yml in Jumoo/jumoo-context.
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Umbraco and our own packages (Jumoo.*, which ship one branch per Umbraco major) set
+    # the minimum for anyone installing this package, so they move when we move them.
+    # This also opts them out of dependabot security updates.
+    ignore:
+      - dependency-name: "Umbraco.*"
+      - dependency-name: "Jumoo.*"
+    groups:
+      nuget-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "npm"
+    directory: "/uSync.Backoffice.Management.Client/usync-assets"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # pinned for the same reason as Umbraco.* / Jumoo.* above.
+      - dependency-name: "@umbraco-cms/*"
+      - dependency-name: "@jumoo/*"
+      # TypeScript stays on v5: @hey-api/openapi-ts (generates the API client) doesn't
+      # support TypeScript 7 yet. Move every client together once it does.
+      - dependency-name: "typescript"
+        versions: [">= 6.0.0"]
+      # @hey-api/* is still 0.x, so a minor bump is a breaking one.
+      - dependency-name: "@hey-api/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "npm"
+    directory: "/uSync.History/history-client"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "@umbraco-cms/*"
+      - dependency-name: "@jumoo/*"
+      - dependency-name: "typescript"
+        versions: [">= 6.0.0"]
+      - dependency-name: "@hey-api/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # gittools/actions v4 requires GitVersion >= 6.2, which needs GitVersion.yml migrating
+    # to the v6 schema. Dependabot can't see that the action version and the versionSpec
+    # input are coupled. Unpin this when we do the GitVersion 6 migration deliberately.
+    ignore:
+      - dependency-name: "gittools/actions"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
