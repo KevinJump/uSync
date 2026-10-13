@@ -19,19 +19,19 @@
 	</ItemGroup>
 	<!-- source link -->
 	<ItemGroup>
-		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.201" />
+		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401" />
 	</ItemGroup>
 	<!-- testing -->
 	<ItemGroup>
 		<PackageVersion Include="Umbraco.Cms.Tests" Version="17.3.0" />
 		<PackageVersion Include="Umbraco.Cms.Tests.Integration" Version="17.3.0" />
-		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
-		<PackageVersion Include="NUnit3TestAdapter" Version="6.2.0" />
+		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+		<PackageVersion Include="NUnit3TestAdapter" Version="6.3.1" />
 		<PackageVersion Include="coverlet.collector" Version="8.0.1" />
 	</ItemGroup>
 	<!-- command line -->
 	<ItemGroup>
-		<PackageVersion Include="NJsonSchema" Version="11.5.2" />
+		<PackageVersion Include="NJsonSchema" Version="11.6.1" />
 		<PackageVersion Include="CommandLineParser" Version="2.9.1" />
 	</ItemGroup>
 </Project>
