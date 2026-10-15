@@ -9,6 +9,7 @@ import {
 } from '@jumoo/uSync';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import * as signalR from '@jumoo/uSync/external/signalr';
+import { uSyncSignalRReconnectPolicy } from './signalr-reconnect-policy.js';
 
 export class uSyncSignalRContext extends UmbControllerBase {
 	#connection?: signalR.HubConnection;
@@ -17,12 +18,12 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		super(host);
 		this.provideContext(USYNC_SIGNALR_CONTEXT_TOKEN, this);
 
-		this.consumeContext(UMB_AUTH_CONTEXT, async (auth) => {
+		this.consumeContext(UMB_AUTH_CONTEXT, (auth) => {
 			if (!auth) return;
 
 			const authConfig = auth?.getOpenApiConfiguration();
 			if (!authConfig) return;
-			this.#setupConnection('/umbraco/SyncHub', await auth.getLatestToken());
+			this.#setupConnection('/umbraco/SyncHub', auth);
 		});
 	}
 
@@ -78,9 +79,12 @@ export class uSyncSignalRContext extends UmbControllerBase {
 	#complete = new UmbObjectState<SyncCompleteMessage | undefined>(undefined);
 	public readonly complete = this.#complete.asObservable();
 
-	#setupConnection(url: string, token: string) {
+	#setupConnection(url: string, auth: typeof UMB_AUTH_CONTEXT.TYPE) {
+		// the token is fetched on every (re)connect, so a reconnect after
+		// the original token has expired still authenticates.
 		this.#connection = new signalR.HubConnectionBuilder()
-			.withUrl(url, { accessTokenFactory: () => token })
+			.withUrl(url, { accessTokenFactory: () => auth.getLatestToken() })
+			.withAutomaticReconnect(new uSyncSignalRReconnectPolicy())
 			.configureLogging(signalR.LogLevel.Warning)
 			.build();
 
@@ -97,6 +101,16 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		});
 
 		this.#connection.start().then(() => {
+			this.#connected.setValue(true);
+		});
+
+		// the client id changes on reconnect, requests made after this
+		// pick up the new one via getClientId().
+		this.#connection.onreconnecting(() => {
+			this.#connected.setValue(false);
+		});
+
+		this.#connection.onreconnected(() => {
 			this.#connected.setValue(true);
 		});
 
