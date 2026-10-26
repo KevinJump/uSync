@@ -20,16 +20,16 @@
     "@hey-api/openapi-ts": "^0.99.0",
     "@jumoo/translate": "^17.2.3",
     "@jumoo/usync": "^17.0.4",
-    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@umbraco-cms/backoffice": "^17.5.0-rc",
-    "chalk": "^5.6.2",
-    "lit": "^3.3.2",
+    "chalk": "^6.0.1",
+    "lit": "^3.3.3",
     "node-fetch": "^3.3.2",
-    "prettier": "^3.8.1",
+    "prettier": "^3.9.10",
     "rm-rs": "^0.2.3",
     "typescript": "^5.9.3",
-    "vite": "^8.0.16",
-    "vite-plugin-checker": "^0.12.0"
+    "vite": "^8.3.4",
+    "vite-plugin-checker": "^0.14.5"
   },
   "overrides": {
     "js-yaml": "^4.3.1"

@@ -182,7 +182,7 @@ jobs:
       # resolve with the job's own GITHUB_TOKEN. Check the action out locally
       # with a PAT scoped to just that repo, then reference it by local path.
       - name: Checkout nightly-feed-config
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Jumoo/nightly-feed-config
           token: ${{ secrets.NIGHTLY_FEED_PAT }}
