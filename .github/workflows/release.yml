@@ -101,9 +101,11 @@ jobs:
       # Neither client project has an MSBuild target that runs npm (the one in
       # uSync.Backoffice.Management.Client is commented out), and both wwwroot
       # folders are gitignored, so the clients have to be built before dotnet build.
+      #
+      # --no-git-tag-version: npm would otherwise try to commit and tag the bump.
       - name: Stamp version on NPM Package
         working-directory: ${{ env.client_folder }}
-        run: npm version ${{ steps.version.outputs.version }}
+        run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
       - name: build uSync client
         working-directory: ${{ env.client_folder }}
@@ -192,3 +194,43 @@ jobs:
           for package in ${{ env.out_folder }}*.nupkg; do
             dotnet nuget push "$package" --api-key "$NUGET_API_KEY" --source ${{ env.nuget_source }} --skip-duplicate
           done
+
+      # @jumoo/usync on npmjs.org, the client types other packages (uSync.Complete,
+      # the history client) build against. Trusted publishing again: needs a publisher
+      # on npmjs.org naming KevinJump/uSync, release.yml and the `nuget` environment,
+      # plus the id-token permission above. No npm token secret.
+      #
+      # Dist-tags are per Umbraco major, so a v17 patch after a v18 release doesn't
+      # take `latest`: latest (highest release), latest-{major} (older majors),
+      # next-{major} (rc). See jumoo-context's context/jumoo/npm-feed.md.
+      - name: publish npm package
+        working-directory: ${{ env.client_folder }}
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # trusted publishing needs npm >= 11.5.1; the npm bundled with setup-node may be older.
+          npm install -g npm@^11.5.1
+
+          # `npm run build` above writes to wwwroot; the published package is ./dist.
+          npm run client:build
+
+          # npm publishes whatever package.json says, so stamp it (already done above,
+          # kept so this step stands on its own).
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+
+          # npm has no --skip-duplicate, so re-running a release would otherwise fail.
+          name=$(node -p "require('./package.json').name")
+          if npm view "$name@$VERSION" version >/dev/null 2>&1; then
+            echo "::notice::$name $VERSION is already on npmjs.org - skipping."
+            exit 0
+          fi
+
+          major="${VERSION%%.*}"
+          if [ "${VERSION%%+*}" != "${VERSION%%-*}" ]; then
+            tag="next-${major}"
+          else
+            current=$(npm view "$name" dist-tags.latest 2>/dev/null || true)
+            highest=$(printf '%s\n%s\n' "$current" "$VERSION" | sort -V | tail -1)
+            if [ -z "$current" ] || [ "$highest" = "$VERSION" ]; then tag=latest; else tag="latest-${major}"; fi
+          fi
+          npm publish --tag "$tag"
