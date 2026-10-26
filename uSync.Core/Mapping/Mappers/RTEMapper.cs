@@ -189,10 +189,8 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper, ISyncProperty
     {
         var includeLinkedItems = flags.HasFlag(DependencyFlags.IncludeLinked);
 
-        foreach (Match m in regex.Matches(stringValue))
+        foreach (var guid in GetLocalLinkGuids(regex, stringValue))
         {
-            var guidString = m.Value.Trim('{', '}').Replace("localLink:", string.Empty, StringComparison.InvariantCultureIgnoreCase);
-            if (Guid.TryParse(guidString, out Guid guid) is false) continue;
 
             var guidUdi = TryGetGuidUdiFromGuid(guid, 
                 [
@@ -210,6 +208,22 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper, ISyncProperty
                 if (dependency is null) continue;
                 yield return dependency;
             }
+        }
+    }
+
+    /// <summary>
+    ///  get the guids from any localLink tags in the value.
+    /// </summary>
+    /// <remarks>
+    ///  matches both {localLink:guid} and the url encoded %7BlocalLink:guid%7D,
+    ///  which Umbraco resolves from v17.8 onwards.
+    /// </remarks>
+    internal static IEnumerable<Guid> GetLocalLinkGuids(Regex regex, string stringValue)
+    {
+        foreach (Match m in regex.Matches(stringValue))
+        {
+            if (Guid.TryParse(m.Groups["guid"].Value, out Guid guid))
+                yield return guid;
         }
     }
 
@@ -243,9 +257,9 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper, ISyncProperty
         RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace, "en-GB")]
     private static partial Regex UdiRegExPattern();
 
-    [GeneratedRegex(@"\{localLink:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}",
+    [GeneratedRegex(@"(?:\{|%7B)localLink:(?<guid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\}|%7D)",
         RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace, "en-GB")]
-    private static partial Regex LinkRegExPattern();
+    internal static partial Regex LinkRegExPattern();
 
     [GeneratedRegex("<\\?UMBRACO_MACRO[^>]*>",
         RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace, "en-GB")]
