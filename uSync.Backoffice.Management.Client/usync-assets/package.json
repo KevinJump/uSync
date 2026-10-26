@@ -13,8 +13,7 @@
 	"types": "./dist/index.d.ts",
 	"module": "./dist/usync.js",
 	"publishConfig": {
-		"registry": "https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/npm/registry/",
-		"access": "restricted"
+		"access": "public"
 	},
 	"exports": {
 		".": "./dist/index.js",
