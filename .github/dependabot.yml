@@ -65,11 +65,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    # gittools/actions v4 requires GitVersion >= 6.2, which needs GitVersion.yml migrating
-    # to the v6 schema. Dependabot can't see that the action version and the versionSpec
-    # input are coupled. Unpin this when we do the GitVersion 6 migration deliberately.
-    ignore:
-      - dependency-name: "gittools/actions"
     groups:
       github-actions:
         patterns:
