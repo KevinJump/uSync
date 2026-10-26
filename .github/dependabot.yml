@@ -27,10 +27,10 @@ updates:
       # pinned for the same reason as Umbraco.* / Jumoo.* above.
       - dependency-name: "@umbraco-cms/*"
       - dependency-name: "@jumoo/*"
-      # TypeScript stays on v5: @hey-api/openapi-ts (generates the API client) doesn't
+      # TypeScript stays below v7: @hey-api/openapi-ts (generates the API client) doesn't
       # support TypeScript 7 yet. Move every client together once it does.
       - dependency-name: "typescript"
-        versions: [">= 6.0.0"]
+        versions: [">= 7.0.0"]
       # @hey-api/* is still 0.x, so a minor bump is a breaking one.
       - dependency-name: "@hey-api/*"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
@@ -50,7 +50,7 @@ updates:
       - dependency-name: "@umbraco-cms/*"
       - dependency-name: "@jumoo/*"
       - dependency-name: "typescript"
-        versions: [">= 6.0.0"]
+        versions: [">= 7.0.0"]
       - dependency-name: "@hey-api/*"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
