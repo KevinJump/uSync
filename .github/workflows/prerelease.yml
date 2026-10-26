@@ -2,6 +2,9 @@ name: "Prerelease - push a nightly build"
 permissions:
   contents: read
   pull-requests: write
+  # npm trusted publishing - the job exchanges its OIDC token for a short lived
+  # publish credential, so there is no npm token secret.
+  id-token: write
 
 # Manual only: dotnet-build.yml already builds and tests every PR, so we don't
 # need a full build+pack run on every merge to main too.
@@ -37,45 +40,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          # GitVersion needs the full history
+          # full history and tags - the version step walks the tags reachable from this commit.
           fetch-depth: 0
 
-      - name: Install GitVersion
-        # pinned to v3 on purpose: v4 of this action requires GitVersion >= 6.2, and our
-        # GitVersion.yml is still v5 schema (mode / tag rather than deployment-mode / label).
-        # Moving to v4 means migrating that config too - see the dependabot ignore.
-        uses: gittools/actions/gitversion/setup@v3
-        with:
-          versionSpec: "5.x"
-
-      - name: Determine Version with GitVersion
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v3
-        with:
-          useConfigFile: true
-          configFilePath: ./GitVersion.yml
-
-      # These builds are only ever pushed to the nightly feed, never to nuget.org,
-      # so the version carries a date + run number rather than GitVersion's own
-      # prerelease scheme - makes it obvious which nightly a given package build
-      # is, and when it was built.
+      # The next patch after the highest release tag *in this branch's history*, plus the
+      # run number: v17.5.0 tagged -> 17.5.1-prerelease.42. The mandated nightly scheme,
+      # see jumoo-context's context/jumoo/nightly-feed.md.
       #
-      # v17/main builds are "-prerelease.{date}.{run}". Any other branch is
-      # "-branch.{branch}.{date}.{run}", so a branch build on the feed can't be
-      # mistaken for a main nightly, and sorts below them ("branch" < "prerelease").
+      # Not GitVersion: on any branch other than vN/main it treats *every* vN/main as a
+      # source branch, so a v17 feature branch could pick up a v18 tag and publish v17 code
+      # under an 18.x version. `git tag --merged HEAD` only sees this branch's own tags.
+      # Release candidates (-rc1) are skipped, so an rc is never the base.
+      #
+      # github.run_number is scoped to this workflow and only goes up, so "latest" on the
+      # feed always resolves to the newest run.
       - name: Determine nightly version
         id: version
         run: |
-          date=$(date -u +%Y%m%d)
-          if [ "$GITHUB_REF" = "refs/heads/v17/main" ]; then
-            label=prerelease
-          else
-            # semver prerelease identifiers are [0-9A-Za-z-] only.
-            label="branch.$(echo "$GITHUB_REF_NAME" | sed 's/[^0-9A-Za-z-]/-/g')"
+          latest=$(git tag --merged HEAD --list 'v*' | sed -E 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          if [ -z "$latest" ]; then
+            echo "::error::No release tag found in this branch's history."
+            exit 1
           fi
-          version="${{ steps.gitversion.outputs.majorMinorPatch }}-$label.$date.$GITHUB_RUN_NUMBER"
+          IFS='.' read -r major minor patch <<< "$latest"
+          version="${major}.${minor}.$((patch + 1))-prerelease.${GITHUB_RUN_NUMBER}"
+          echo "Last release: $latest -> nightly $version"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "Full Version: $version"
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -96,7 +86,7 @@ jobs:
       # folders are gitignored, so the clients have to be built before dotnet build.
       - name: Stamp version on NPM Package
         working-directory: ${{ env.client_folder }}
-        run: npm version ${{ steps.version.outputs.version }}
+        run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
       - name: build uSync client
         working-directory: ${{ env.client_folder }}
@@ -120,12 +110,8 @@ jobs:
       # the version is set here, not at pack time, so the assemblies carry it and the
       # pack steps below can reuse this build instead of rebuilding every project.
       #
-      # InformationalVersion is set explicitly because the GitVersion step exports its
-      # own values as environment variables for the rest of this job, including
-      # "informationalVersion" (e.g. 17.4.4-ci.123+Branch...). MSBuild reads environment
-      # variables as properties, case-insensitively, so without this the assemblies (and
-      # the version shown on the uSync dashboard) carry GitVersion's value, not the
-      # nightly one.
+      # InformationalVersion is set explicitly so the version shown on the uSync
+      # dashboard is the nightly one, without a +{commit sha} suffix.
       - name: build
         run: >-
           dotnet build ${{ env.solution_name }}
@@ -188,8 +174,9 @@ jobs:
           token: ${{ secrets.NIGHTLY_FEED_PAT }}
           path: .nightly-feed-config
 
-      # Any branch can publish to the nightly feed - this workflow is manual only,
-      # and branch builds carry a "-branch.{name}" label (see the version step).
+      # Any branch can publish to the nightly feed - this workflow is manual only.
+      # A feature branch build gets the same -prerelease.{run} version as a main one,
+      # so check which branch a run was from before relying on it.
       - name: Publish to nightly feed
         uses: ./.nightly-feed-config
         with:
@@ -198,3 +185,22 @@ jobs:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+
+      # @jumoo/usync on npmjs.org, same version as the NuGet packages above, on
+      # `next-{major}` (next-17): a plain `npm install @jumoo/usync` still gets the
+      # latest release, and the v17 and v18 nightlies don't fight over one `next` tag.
+      # Needs a trusted publisher on npmjs.org naming KevinJump/uSync and
+      # prerelease.yml (no environment).
+      - name: publish npm package
+        working-directory: ${{ env.client_folder }}
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # trusted publishing needs npm >= 11.5.1; the npm bundled with setup-node may be older.
+          npm install -g npm@^11.5.1
+
+          # `npm run build` above writes to wwwroot; the published package is ./dist.
+          npm run client:build
+
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          npm publish --tag "next-${VERSION%%.*}"
