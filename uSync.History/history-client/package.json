@@ -20,13 +20,13 @@
     "@hey-api/openapi-ts": "^0.99.0",
     "@jumoo/usync": "^18.0.3",
     "@umbraco-cms/backoffice": "^18.0.0",
-    "chalk": "^6.0.0",
+    "chalk": "^6.0.1",
     "cross-env": "^10.1.0",
     "lit": "^3.3.3",
     "node-fetch": "^3.3.2",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.10",
     "typescript": "^6.0.3",
-    "vite": "^8.2.1"
+    "vite": "^8.3.4"
   },
   "overrides": {
     "js-yaml": "^4.3.1"

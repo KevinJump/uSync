@@ -79,10 +79,21 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
             return;
         }
 
-        if (_serverRegistrar.CurrentServerRole == ServerRole.Subscriber)
+        // From Umbraco 17.8 the server role is elected before this notification
+        // (umbraco/Umbraco-CMS#23801). Before that it was always Unknown here, so
+        // the Subscriber check below never fired. With the default election,
+        // Subscriber means "lost the scheduling election", not "not a backoffice
+        // server", so on an election-based load-balanced site only the
+        // SchedulingPublisher runs the startup import.
+        var serverRole = _serverRegistrar.CurrentServerRole;
+
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("uSync: Server role at startup is {serverRole}", serverRole);
+
+        if (serverRole == ServerRole.Subscriber)
         {
             if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("This is a replicate server in a load balanced setup - uSync will not run {serverRole}", _serverRegistrar.CurrentServerRole);
+                _logger.LogInformation("This is a Subscriber server in a load balanced setup - uSync will not run the startup import {serverRole}", serverRole);
 
             return;
         }

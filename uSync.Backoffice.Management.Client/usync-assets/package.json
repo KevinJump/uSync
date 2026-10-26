@@ -64,13 +64,13 @@
 		"@umbraco-cms/backoffice": "^18.0.0-rc3",
 		"chalk": "^6.0.0",
 		"cross-env": "^10.1.0",
-		"eslint": "^10.8.1",
+		"eslint": "^10.13.0",
 		"lit": "^3.3.3",
 		"node-fetch": "^3.3.2",
-		"prettier": "^3.9.6",
+		"prettier": "^3.9.10",
 		"typescript": "^5.9.3",
-		"vite": "^8.2.1",
-		"vite-plugin-dts": "^5.0.3"
+		"vite": "^8.3.4",
+		"vite-plugin-dts": "^5.1.2"
 	},
 	"overrides": {
 		"js-yaml": "^4.3.1"
