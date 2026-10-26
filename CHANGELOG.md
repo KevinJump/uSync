@@ -9,6 +9,59 @@ re-export), see [`changes/format.md`](changes/format.md).
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 History is backfilled from the v18 release history starting at `v18.0.0`.
 
+## [18.2.0] - 2026-10-26
+
+### Added
+
+- **The dashboard reconnects to uSync's SignalR hub automatically.** Before,
+  a server restart or network blip cut off live progress until the page was
+  reloaded. The connection now retries with a capped backoff, and it fetches a
+  fresh access token on each reconnect. (#1135)
+
+- **The server role is logged at startup.** uSync logs the resolved server role
+  at Information level when it starts, which helps when diagnosing
+  load-balanced setups. (#1134)
+
+### Changed
+
+- **`ImportSingle` returns a `uSyncActionView`.** It was the only Management
+  API endpoint that returned a raw `uSyncAction`, which put `System.Exception`
+  and the .NET reflection types behind it into the swagger document. It now
+  returns the same view model as every other endpoint, with the exception
+  message in `Message`. Exceptions elsewhere in the uSync swagger document are
+  described as a simple object. Other packages' swagger documents are not
+  touched. (#1116)
+
+- **`uSyncSettings` has typed default values.** `DisableDashboard`,
+  `SummaryDashboard` and `DisableNotificationSuppression` now default to
+  booleans and `Folders` to an array in the swagger and appsettings schemas,
+  where before they defaulted to strings. The `RootFolder` and `Folders` defaults
+  no longer point at v14 folders. (#1116)
+
+### Fixed
+
+- **Rich text dependencies include URL-encoded local links.** Newer Umbraco
+  versions resolve `%7BlocalLink:guid%7D` as well as `{localLink:guid}`
+  ([umbraco/Umbraco-CMS#23767][u23767]). uSync now finds both forms when it
+  works out an item's dependencies. (#1133)
+
+- **Changing a content item's key cleans up its URL aliases.** When an import
+  changed a content item's key, uSync removed the `umbracoDocumentUrl` rows for
+  the old key but left the `umbracoDocumentUrlAlias` rows behind. It now removes
+  those as well. (#1136)
+
+- **Items with 1000 or more siblings import in the right order.** Import
+  ordering packed level and sort order into one number, so an item with a sort
+  order of 1000 or more could be imported before its own parent. Items are now
+  sorted by level, then sort order. (#1119)
+
+- **Faster, exact cache clearing during exports and reports.** uSync cleared
+  cache entries with a prefix scan. That slowed large exports and reports, and it
+  over-cleared: clearing id `12` also cleared `123`. Entries are now removed by
+  their exact key. Ported from a contribution by @AndersKaae. (#1117)
+
+[u23767]: https://github.com/umbraco/Umbraco-CMS/pull/23767
+
 ## [18.1.5] - 2026-09-30
 
 ### Fixed
