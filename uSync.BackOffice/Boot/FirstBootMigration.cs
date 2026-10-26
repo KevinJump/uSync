@@ -65,6 +65,10 @@ public class FirstBootMigration : UnscopedAsyncMigrationBase
             if (!_uSyncConfig.Settings.ImportOnFirstBoot)
                 return;
 
+            // package migrations run before Umbraco elects the server role, so on an
+            // election-based setup this is still Unknown here (true on 17.8 as well,
+            // where the election moved earlier but still runs after migrations).
+            // It only catches roles that are pinned by a custom IServerRoleAccessor.
             if (_serverRoleAccessor.CurrentServerRole == ServerRole.Subscriber)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
