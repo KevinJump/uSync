@@ -4,7 +4,7 @@ const _constants = {
 	icon: 'icon-infinity',
 	menuName: 'Syncronisation',
 	menuAlias: 'usync.menu',
-	version: '17.x',
+	version: '18.x',
 
 	conditions: {
 		legacy: 'usync.legacy.condition',
