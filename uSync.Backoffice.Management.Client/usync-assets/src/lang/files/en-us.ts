@@ -55,6 +55,7 @@ export default {
 		previewNoProperties: 'No properties',
 		previewMissingDataType: 'the data type for this property is not in the site yet',
 		previewNewDataType: 'new data type',
+		previewNew: 'new',
 
 		runningInBackground:
 			'uSync is running this process in background, if you navigate away from this page it will continue to run.',

@@ -65,5 +65,10 @@ public class SyncItemPreviewResponse
     /// </summary>
     public List<Guid> NewDataTypes { get; set; } = [];
 
+    /// <summary>
+    ///  keys of the compositions that aren't in the site yet (built from the uSync files).
+    /// </summary>
+    public List<Guid> NewCompositions { get; set; } = [];
+
     public List<uSyncChange> Details { get; set; } = [];
 }

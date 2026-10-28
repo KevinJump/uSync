@@ -82,7 +82,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         details.AddRange(DeserializeTabs(item, node));
         details.AddRange(await DeserializePropertiesAsync(item, node, options));
 
-        details.AddRange(await DeserializeCompositionsAsync(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node, options));
 
         CleanTabs(item, node, options);
 
@@ -93,7 +93,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
     {
         var details = new List<uSyncChange>();
 
-        details.AddRange(await DeserializeCompositionsAsync(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node, options));
         details.AddRange(await DeserializeStructureAsync(item, node));
 
         SetSafeAliasValue(item, node, false);

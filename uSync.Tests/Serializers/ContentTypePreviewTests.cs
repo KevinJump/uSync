@@ -189,4 +189,40 @@ public class ContentTypePreviewTests : UmbracoIntegrationTest
 
         Assert.That(ContentTypeService.Get(contentType.Key)!.PropertyTypes.Any(x => x.Alias == "subtitle"), Is.False);
     }
+
+    /// <summary>
+    ///  a type can be composed of a type that only exists in the uSync files.
+    /// </summary>
+    [Test]
+    public async Task Preview_PendingComposition_IsUsed()
+    {
+        var contentType = CreateContentType("pendingComposition");
+        var node = await SerializeAsync(contentType);
+
+        var shortStringHelper = GetRequiredService<IShortStringHelper>();
+        var pending = new ContentType(shortStringHelper, -1) { Key = Guid.NewGuid(), Alias = "seoControls", Name = "SEO Controls", IsElement = true };
+        pending.AddPropertyType(new PropertyType(shortStringHelper, "Umbraco.TextBox", ValueStorageType.Nvarchar, "metaTitle")
+        {
+            Name = "Meta title",
+            DataTypeId = UmbConstants.DataTypes.Textbox,
+        });
+
+        node.Element("Info")!.Element("Compositions")!.Add(
+            new XElement("Composition", "seoControls", new XAttribute("Key", pending.Key)));
+
+        var handler = GetRequiredService<ISyncHandlerFactory>().GetValidHandler(uSync.BackOffice.uSyncConstants.Handlers.ContentTypeHandler)!;
+        var options = new SyncPreviewOptions
+        {
+            PendingItemResolver = (type, key) => Task.FromResult<object?>(type == typeof(IContentType) && key == pending.Key ? pending : null),
+        };
+
+        var preview = await handler.Handler.GetPreviewAsync(node, handler.Settings, options);
+        var incoming = (IContentType)preview!.Incoming!;
+
+        Assert.That(preview.Success, Is.True, preview.Message);
+        Assert.That(incoming.ContentTypeComposition.Select(x => x.Key), Does.Contain(pending.Key));
+        Assert.That(incoming.CompositionPropertyTypes.Select(x => x.Alias), Does.Contain("metaTitle"));
+
+        Assert.That(ContentTypeService.Get(contentType.Key)!.ContentTypeComposition, Is.Empty);
+    }
 }

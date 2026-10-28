@@ -137,7 +137,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         details.AddRange(await DeserializeBaseAsync(item, node, options));
 
         // compositions
-        details.AddRange(await DeserializeCompositionsAsync(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node, options));
 
         // tabs
         details.AddRange(DeserializeTabs(item, node));
@@ -178,7 +178,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         // we can do this here, hopefully its not needed 
         // as we graph sort at the start,
         // so it should say 'no changes' on a second pass.
-        details.AddRange(await DeserializeCompositionsAsync(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node, options));
 
         details.AddRange(await DeserializeStructureAsync(item, node));
 

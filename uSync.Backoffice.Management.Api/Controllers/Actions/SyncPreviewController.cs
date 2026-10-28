@@ -93,6 +93,10 @@ public class SyncPreviewController : uSyncControllerBase
                 break;
         }
 
+        response.NewCompositions = [.. preview.PendingItems
+            .OfType<IContentTypeComposition>()
+            .Select(x => x.Key)];
+
         return response;
     }
 

@@ -12,6 +12,7 @@ const canWriteFixtures = !process.env.UMBRACO_URL && existsSync(syncFolder);
 
 const dataTypeKey = 'e2e0f1a2-b3c4-4d5e-8f60-718293a4b5c6';
 const contentTypeKey = 'e2e1a2b3-c4d5-4e6f-8071-8293a4b5c6d7';
+const compositionKey = 'e2e5e6f7-0819-42a3-b4c5-d6e7f8091a2b';
 
 const fixtures = {
 	'DataTypes/E2EPreviewText.config': `<?xml version="1.0" encoding="utf-8"?>
@@ -35,7 +36,9 @@ const fixtures = {
     <ListView>00000000-0000-0000-0000-000000000000</ListView>
     <Variations>Nothing</Variations>
     <IsElement>false</IsElement>
-    <Compositions />
+    <Compositions>
+      <Composition Key="${compositionKey}">e2ePreviewComposition</Composition>
+    </Compositions>
     <DefaultTemplate></DefaultTemplate>
     <AllowedTemplates />
   </Info>
@@ -68,6 +71,58 @@ const fixtures = {
     </Tab>
     <Tab>
       <Key>e2e4d5e6-f708-4192-a3b4-c5d6e7f8091a</Key>
+      <Caption>Details</Caption>
+      <Alias>content/details</Alias>
+      <Type>Group</Type>
+      <SortOrder>0</SortOrder>
+    </Tab>
+  </Tabs>
+</ContentType>
+`,
+	'ContentTypes/e2epreviewcomposition.config': `<?xml version="1.0" encoding="utf-8"?>
+<ContentType Key="${compositionKey}" Alias="e2ePreviewComposition" Level="1">
+  <Info>
+    <Name>E2E Preview Composition</Name>
+    <Icon>icon-science</Icon>
+    <Thumbnail>folder.png</Thumbnail>
+    <Description></Description>
+    <AllowAtRoot>False</AllowAtRoot>
+    <ListView>00000000-0000-0000-0000-000000000000</ListView>
+    <Variations>Nothing</Variations>
+    <IsElement>true</IsElement>
+    <Compositions />
+    <DefaultTemplate></DefaultTemplate>
+    <AllowedTemplates />
+  </Info>
+  <Structure />
+  <GenericProperties>
+    <GenericProperty>
+      <Key>e2e6f708-192a-43b4-c5d6-e7f8091a2b3c</Key>
+      <Name>E2E Summary</Name>
+      <Alias>e2eSummary</Alias>
+      <Definition>${dataTypeKey}</Definition>
+      <Type>Umbraco.TextBox</Type>
+      <Mandatory>false</Mandatory>
+      <Validation></Validation>
+      <Description><![CDATA[]]></Description>
+      <SortOrder>1</SortOrder>
+      <Tab Alias="content/details">Details</Tab>
+      <Variations>Nothing</Variations>
+      <MandatoryMessage></MandatoryMessage>
+      <ValidationRegExpMessage></ValidationRegExpMessage>
+      <LabelOnTop>false</LabelOnTop>
+    </GenericProperty>
+  </GenericProperties>
+  <Tabs>
+    <Tab>
+      <Key>e2e7081a-2a3b-44c5-d6e7-f8091a2b3c4d</Key>
+      <Caption>Content</Caption>
+      <Alias>content</Alias>
+      <Type>Tab</Type>
+      <SortOrder>0</SortOrder>
+    </Tab>
+    <Tab>
+      <Key>e2e8192a-3b4c-45d6-e7f8-091a2b3c4d5e</Key>
       <Caption>Details</Caption>
       <Alias>content/details</Alias>
       <Type>Group</Type>
@@ -140,5 +195,16 @@ test.describe('uSync item preview', () => {
 		await expect(property).toContainText('E2E Preview Text');
 		await expect(property).toContainText('new data type');
 		await expect(property.locator('umb-property-editor-ui-text-box')).toBeVisible();
+	});
+
+	test('previews a new content type with a new composition', async ({ umbracoUi }) => {
+		const modal = await openPreview(umbracoUi.page, 'Content Types', 'e2ePreviewPage');
+		const preview = modal.locator('usync-content-type-preview');
+
+		// the composition only exists in the uSync files, its group merges into the page's.
+		await expect(preview).toContainText('E2E Preview Composition (new)');
+		const inherited = preview.locator('.property').filter({ hasText: 'e2eSummary' });
+		await expect(inherited).toContainText('from E2E Preview Composition');
+		await expect(inherited.locator('umb-property-editor-ui-text-box')).toBeVisible();
 	});
 });

@@ -1115,7 +1115,13 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         await FindFolderAsync(key, folderNode.Value);
     }
 
-    protected async Task<IEnumerable<uSyncChange>> DeserializeCompositionsAsync(TObject item, XElement node)
+    protected Task<IEnumerable<uSyncChange>> DeserializeCompositionsAsync(TObject item, XElement node)
+        => DeserializeCompositionsAsync(item, node, new SyncSerializerOptions());
+
+    /// <summary>
+    ///  set the compositions, when previewing this can use compositions that aren't in Umbraco yet.
+    /// </summary>
+    protected async Task<IEnumerable<uSyncChange>> DeserializeCompositionsAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
         var comps = node?.Element(uSyncConstants.Xml.Info)?.Element("Compositions");
         if (comps == null) return [];
@@ -1130,7 +1136,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("{itemAlias} > Comp {alias} {key}", item.Alias, alias, key);
 
-            var type = await FindItemAsync(key, alias);
+            var type = await FindItemAsync(key)
+                ?? await options.FindPendingItemAsync<TObject>(key)
+                ?? await FindItemAsync(alias);
             if (type != null)
                 compositions.Add(type);
         }

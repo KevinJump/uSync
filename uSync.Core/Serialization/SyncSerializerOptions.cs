@@ -82,10 +82,10 @@ public class SyncSerializerOptions
     ///  find an item that is part of the import, but isn't in Umbraco yet.
     /// </summary>
     public async Task<TItem?> FindPendingItemAsync<TItem>(Guid key)
-        where TItem : class
-        => PendingItemResolver is null || key == Guid.Empty
-            ? null
-            : await PendingItemResolver(typeof(TItem), key) as TItem;
+    {
+        if (PendingItemResolver is null || key == Guid.Empty) return default;
+        return await PendingItemResolver(typeof(TItem), key) is TItem item ? item : default;
+    }
 
     public bool FailOnMissingParent => Flags.HasFlag(SerializerFlags.FailMissingParent);
 

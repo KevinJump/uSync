@@ -58,6 +58,7 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 	#compositions = new Map<string, USyncPreviewContentType>();
 	#dataTypes = new Map<string, DataTypeResponseModel>();
 	#newDataTypes = new Set<string>();
+	#newCompositions = new Set<string>();
 	#diff?: USyncContentTypeDiff;
 
 	protected willUpdate(changed: PropertyValues<this>) {
@@ -67,6 +68,7 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		this.#compositions = new Map(this.#sides.compositions.map((c) => [c.id, c]));
 		this.#dataTypes = new Map(this.preview.dataTypes.map((d) => [d.id, d]));
 		this.#newDataTypes = new Set(this.preview.newDataTypes);
+		this.#newCompositions = new Set(this.preview.newCompositions);
 		this.#diff = diffContentTypes(this.#sides.current, this.#sides.incoming);
 		this._activeTab = undefined;
 	}
@@ -148,9 +150,10 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 			'',
 			'',
 		];
-		const compositions = compositionIds(type).map(
-			(id) => this.#compositions.get(id)?.name ?? id,
-		);
+		const compositions = compositionIds(type).map((id) => ({
+			name: this.#compositions.get(id)?.name ?? id,
+			isNew: this.#newCompositions.has(id),
+		}));
 
 		return html`
 			<uui-box>
@@ -211,7 +214,18 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 									${this.localize.termOrDefault('uSync_previewCompositions', 'Compositions')}
 								</dt>
 								<dd class=${classMap(changed('compositions'))}>
-									${compositions.map((name) => html`<uui-tag look="outline">${name}</uui-tag> `)}
+									${compositions.map(
+										(c) =>
+											html`<uui-tag
+												look="outline"
+												color=${c.isNew ? 'positive' : 'default'}
+												>${c.name}${
+													c.isNew
+														? ` (${this.localize.termOrDefault('uSync_previewNew', 'new')})`
+														: ''
+												}</uui-tag
+											> `,
+									)}
 								</dd>
 							</dl>`
 						: nothing
