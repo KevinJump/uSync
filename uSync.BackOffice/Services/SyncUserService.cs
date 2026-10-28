@@ -17,17 +17,22 @@ internal class SyncUserService : ISyncUserService
     private readonly ISyncConfigService _syncConfigService;
     private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
     private readonly IUserService _userService;
+    private readonly IUserIdKeyResolver _userIdKeyResolver;
+
+    private int? _superUserId;
 
     public SyncUserService(
         ILogger<SyncUserService> logger,
         ISyncConfigService syncConfigService,
         IBackOfficeSecurityAccessor backOfficeSecurityAccessor,
-        IUserService userService)
+        IUserService userService,
+        IUserIdKeyResolver userIdKeyResolver)
     {
         _logger = logger;
         _syncConfigService = syncConfigService;
         _backOfficeSecurityAccessor = backOfficeSecurityAccessor;
         _userService = userService;
+        _userIdKeyResolver = userIdKeyResolver;
     }
 
     /// <inheritdoc/>
@@ -42,13 +47,16 @@ internal class SyncUserService : ISyncUserService
 
         var backgroundUserKey = _syncConfigService.Settings.BackgroundUser;
         if (backgroundUserKey is null)
-            return Constants.Security.SuperUserId;
+            return await GetSuperUserIdAsync();
 
         var backgroundUser = await _userService.GetAsync(backgroundUserKey.Value);
         if (backgroundUser is not null)
             return backgroundUser.Id;
 
         _logger.LogWarning("uSync: BackgroundUser {key} doesn't exist, running the import as the superuser", backgroundUserKey);
-        return Constants.Security.SuperUserId;
+        return await GetSuperUserIdAsync();
     }
+
+    private async Task<int> GetSuperUserIdAsync()
+        => _superUserId ??= await _userIdKeyResolver.GetAsync(Constants.Security.SuperUserKey);
 }

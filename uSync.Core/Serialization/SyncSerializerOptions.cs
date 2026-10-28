@@ -40,7 +40,7 @@ public class SyncSerializerOptions
     {
         // an unknown user (nobody resolved one) falls back to the superuser.
         UserId = userId == Umbraco.Cms.Core.Constants.Security.UnknownUserId
-            ? Umbraco.Cms.Core.Constants.Security.SuperUserId
+            ? uSyncConstants.SuperUserId
             : userId;
     }
 

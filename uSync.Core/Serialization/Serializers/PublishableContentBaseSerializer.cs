@@ -178,7 +178,7 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
         // the file's writer saves and publishes the item when they exist on this site,
         // otherwise it's the importing user (options.UserId). A writer we can't find
         // comes back as the superuser id, so that can't win over the importing user.
-        if (writerId != Constants.Security.SuperUserId)
+        if (writerId != uSyncConstants.SuperUserId)
         {
             options.UserId = writerId;
         }
