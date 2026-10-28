@@ -243,28 +243,25 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             // this can cause us false change readings
             // but we need to preserve the values if they are blank
             // because we have to be able to set them to blank when we deserialize them.
-            foreach (var value in property.Values.OrderBy(x => x.Culture ?? ""))
+            foreach (var value in property.Values.OrderBy(x => x.Culture ?? "").ThenBy(x => x.Segment ?? ""))
             {
                 var valueNode = new XElement("Value");
 
-                // valid if there is no culture, or segment and 
-                // we are including default values
-                var validNode = string.IsNullOrWhiteSpace(value.Culture)
-                    && string.IsNullOrWhiteSpace(value.Segment)
-                    && includeDefaults;
+                var hasCulture = !string.IsNullOrWhiteSpace(value.Culture);
+                var hasSegment = !string.IsNullOrWhiteSpace(value.Segment);
 
-                // or b) it is a valid culture/segment. 
-                if (!string.IsNullOrWhiteSpace(value.Culture) && cultures.IsValid(value.Culture))
-                {
+                // a) no culture or segment, valid if we are including default values
+                // b) otherwise both the culture and the segment (when set) must be valid,
+                //    segments are overrides of a culture value, so they go with their culture.
+                var validNode = !hasCulture && !hasSegment
+                    ? includeDefaults
+                    : (!hasCulture || cultures.IsValid(value.Culture!)) && (!hasSegment || segments.IsValid(value.Segment!));
+
+                if (validNode && hasCulture)
                     valueNode.Add(new XAttribute("Culture", value.Culture.EnsureCultureCode() ?? string.Empty));
-                    validNode = true;
-                }
 
-                if (!string.IsNullOrWhiteSpace(value.Segment) && segments.IsValid(value.Segment))
-                {
-                    valueNode.Add(new XAttribute("Segment", value.Segment ?? string.Empty));
-                    validNode = true;
-                }
+                if (validNode && hasSegment)
+                    valueNode.Add(new XAttribute("Segment", value.Segment!));
 
                 if (validNode)
                 {
@@ -304,7 +301,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             {
                 // we sort them at the end because we might end up adding a blank culture value last. 
                 var propertyNode = new XElement(property.Alias);
-                propertyNode.Add(elements.OrderBy(x => x.Attribute("Culture").ValueOrDefault("")));
+                propertyNode.Add(elements
+                    .OrderBy(x => x.Attribute("Culture").ValueOrDefault(""))
+                    .ThenBy(x => x.Attribute("Segment").ValueOrDefault("")));
                 node.Add(propertyNode);
             }
         }
@@ -521,6 +520,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         List<uSyncChange> changes = [];
 
         var activeCultures = options.GetDeserializedCultures(node);
+        var activeSegments = options.GetDeserializedSegments(node);
+        var keepMissingSegments = options.GetSetting(uSyncConstants.DefaultSettings.KeepMissingSegments, uSyncConstants.DefaultSettings.KeepMissingSegments_Default);
 
         var properties = node.GetPropertiesNode();
         if (properties == null || !properties.HasElements)
@@ -554,6 +555,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
                     try
                     {
+                        if (!string.IsNullOrEmpty(segment) && !current.PropertyType.VariesBySegment())
+                        {
+                            // segments are overrides of the default value, without segment variance there is nothing to override.
+                            logger.LogWarning("{item} Property {alias} does not vary by segment, so the value for segment {segment} is not being used", item.Name, alias, segment);
+                            continue;
+                        }
+
                         if (!string.IsNullOrEmpty(culture) && activeCultures.IsValid(culture))
                         {
                             //
@@ -634,6 +642,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                         errors += $"Failed to set [{alias}] {ex.Message} <br/>";
                     }
                 }
+
+                if (!keepMissingSegments)
+                    changes.AddRange(RemoveMissingSegmentValues(item, current, values, activeCultures, activeSegments));
             }
             else
             {
@@ -644,6 +655,41 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         }
 
         return Attempt.SucceedWithStatus(errors, changes);
+    }
+
+    /// <summary>
+    ///  clear any segment values on the item that are not in the file.
+    /// </summary>
+    /// <remarks>
+    ///  segment values are overrides of the default value, so when an override has gone
+    ///  from the source we clear it here (the property then falls back to the default value).
+    ///  only cultures and segments covered by the file are touched, so partial files stay partial.
+    /// </remarks>
+    private IEnumerable<uSyncChange> RemoveMissingSegmentValues(TObject item, IProperty current, List<XElement> values, IList<string> activeCultures, IList<string> activeSegments)
+    {
+        if (!current.PropertyType.VariesBySegment()) yield break;
+
+        var fileValues = values
+            .Select(x => (
+                Culture: x.Attribute("Culture").ValueOrDefault(string.Empty),
+                Segment: x.Attribute("Segment").ValueOrDefault(string.Empty)))
+            .Where(x => !string.IsNullOrEmpty(x.Segment))
+            .ToList();
+
+        var missing = current.Values
+            .Where(x => !string.IsNullOrEmpty(x.Segment) && x.EditedValue is not null)
+            .Where(x => activeSegments.IsValid(x.Segment!) && activeCultures.IsValidOrBlank(x.Culture ?? string.Empty))
+            .Where(x => !fileValues.Any(f => f.Segment.InvariantEquals(x.Segment) && f.Culture.InvariantEquals(x.Culture ?? string.Empty)))
+            .ToList();
+
+        foreach (var value in missing)
+        {
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("{item} Property {alias} clearing value for segment {segment} {culture} as it is not in the file", item.Name, current.Alias, value.Segment, value.Culture);
+
+            item.SetValue(current.Alias, null, value.Culture, value.Segment);
+            yield return uSyncChange.Delete($"Property/{current.Alias}", current.Alias, value.Segment);
+        }
     }
 
     /// <summary>

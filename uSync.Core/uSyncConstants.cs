@@ -154,6 +154,10 @@ public static partial class uSyncConstants
         public const string ImportTrashed = "ImportTrashed";
         public const bool ImportTrashed_Default = false;
 
+        // keep segment values that are on the site but not in the file (default is to clear them).
+        public const string KeepMissingSegments = "KeepMissingSegments";
+        public const bool KeepMissingSegments_Default = false;
+
     }
 
     public const int DependencyCountMax = 204800;

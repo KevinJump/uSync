@@ -109,6 +109,13 @@ public class SyncSerializerOptions
     public IList<string> GetSegments()
         => GetSetting(uSyncConstants.SegmentKey, string.Empty).ToDelimitedList();
 
+    public IList<string> GetDeserializedSegments(XElement node)
+    {
+        var nodeSegments = node.GetSegments();
+        if (!string.IsNullOrEmpty(nodeSegments)) return nodeSegments.ToDelimitedList();
+        return GetSegments();
+    }
+
     /// <summary>
     ///  merge any new settings into the settings collection.
     /// </summary>
