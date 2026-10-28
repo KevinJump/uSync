@@ -88,7 +88,7 @@ internal class uSyncManagementCache : ISyncManagementCache
 
         try
         {
-            using ICoreScope scope = _scopeProvider.CreateCoreScope(autoComplete: true);
+            using ICoreScope scope = _scopeProvider.CreateCoreScope();
 
             var shared = new SyncManagementSharedProgress
             {
@@ -103,6 +103,7 @@ internal class uSyncManagementCache : ISyncManagementCache
             };
 
             await _longRunningOperationRepository.SetResultAsync(operationId, shared);
+            scope.Complete();
         }
         catch (Exception ex)
         {

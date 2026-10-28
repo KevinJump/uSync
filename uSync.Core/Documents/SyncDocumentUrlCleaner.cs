@@ -28,7 +28,7 @@ internal class SyncDocumentUrlCleaner : ISyncDocumentUrlCleaner
     {
         try
         {
-            using (_scopeProvider.CreateCoreScope(autoComplete: true))
+            using (var scope = _scopeProvider.CreateCoreScope())
             {
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug("Cleaning urls for document {DocumentKey}", key);
@@ -38,6 +38,8 @@ internal class SyncDocumentUrlCleaner : ISyncDocumentUrlCleaner
                 // umbracoUrlAlias rows are stored by document key too, so the old
                 // key's rows are left behind when the key changes.
                 _documentUrlAliasRepository.DeleteByDocumentKey([key]);
+
+                scope.Complete();
             }
         }
         catch(Exception ex)

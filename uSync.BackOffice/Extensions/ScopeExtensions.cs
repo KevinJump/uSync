@@ -41,8 +41,7 @@ internal static class ScopeExtensions
             syncEventService);
 
         return scopeProvider.CreateCoreScope(
-            scopedNotificationPublisher: notificationPublisher,
-            autoComplete: true);
+            scopedNotificationPublisher: notificationPublisher);
     }
 }
 
