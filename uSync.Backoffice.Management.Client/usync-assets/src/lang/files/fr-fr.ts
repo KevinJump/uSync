@@ -84,7 +84,7 @@ export default {
 			'La version du format du fichier de synchronisation ne correspond pas à la version attendue. Cela peut indiquer un problème de compatibilité potentiel.',
 
 		legacyBanner:
-			'Ce site contient des fichiers d\'une version précédente d\'uSync. Consultez les détails dans l\'onglet Héritage.',
+			'Ce site contient des fichiers d\'une version précédente d\'uSync. Consultez les détails dans l\'onglet Migrer.',
 
 		legacyCopyTitle: 'Écraser les fichiers v%0%',
 		legacyCopyContent:

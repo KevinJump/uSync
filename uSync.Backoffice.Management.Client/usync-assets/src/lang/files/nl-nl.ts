@@ -84,7 +84,7 @@ export default {
 			'De versie van het synchronisatiebestandsformaat komt niet overeen met de verwachte versie. Dit kan wijzen op een mogelijk compatibiliteitsprobleem.',
 
 		legacyBanner:
-			'Deze site bevat bestanden van een eerdere versie van uSync. Bekijk de details op het tabblad Verouderd.',
+			'Deze site bevat bestanden van een eerdere versie van uSync. Bekijk de details op het tabblad Migreren.',
 
 		legacyCopyTitle: 'v%0%-bestanden overschrijven',
 		legacyCopyContent:

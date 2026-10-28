@@ -84,7 +84,7 @@ export default {
 			'Die Formatversion der Synchronisierungsdatei stimmt nicht mit der erwarteten Version überein. Dies kann auf ein potenzielles Kompatibilitätsproblem hinweisen.',
 
 		legacyBanner:
-			'Diese Website enthält Dateien einer früheren Version von uSync. Details finden Sie auf der Registerkarte Legacy.',
+			'Diese Website enthält Dateien einer früheren Version von uSync. Details finden Sie auf der Registerkarte Migrieren.',
 
 		legacyCopyTitle: 'v%0%-Dateien überschreiben',
 		legacyCopyContent:
