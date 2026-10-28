@@ -211,8 +211,10 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
         for (var index = 0; index < folderNames.Count; index++)
         {
-            var folderName = folderNames[index];
             var isTargetFolder = index == folderNames.Count - 1;
+
+            // the friendly path has the spaces taken out, the parent node has the real name.
+            var folderName = isTargetFolder ? name : folderNames[index];
 
             var existing = (await _containerService.GetAsync(folderName, index + 1))
                 .FirstOrDefault(x => x.Name.InvariantEquals(folderName) &&
