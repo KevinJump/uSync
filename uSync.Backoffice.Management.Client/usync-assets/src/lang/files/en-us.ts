@@ -43,6 +43,17 @@ export default {
 		previewNoConfiguration: 'No configuration',
 		previewPropertyEditor: 'Property editor',
 		previewPropertyEditorUi: 'Property editor UI',
+		previewDocumentType: 'Document type',
+		previewMediaType: 'Media type',
+		previewMemberType: 'Member type',
+		previewElementType: 'Element type',
+		previewAllowedAtRoot: 'Allowed at root',
+		previewVariesByCulture: 'Varies by culture',
+		previewVariesBySegment: 'Varies by segment',
+		previewCompositions: 'Compositions',
+		previewGenericTab: 'Generic',
+		previewNoProperties: 'No properties',
+		previewMissingDataType: 'the data type for this property is not in the site yet',
 
 		runningInBackground:
 			'uSync is running this process in background, if you navigate away from this page it will continue to run.',

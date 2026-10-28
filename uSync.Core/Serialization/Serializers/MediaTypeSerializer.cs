@@ -72,13 +72,13 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
 
         var details = new List<uSyncChange>();
 
-        var attempt = await FindOrCreateAsync(node);
+        var attempt = await FindOrCreateAsync(node, options);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
 
-        details.AddRange(await DeserializeBaseAsync(item, node));
+        details.AddRange(await DeserializeBaseAsync(item, node, options));
         details.AddRange(DeserializeTabs(item, node));
         details.AddRange(await DeserializePropertiesAsync(item, node, options));
 

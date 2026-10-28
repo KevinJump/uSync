@@ -165,10 +165,10 @@ public class DataTypePreviewTests : UmbracoIntegrationTest
     [Test]
     public async Task Handler_WithoutPreviewSupport_ReturnsNull()
     {
-        var handler = GetRequiredService<ISyncHandlerFactory>().GetValidHandler(uSync.BackOffice.uSyncConstants.Handlers.ContentTypeHandler);
+        var handler = GetRequiredService<ISyncHandlerFactory>().GetValidHandler(uSync.BackOffice.uSyncConstants.Handlers.TemplateHandler);
         Assert.That(handler, Is.Not.Null);
 
-        var preview = await handler!.Handler.GetPreviewAsync(new XElement("ContentType"), handler.Settings);
+        var preview = await handler!.Handler.GetPreviewAsync(new XElement("Template"), handler.Settings);
         Assert.That(preview, Is.Null);
     }
 }

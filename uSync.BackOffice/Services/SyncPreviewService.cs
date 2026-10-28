@@ -28,7 +28,7 @@ internal class SyncPreviewService : ISyncPreviewService
     }
 
     /// <inheritdoc/>
-    public async Task<TResult?> GetPreviewAsync<TResult>(string handlerAlias, Guid key, Func<SyncItemPreview, TResult> mapper)
+    public async Task<TResult?> GetPreviewAsync<TResult>(string handlerAlias, Guid key, Func<SyncItemPreview, Task<TResult>> mapper)
     {
         var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias);
         if (handlerConfig is null) return default;
@@ -49,6 +49,6 @@ internal class SyncPreviewService : ISyncPreviewService
             return default;
         }
 
-        return mapper(preview);
+        return await mapper(preview);
     }
 }

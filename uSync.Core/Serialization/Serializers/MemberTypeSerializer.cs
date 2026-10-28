@@ -120,7 +120,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
 
     protected override async Task<SyncAttempt<IMemberType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
-        var attempt = await FindOrCreateAsync(node);
+        var attempt = await FindOrCreateAsync(node, options);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
@@ -128,7 +128,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
 
         var details = new List<uSyncChange>();
 
-        details.AddRange(await DeserializeBaseAsync(item, node));
+        details.AddRange(await DeserializeBaseAsync(item, node, options));
         details.AddRange(DeserializeTabs(item, node));
         details.AddRange(await DeserializePropertiesAsync(item, node, options));
 

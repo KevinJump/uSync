@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
@@ -13,10 +14,12 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
+using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -80,4 +83,8 @@ public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType>, ISyncHandl
 
         return item.Name?.ToSafeFileName(shortStringHelper) ?? item.Key.ToString();
     }
+
+    /// <inheritdoc/>
+    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings)
+        => BuildPreviewAsync(node, settings, SerializerFlags.OnePass);
 }

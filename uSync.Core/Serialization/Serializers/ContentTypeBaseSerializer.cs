@@ -50,9 +50,16 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     protected virtual Guid GetDefaultListType() => Guid.Empty;
 
     protected override async Task<Attempt<TObject?>> FindOrCreateAsync(XElement node)
-    {
-        var attempt = await base.FindOrCreateAsync(node);
+        => ResetPropertyDirtyState(await base.FindOrCreateAsync(node));
 
+    /// <inheritdoc/>
+    protected override async Task<Attempt<TObject?>> FindOrCreateAsync(XElement node, SyncSerializerOptions options)
+        => options.DoNotSave
+            ? ResetPropertyDirtyState(await base.FindOrCreateAsync(node, options))
+            : await FindOrCreateAsync(node);
+
+    private static Attempt<TObject?> ResetPropertyDirtyState(Attempt<TObject?> attempt)
+    {
         // before Umbraco 17.7 a content type loaded from the cache keeps its property types'
         // dirty state from when they were created, so a variance-only change on import is
         // not seen as structural and the published cache goes stale. clear it before we make
@@ -242,7 +249,13 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     #region De-serialization
 
 
-    protected async Task<IEnumerable<uSyncChange>> DeserializeBaseAsync(TObject item, XElement node)
+    protected Task<IEnumerable<uSyncChange>> DeserializeBaseAsync(TObject item, XElement node)
+        => DeserializeBaseAsync(item, node, new SyncSerializerOptions());
+
+    /// <summary>
+    ///  deserialize the base info for a content type, when the options say DoNotSave missing folders are not created.
+    /// </summary>
+    protected async Task<IEnumerable<uSyncChange>> DeserializeBaseAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
         if (node == null) return [];
 
@@ -330,7 +343,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         if (!SetMasterFromElement(item, info.Element(uSyncConstants.Xml.Parent)))
         {
-            await SetFolderFromElementAsync(item, info.Element("Folder"));
+            await SetFolderFromElementAsync(item, info.Element("Folder"), options.DoNotSave is false);
         }
 
         return changes;
@@ -1074,8 +1087,16 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return changes;
     }
 
-    protected async Task CleanFolderAsync(TObject item, XElement node)
+    protected Task CleanFolderAsync(TObject item, XElement node)
+        => CleanFolderAsync(item, node, new SyncSerializerOptions());
+
+    /// <summary>
+    ///  make sure the item's folder exists (does nothing when the options say DoNotSave).
+    /// </summary>
+    protected async Task CleanFolderAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
+        if (options.DoNotSave) return;
+
         var folderNode = node.Element(uSyncConstants.Xml.Info)?.Element("Folder");
         if (folderNode is null) return;
 
@@ -1130,7 +1151,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     }
 
 
-    private async Task SetFolderFromElementAsync(IContentTypeBase item, XElement? folderNode)
+    private async Task SetFolderFromElementAsync(IContentTypeBase item, XElement? folderNode, bool createIfMissing)
     {
         if (folderNode is null) return;
 
@@ -1144,7 +1165,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         }
         else
         {
-            var container = await FindFolderAsync(folderNode.GetKey(), folder);
+            var container = await FindFolderAsync(folderNode.GetKey(), folder, createIfMissing);
             if (container != null && container.Id != item.ParentId)
             {
                 item.SetParent(container);

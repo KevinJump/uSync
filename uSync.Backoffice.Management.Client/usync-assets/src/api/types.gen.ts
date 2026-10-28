@@ -32,6 +32,11 @@ export enum ChangeType {
     REMOVED = 'Removed'
 }
 
+export enum CompositionTypeModel {
+    COMPOSITION = 'Composition',
+    INHERITANCE = 'Inheritance'
+}
+
 export type DataTypePropertyPresentationModel = {
     alias: string;
     value?: unknown;
@@ -45,6 +50,64 @@ export type DataTypeResponseModel = {
     id: string;
     isDeletable: boolean;
     canIgnoreStartNodes: boolean;
+};
+
+export type DocumentTypeCleanupModel = {
+    preventCleanup: boolean;
+    keepAllVersionsNewerThanDays?: number | null;
+    keepLatestVersionPerDayForDays?: number | null;
+};
+
+export type DocumentTypeCompositionModel = {
+    documentType: ReferenceByIdModel;
+    compositionType: CompositionTypeModel;
+};
+
+export type DocumentTypePropertyTypeContainerResponseModel = {
+    id: string;
+    parent?: ReferenceByIdModel | null;
+    name?: string | null;
+    type: string;
+    sortOrder: number;
+};
+
+export type DocumentTypePropertyTypeResponseModel = {
+    id: string;
+    container?: ReferenceByIdModel | null;
+    sortOrder: number;
+    alias: string;
+    name: string;
+    description?: string | null;
+    dataType: ReferenceByIdModel;
+    variesByCulture: boolean;
+    variesBySegment: boolean;
+    validation: PropertyTypeValidationModel;
+    appearance: PropertyTypeAppearanceModel;
+};
+
+export type DocumentTypeResponseModel = {
+    alias: string;
+    name: string;
+    description?: string | null;
+    icon: string;
+    allowedAsRoot: boolean;
+    variesByCulture: boolean;
+    variesBySegment: boolean;
+    collection?: ReferenceByIdModel | null;
+    isElement: boolean;
+    properties: Array<DocumentTypePropertyTypeResponseModel>;
+    containers: Array<DocumentTypePropertyTypeContainerResponseModel>;
+    id: string;
+    allowedTemplates: Array<ReferenceByIdModel>;
+    defaultTemplate?: ReferenceByIdModel | null;
+    cleanup: DocumentTypeCleanupModel;
+    allowedDocumentTypes: Array<DocumentTypeSortModel>;
+    compositions: Array<DocumentTypeCompositionModel>;
+};
+
+export type DocumentTypeSortModel = {
+    documentType: ReferenceByIdModel;
+    sortOrder: number;
 };
 
 export type HandlerSettings = {
@@ -68,6 +131,107 @@ export enum HandlerStatus {
     ERROR = 'Error'
 }
 
+export type MediaTypeCompositionModel = {
+    mediaType: ReferenceByIdModel;
+    compositionType: CompositionTypeModel;
+};
+
+export type MediaTypePropertyTypeContainerResponseModel = {
+    id: string;
+    parent?: ReferenceByIdModel | null;
+    name?: string | null;
+    type: string;
+    sortOrder: number;
+};
+
+export type MediaTypePropertyTypeResponseModel = {
+    id: string;
+    container?: ReferenceByIdModel | null;
+    sortOrder: number;
+    alias: string;
+    name: string;
+    description?: string | null;
+    dataType: ReferenceByIdModel;
+    variesByCulture: boolean;
+    variesBySegment: boolean;
+    validation: PropertyTypeValidationModel;
+    appearance: PropertyTypeAppearanceModel;
+};
+
+export type MediaTypeResponseModel = {
+    alias: string;
+    name: string;
+    description?: string | null;
+    icon: string;
+    allowedAsRoot: boolean;
+    variesByCulture: boolean;
+    variesBySegment: boolean;
+    collection?: ReferenceByIdModel | null;
+    isElement: boolean;
+    properties: Array<MediaTypePropertyTypeResponseModel>;
+    containers: Array<MediaTypePropertyTypeContainerResponseModel>;
+    id: string;
+    allowedMediaTypes: Array<MediaTypeSortModel>;
+    compositions: Array<MediaTypeCompositionModel>;
+    isDeletable: boolean;
+    aliasCanBeChanged: boolean;
+};
+
+export type MediaTypeSortModel = {
+    mediaType: ReferenceByIdModel;
+    sortOrder: number;
+};
+
+export type MemberTypeCompositionModel = {
+    memberType: ReferenceByIdModel;
+    compositionType: CompositionTypeModel;
+};
+
+export type MemberTypePropertyTypeContainerResponseModel = {
+    id: string;
+    parent?: ReferenceByIdModel | null;
+    name?: string | null;
+    type: string;
+    sortOrder: number;
+};
+
+export type MemberTypePropertyTypeResponseModel = {
+    id: string;
+    container?: ReferenceByIdModel | null;
+    sortOrder: number;
+    alias: string;
+    name: string;
+    description?: string | null;
+    dataType: ReferenceByIdModel;
+    variesByCulture: boolean;
+    variesBySegment: boolean;
+    validation: PropertyTypeValidationModel;
+    appearance: PropertyTypeAppearanceModel;
+    isSensitive: boolean;
+    visibility: MemberTypePropertyTypeVisibilityModel;
+};
+
+export type MemberTypePropertyTypeVisibilityModel = {
+    memberCanView: boolean;
+    memberCanEdit: boolean;
+};
+
+export type MemberTypeResponseModel = {
+    alias: string;
+    name: string;
+    description?: string | null;
+    icon: string;
+    allowedAsRoot: boolean;
+    variesByCulture: boolean;
+    variesBySegment: boolean;
+    collection?: ReferenceByIdModel | null;
+    isElement: boolean;
+    properties: Array<MemberTypePropertyTypeResponseModel>;
+    containers: Array<MemberTypePropertyTypeContainerResponseModel>;
+    id: string;
+    compositions: Array<MemberTypeCompositionModel>;
+};
+
 export type PerformActionRequest = {
     requestId: string;
     action: string;
@@ -84,6 +248,21 @@ export type PerformActionResponse = {
     inBackground: boolean;
     operationId?: string | null;
     message?: string | null;
+};
+
+export type PropertyTypeAppearanceModel = {
+    labelOnTop: boolean;
+};
+
+export type PropertyTypeValidationModel = {
+    mandatory: boolean;
+    mandatoryMessage?: string | null;
+    regEx?: string | null;
+    regExMessage?: string | null;
+};
+
+export type ReferenceByIdModel = {
+    id: string;
 };
 
 export type SyncActionButton = {
@@ -135,6 +314,16 @@ export type SyncItemPreviewResponse = {
     message?: string | null;
     currentDataType?: DataTypeResponseModel | null;
     incomingDataType?: DataTypeResponseModel | null;
+    currentDocumentType?: DocumentTypeResponseModel | null;
+    incomingDocumentType?: DocumentTypeResponseModel | null;
+    currentMediaType?: MediaTypeResponseModel | null;
+    incomingMediaType?: MediaTypeResponseModel | null;
+    currentMemberType?: MemberTypeResponseModel | null;
+    incomingMemberType?: MemberTypeResponseModel | null;
+    compositionDocumentTypes: Array<DocumentTypeResponseModel>;
+    compositionMediaTypes: Array<MediaTypeResponseModel>;
+    compositionMemberTypes: Array<MemberTypeResponseModel>;
+    dataTypes: Array<DataTypeResponseModel>;
     details: Array<USyncChange>;
 };
 

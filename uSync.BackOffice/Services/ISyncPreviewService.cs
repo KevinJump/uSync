@@ -18,5 +18,5 @@ public interface ISyncPreviewService
     ///  and nothing it (or the dry run) writes is kept.
     /// </remarks>
     /// <returns>null if the handler or item can't be found, or the handler doesn't support previews</returns>
-    Task<TResult?> GetPreviewAsync<TResult>(string handlerAlias, Guid key, Func<SyncItemPreview, TResult> mapper);
+    Task<TResult?> GetPreviewAsync<TResult>(string handlerAlias, Guid key, Func<SyncItemPreview, Task<TResult>> mapper);
 }

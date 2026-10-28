@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
@@ -14,10 +15,12 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
+using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -77,4 +80,7 @@ public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType>, ISyncHandler
     protected override async Task<IEntity?> GetContainerAsync(Guid key)
         => await _mediaTypeContainerService.GetAsync(key);
 
+    /// <inheritdoc/>
+    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings)
+        => BuildPreviewAsync(node, settings, SerializerFlags.OnePass);
 }
