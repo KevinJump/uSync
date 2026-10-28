@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+
+using Microsoft.Extensions.Logging;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Legacy.Migrators;
 using uSync.BackOffice.Services;
 using uSync.Core;
 
@@ -14,7 +19,7 @@ namespace uSync.BackOffice.Legacy;
 /// <summary>
 ///  checks for legacy datatypes,and helps convert them.
 /// </summary>
-internal class SyncLegacyService : ISyncLegacyService
+internal partial class SyncLegacyService : ISyncLegacyService
 {
     private int _majorVersion = uSync.Version.Major;
 
@@ -30,11 +35,19 @@ internal class SyncLegacyService : ISyncLegacyService
 
     private readonly ISyncFileService _syncFileService;
     private readonly ISyncConfigService _configService;
+    private readonly IEnumerable<ISyncLegacyMigrator> _migrators;
+    private readonly ILogger<SyncLegacyService> _logger;
 
-    public SyncLegacyService(ISyncFileService syncFileService, ISyncConfigService configService)
+    public SyncLegacyService(
+        ISyncFileService syncFileService,
+        ISyncConfigService configService,
+        IEnumerable<ISyncLegacyMigrator> migrators,
+        ILogger<SyncLegacyService> logger)
     {
         _syncFileService = syncFileService;
         _configService = configService;
+        _migrators = migrators;
+        _logger = logger;
     }
 
     /// <inheritdoc/>
@@ -86,6 +99,10 @@ internal class SyncLegacyService : ISyncLegacyService
 
     /// <inheritdoc/>
     public bool CopyLegacyFolder(string folder)
+        => CopyLegacyFolderAsync(folder, []).GetAwaiter().GetResult();
+
+    /// <inheritdoc/>
+    public async Task<bool> CopyLegacyFolderAsync(string folder, IEnumerable<string> migrationIds)
     {
         var latestPath = $"~/uSync/v{_majorVersion}";
         var backupPath = $"~/uSync/v{_majorVersion}-backup";
@@ -102,6 +119,14 @@ internal class SyncLegacyService : ISyncLegacyService
         _syncFileService.CreateFolder(latestPath);
 
         _syncFileService.CopyFolder(folder, latestPath);
+
+        var migrators = _migrators
+            .Where(x => migrationIds.Contains(x.Id, StringComparer.OrdinalIgnoreCase))
+            .ToList();
+
+        if (migrators.Count > 0)
+            await RunMigratorsAsync(latestPath, GetFolderMajorVersion(folder), migrators);
+
         return true;
     }
 

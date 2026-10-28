@@ -20,6 +20,7 @@ using uSync.BackOffice.Cache;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
 using uSync.BackOffice.Legacy;
+using uSync.BackOffice.Legacy.Migrators;
 using uSync.BackOffice.Notifications;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
@@ -104,6 +105,9 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.AddSyncTracker();
 
         builder.Services.AddTransient<ISyncLegacyService, SyncLegacyService>();
+        builder.Services.AddTransient<ISyncLegacyMigrator, MultiNodeTreePickerLegacyMigrator>();
+        builder.Services.AddTransient<ISyncLegacyMigrator, MediaPickerSingleLegacyMigrator>();
+        builder.Services.AddTransient<ISyncLegacyMigrator, DropDownSingleLegacyMigrator>();
 
         builder.Services.AddSingleton<IAuthorizationHandler, uSyncAllowedApplicationHandler>();
         builder.Services.AddAuthorization(o => CreatePolicies(o));
