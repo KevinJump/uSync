@@ -42,6 +42,20 @@ public class ConfigurationSerializerCollection :
     }
 
     /// <summary>
+    ///  find the first serializer that wants to move this configuration onto another editor.
+    /// </summary>
+    public SyncEditorReplacement? GetEditorReplacement(string editorAlias, IDictionary<string, object> configuration)
+    {
+        foreach (var serializer in GetSerializers(editorAlias))
+        {
+            var replacement = serializer.GetEditorReplacement(editorAlias, configuration);
+            if (replacement is not null)
+                return replacement;
+        }
+        return null;
+    }
+
+    /// <summary>
     ///  tells serializers that care about it that this is a rename 
     /// </summary>
     /// <param name="oldEditorAlias"></param>

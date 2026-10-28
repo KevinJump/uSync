@@ -32,6 +32,17 @@ public interface IConfigurationSerializer
 
     string? GetEditorUIAlias() => null;
 
+    /// <summary>
+    ///  the editor this configuration should be imported onto, when it isn't the one in the file.
+    /// </summary>
+    /// <remarks>
+    ///  for editors Umbraco has split by configuration (e.g. v19 moved a media picker
+    ///  with multiple:false onto its own single media picker editor), the editor
+    ///  depends on the config being imported, so GetEditorAlias() can't express it.
+    /// </remarks>
+    SyncEditorReplacement? GetEditorReplacement(string editorAlias, IDictionary<string, object> configuration)
+        => null;
+
     bool IsSerializer(string propertyName)
         => Editors.InvariantContains(propertyName);
 }
@@ -40,3 +51,8 @@ public interface IConfigurationTrackingSerializer : IConfigurationSerializer
 {
     Task TrackRenamedEditorAsync(string oldEditorAlias, string newEditorAlias);
 }
+
+/// <summary>
+///  the editor (and editor UI) a data type should be moved onto during an import.
+/// </summary>
+public record SyncEditorReplacement(string EditorAlias, string EditorUiAlias);

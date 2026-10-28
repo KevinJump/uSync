@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 
 using Umbraco.Cms.Core;
@@ -116,8 +117,14 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         }
 
         var editorAlias = info?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
-        var editor = FindDataEditor(editorAlias);
-        if (editorAlias != item.EditorAlias)
+
+        // some editors are split by their config (v19 single media pickers, typed labels, etc.),
+        // so the editor we import onto may not be the one in the file.
+        var replacement = GetEditorReplacement(node, editorAlias);
+        var targetEditorAlias = replacement?.EditorAlias ?? editorAlias;
+
+        var editor = FindDataEditor(targetEditorAlias);
+        if (targetEditorAlias != item.EditorAlias)
         {
             // use the configuration serializers to track the rename.
             // uSync.migrations can use this to hook into the rename here, so we don't 
@@ -140,7 +147,12 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         var editorUiAlias = info?.Element("EditorUIAlias").ValueOrDefault(string.Empty) ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(editorUiAlias) is true)
+        if (replacement is not null)
+        {
+            // the UI alias in the file belongs to the editor we have moved away from.
+            editorUiAlias = replacement.EditorUiAlias;
+        }
+        else if (string.IsNullOrWhiteSpace(editorUiAlias) is true)
         {
             // EditorUIAlias is often not set on migrations, so we need to go get it.
             var newEditorUiAlias = ToPropertyEditorUiAlias(item.EditorAlias) ?? string.Empty;
@@ -197,6 +209,33 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         return null;
     }
 
+    private SyncEditorReplacement? GetEditorReplacement(XElement node, string editorAlias)
+    {
+        if (TryGetImportConfiguration(node, out var configuration) is false)
+            return null;
+
+        var replacement = _configurationSerializers.GetEditorReplacement(editorAlias, configuration);
+        if (replacement is not null && logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Editor {alias} replaced by {newAlias} based on its configuration", editorAlias, replacement.EditorAlias);
+
+        return replacement;
+    }
+
+    private static bool TryGetImportConfiguration(XElement node, [MaybeNullWhen(false)] out IDictionary<string, object> configuration)
+    {
+        configuration = null;
+
+        var config = node.Element("Config").ValueOrDefault(string.Empty);
+        if (string.IsNullOrEmpty(config)) return false;
+
+        if (config.TryDeserialize(out IDictionary<string, object>? importData) is false || importData is null)
+            return false;
+
+        // v8,9,etc configs the properties
+        configuration = importData.ConvertToCamelCase();
+        return true;
+    }
+
     private async Task<List<uSyncChange>> DeserializeConfiguration(IDataType item, XElement node, string editorAlias)
     {
         var config = node.Element("Config").ValueOrDefault(string.Empty);
@@ -204,14 +243,11 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         var changes = new List<uSyncChange>();
 
-        if (config.TryDeserialize(out IDictionary<string, object>? importData) is false || importData is null)
+        if (TryGetImportConfiguration(node, out var importData) is false)
         {
             changes.AddWarning("Data", item.Name ?? item.Id.ToString(), "Failed to deserialize config for item");
             return changes;
         }
-
-        // v8,9,etc configs the properties 
-        importData = importData.ConvertToCamelCase();
 
         // multiple serializers can run per property. 
         var serializers = _configurationSerializers.GetSerializers(editorAlias);
@@ -443,19 +479,28 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             Constants.PropertyEditors.Aliases.ColorPickerEyeDropper => "Umb.PropertyEditorUi.EyeDropper",
             Constants.PropertyEditors.Aliases.ContentPicker => "Umb.PropertyEditorUi.DocumentPicker",
             Constants.PropertyEditors.Aliases.DateTime => "Umb.PropertyEditorUi.DatePicker",
-            Constants.PropertyEditors.Aliases.DropDownListFlexible => "Umb.PropertyEditorUi.Dropdown",
+            Constants.PropertyEditors.Aliases.MultipleDropDown => "Umb.PropertyEditorUi.Dropdown",
+            Constants.PropertyEditors.Aliases.SingleDropDown => "Umb.PropertyEditorUi.Dropdown.Single",
             Constants.PropertyEditors.Aliases.ImageCropper => "Umb.PropertyEditorUi.ImageCropper",
             Constants.PropertyEditors.Aliases.Integer => "Umb.PropertyEditorUi.Integer",
             Constants.PropertyEditors.Aliases.Decimal => "Umb.PropertyEditorUi.Decimal",
             Constants.PropertyEditors.Aliases.ListView => "Umb.PropertyEditorUi.Collection",
             Constants.PropertyEditors.Aliases.MediaPicker3 => "Umb.PropertyEditorUi.MediaPicker",
+            Constants.PropertyEditors.Aliases.SingleMediaPicker => "Umb.PropertyEditorUi.MediaPicker.Single",
             Constants.PropertyEditors.Aliases.MemberPicker => "Umb.PropertyEditorUi.MemberPicker",
             Constants.PropertyEditors.Aliases.MemberGroupPicker => "Umb.PropertyEditorUi.MemberGroupPicker",
             Constants.PropertyEditors.Aliases.MultiNodeTreePicker => "Umb.PropertyEditorUi.ContentPicker",
             Constants.PropertyEditors.Aliases.MultipleTextstring => "Umb.PropertyEditorUi.MultipleTextString",
             Constants.PropertyEditors.Aliases.Label => "Umb.PropertyEditorUi.Label",
+            Constants.PropertyEditors.Aliases.LabelText => "Umb.PropertyEditorUi.Label.Text",
+            Constants.PropertyEditors.Aliases.LabelInteger => "Umb.PropertyEditorUi.Label.Integer",
+            Constants.PropertyEditors.Aliases.LabelBigInt => "Umb.PropertyEditorUi.Label.BigInt",
+            Constants.PropertyEditors.Aliases.LabelDecimal => "Umb.PropertyEditorUi.Label.Decimal",
+            Constants.PropertyEditors.Aliases.LabelDateTime => "Umb.PropertyEditorUi.Label.DateTime",
+            Constants.PropertyEditors.Aliases.LabelTime => "Umb.PropertyEditorUi.Label.Time",
             Constants.PropertyEditors.Aliases.RadioButtonList => "Umb.PropertyEditorUi.RadioButtonList",
             Constants.PropertyEditors.Aliases.Slider => "Umb.PropertyEditorUi.Slider",
+            Constants.PropertyEditors.Aliases.RangeSlider => "Umb.PropertyEditorUi.Slider.Range",
             Constants.PropertyEditors.Aliases.Tags => "Umb.PropertyEditorUi.Tags",
             Constants.PropertyEditors.Aliases.TextBox => "Umb.PropertyEditorUi.TextBox",
             Constants.PropertyEditors.Aliases.TextArea => "Umb.PropertyEditorUi.TextArea",
@@ -467,6 +512,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             Constants.PropertyEditors.Aliases.UploadField => "Umb.PropertyEditorUi.UploadField",
             Constants.PropertyEditors.Aliases.EmailAddress => "Umb.PropertyEditorUi.EmailAddress",
             Constants.PropertyEditors.Aliases.MultiUrlPicker => "Umb.PropertyEditorUi.MultiUrlPicker",
+            Constants.PropertyEditors.Aliases.SingleUrlPicker => "Umb.PropertyEditorUi.UrlPicker.Single",
             _ => GetEditorUIAliasFromSerializer(editorAlias)
         };
     }
