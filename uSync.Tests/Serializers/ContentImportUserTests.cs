@@ -154,7 +154,7 @@ public class ContentImportUserTests : UmbracoIntegrationTest
         SetWriter(node, writer.Email);
 
         var attempt = await Serializer.DeserializeAsync(node,
-            new SyncSerializerOptions(SerializerFlags.Force, [], UmbConstants.Security.SuperUserId));
+            new SyncSerializerOptions(SerializerFlags.Force, [], uSyncConstants.SuperUserId));
         var reloaded = ContentService.GetById(content.Key)!;
 
         Assert.Multiple(() =>
@@ -188,6 +188,6 @@ public class ContentImportUserTests : UmbracoIntegrationTest
     public void UnknownUserId_FallsBackToTheSuperuser()
     {
         var options = new SyncSerializerOptions(SerializerFlags.None, [], UmbConstants.Security.UnknownUserId);
-        Assert.That(options.UserId, Is.EqualTo(UmbConstants.Security.SuperUserId));
+        Assert.That(options.UserId, Is.EqualTo(uSyncConstants.SuperUserId));
     }
 }

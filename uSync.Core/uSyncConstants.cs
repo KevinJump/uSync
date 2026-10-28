@@ -29,6 +29,16 @@ public static partial class uSyncConstants
 
     }
 
+    /// <summary>
+    ///  int id of Umbraco's superuser (the user with Constants.Security.SuperUserKey).
+    /// </summary>
+    /// <remarks>
+    ///  Umbraco 19 obsoletes Constants.Security.SuperUserId, but the superuser row is
+    ///  still seeded with this id and the int based user APIs still use it. Where we
+    ///  have services we resolve the id from SuperUserKey, this is for the places we don't.
+    /// </remarks>
+    internal const int SuperUserId = -1;
+
     // this is our format 'version' - 
     // it only changes when the format of the .config files change
     // we use it to prompt people to do an uptodate export.
