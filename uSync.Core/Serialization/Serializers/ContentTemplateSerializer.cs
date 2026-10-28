@@ -53,8 +53,13 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
     protected override async Task<SyncAttempt<IContent>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
         var attempt = await FindOrCreateAsync(node);
-        if (!attempt.Success || attempt.Result is null) 
-            throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
+        if (!attempt.Success || attempt.Result is null)
+        {
+            // a blueprint we can't create (for example the content type isn't allowed for blueprints)
+            // is a failed import, not an exception.
+            return SyncAttempt<IContent>.Fail(node.GetAlias(), ChangeType.ImportFail,
+                attempt.Exception?.Message ?? $"Unknown error {node.GetAlias()}");
+        }
 
         var item = attempt.Result;
 
@@ -123,21 +128,32 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         });
     }
 
-    protected override Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+    protected override async Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        return uSyncTaskHelper.FromResultOf(() =>
-        {
-            var contentType = _contentTypeService.Get(itemType);
-            if (contentType == null) return
-                    Attempt.Fail<IContent?>(null, new ArgumentException($"Missing content Type {itemType}"));
+        var contentType = _contentTypeService.Get(itemType);
+        if (contentType == null)
+            return Attempt.Fail<IContent?>(null, new ArgumentException($"Missing content Type {itemType}"));
 
-            // parent can be either an existing blueprint (unlikely) or the
-            // DocumentBlueprintContainer (folder) the blueprint lives in, so
-            // we create by id rather than assuming it's always an IContent.
-            var item = new Content(alias, parent?.Id ?? -1, contentType);
+        // Umbraco 19 only validates this in the blueprint editing service, uSync saves via
+        // the content service, so we have to check for ourselves.
+        if (await IsAllowedForBlueprintsAsync(contentType, parent?.Key) is false)
+            return Attempt.Fail<IContent?>(null, new InvalidOperationException(
+                $"Content type '{contentType.Alias}' is not allowed for blueprints (element types, and types excluded by content type filters, can't have blueprints)"));
 
-            return Attempt.Succeed<IContent?>(item);
-        });
+        // parent can be either an existing blueprint (unlikely) or the
+        // DocumentBlueprintContainer (folder) the blueprint lives in, so
+        // we create by id rather than assuming it's always an IContent.
+        var item = new Content(alias, parent?.Id ?? -1, contentType);
+
+        return Attempt.Succeed<IContent?>(item);
+    }
+
+    private async Task<bool> IsAllowedForBlueprintsAsync(IContentType contentType, Guid? containerKey)
+    {
+        if (contentType.IsElement) return false;
+
+        var allowed = await _contentTypeService.GetAllAllowedForBlueprintsAsync(containerKey, 0, int.MaxValue);
+        return allowed.Items.Any(x => x.Key == contentType.Key);
     }
 
     protected override async Task<Attempt<IContent?>> FindOrCreateAsync(XElement node)
