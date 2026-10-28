@@ -1,0 +1,29 @@
+name: Label PRs for the next release
+
+# Adds the release label to every PR opened against this branch, so the PRs that
+# make up a release can be listed with one label search.
+#
+# pull_request_target runs this file from the base branch, so each "v{major}/main"
+# branch carries its own copy and its own label. It never checks out the PR's code.
+# Change release_label when work moves on to the next release.
+on:
+  pull_request_target:
+    types: [ opened, reopened, edited ]
+    branches: [ "v19/main" ]
+
+permissions:
+  pull-requests: write
+
+env:
+  release_label: release/19.0.0
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add release label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr edit "$PR_NUMBER" --add-label "$release_label"
