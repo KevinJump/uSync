@@ -161,11 +161,6 @@ public partial class SyncService
     }
 
     /// <inheritdoc/>>
-    [Obsolete("Use the overload with the group parameter instead")]
-    public async Task FinishBulkProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions)
-        => await FinishBulkProcessAsync(action, uSync.EverythingGroupName, actions);
-
-    /// <inheritdoc/>>
     public async Task FinishBulkProcessAsync(HandlerActions action, string? group, IEnumerable<uSyncAction> actions)
     {
         switch (action)

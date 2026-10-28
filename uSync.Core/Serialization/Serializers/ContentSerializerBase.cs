@@ -778,10 +778,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return await HandleTrashedState(item, trashed, restoreParent, relationAlias);
     }
 
-    [Obsolete("Use HandleTrashedState with relationAlias, will be removed in v18")]
-    protected virtual uSyncChange? HandleTrashedState(TObject item, bool trashed, Guid restoreParent)
-        => uSyncChange.NoChange($"Member/{item.Name}", item.Name ?? item.Id.ToString());
-
     protected virtual Task<uSyncChange?> HandleTrashedState(TObject item, bool trashed, Guid restoreParent, string relationAlias)
     {
         if (!trashed && item.Trashed)

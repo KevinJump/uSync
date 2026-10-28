@@ -158,12 +158,6 @@ public interface ISyncService
     /// <summary>
     ///  trigger the end of the bulk process
     /// </summary>
-    [Obsolete("Use StartBulkProcessAsync(HandlerActions action, string group) instead")]
-    Task FinishBulkProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions);
-
-    /// <summary>
-    ///  trigger the end of the bulk process
-    /// </summary>
     Task FinishBulkProcessAsync(HandlerActions action, string? group, IEnumerable<uSyncAction> actions);
 
     /// <summary>

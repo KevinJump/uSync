@@ -207,10 +207,6 @@ internal class SyncActionService : ISyncActionService
     }
 
     /// <inheritdoc/>
-    public async Task StartProcessAsync(HandlerActions action)
-        => await StartProcessAsync(new SyncStartActionRequest { HandlerAction = action, Username = "", Clean = false });
-
-    /// <inheritdoc/>
     public async Task<SyncActionResult> FinishProcessAsync(SyncFinalActionRequest request)
     {
         await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.ActionOptions.Group, request.Actions);

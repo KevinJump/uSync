@@ -5,7 +5,6 @@ using Umbraco.Cms.Core.Models.Membership;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
-using uSync.Backoffice.Management.Api.Extensions;
 using uSync.Backoffice.Management.Api.Models;
 using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
@@ -53,14 +52,6 @@ internal class uSyncManagementService : ISyncManagementService
         _longRunningOperationService = longRunningOperationService;
         _syncTrackerService = syncTrackerService;
     }
-
-    [Obsolete("Use GetActions(string setName) instead, this will be removed in v18")]
-    public List<SyncActionGroup> GetActions()
-        => GetActions(_configService.Settings.DefaultSet);
-
-    [Obsolete("Use GetActionsAsync(string setName) instead, this will be removed in v19")]
-    public List<SyncActionGroup> GetActions(string setName)
-        => GetActionsAsync(setName).Result;
 
     /// <summary>
     ///  Gets the list of available actions

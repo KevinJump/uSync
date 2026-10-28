@@ -11,10 +11,6 @@ public static class ChangeListExtensions
     public static void AddNew(this List<uSyncChange> changes, string name, string value, string path)
         => changes.Add(uSyncChange.Create(path, name, value, true));
 
-    [Obsolete("Use AddNew without success parameter instead, will be removed in v18")]
-    public static void AddNew(this List<uSyncChange> changes, string name, string value, string path, bool success)
-        => AddNew(changes, name, value, path);
-
     public static void AddIfUpdated<TObject>(this List<uSyncChange> changes, string name, TObject oldValue, TObject newValue, string path = "")
     {
         if ((newValue is null && oldValue is null) || (newValue?.Equals(oldValue) is true)) return;

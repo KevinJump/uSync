@@ -20,16 +20,6 @@ public class uSyncBulkNotification : INotification
     }
 
     /// <summary>
-    ///  generate a new bulk notification object without a group.
-    /// </summary>
-
-    [Obsolete("Use the constructor with group and actions instead - will be removed in v19")]
-    public uSyncBulkNotification(IEnumerable<uSyncAction> actions)
-    {
-        this.Actions = actions;
-    }
-
-    /// <summary>
     ///  The group e.g settings, content that this action ran under.
     /// </summary>
     public string? Group { get; set; }   

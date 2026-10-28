@@ -80,26 +80,6 @@ public class SyncValueMapperCollection
     /// <summary>
     ///  Get the mapped import value
     /// </summary>
-    [Obsolete("Use GetImportValueAsync(string value, IPropertyType propertyType) instead will be removed in v19")]
-    public async Task<object?> GetImportValueAsync(string value, string editorAlias)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-         
-        var mappers = await GetImportingSyncMappers(editorAlias);
-        if (mappers.Any())
-        {
-            var mappedValue = value;
-            foreach (var mapper in mappers)
-            {
-                mappedValue = await mapper.GetImportValueAsync(mappedValue ?? string.Empty, editorAlias);
-            }
-
-            return GetCleanFlatJson(mappedValue ?? string.Empty);
-        }
-
-        return value;
-    }
-
     public async Task<object?> GetImportValueAsync(string value, IPropertyType propertyType, SyncSerializerOptions options)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
