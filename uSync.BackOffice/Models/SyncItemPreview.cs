@@ -57,4 +57,10 @@ public class SyncItemPreview
     ///  changes reported by the serializer during the dry run.
     /// </summary>
     public IEnumerable<uSyncChange> Details { get; set; } = [];
+
+    /// <summary>
+    ///  items from the uSync files (not in Umbraco yet) that the incoming item uses, 
+    ///  e.g. a new data type used by a new property.
+    /// </summary>
+    public IReadOnlyList<object> PendingItems { get; set; } = [];
 }

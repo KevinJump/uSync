@@ -73,7 +73,7 @@ public class SyncPreviewController : uSyncControllerBase
                 response.CurrentDocumentType = MapItem<IContentType, DocumentTypeResponseModel>(preview.Current);
                 response.IncomingDocumentType = MapItem<IContentType, DocumentTypeResponseModel>(preview.Incoming);
                 response.CompositionDocumentTypes = MapCompositions<IContentType, DocumentTypeResponseModel>(preview);
-                response.DataTypes = await MapDataTypesAsync(preview);
+                await MapDataTypesAsync(preview, response);
                 break;
 
             case IMediaType:
@@ -81,7 +81,7 @@ public class SyncPreviewController : uSyncControllerBase
                 response.CurrentMediaType = MapItem<IMediaType, MediaTypeResponseModel>(preview.Current);
                 response.IncomingMediaType = MapItem<IMediaType, MediaTypeResponseModel>(preview.Incoming);
                 response.CompositionMediaTypes = MapCompositions<IMediaType, MediaTypeResponseModel>(preview);
-                response.DataTypes = await MapDataTypesAsync(preview);
+                await MapDataTypesAsync(preview, response);
                 break;
 
             case IMemberType:
@@ -89,7 +89,7 @@ public class SyncPreviewController : uSyncControllerBase
                 response.CurrentMemberType = MapItem<IMemberType, MemberTypeResponseModel>(preview.Current);
                 response.IncomingMemberType = MapItem<IMemberType, MemberTypeResponseModel>(preview.Incoming);
                 response.CompositionMemberTypes = MapCompositions<IMemberType, MemberTypeResponseModel>(preview);
-                response.DataTypes = await MapDataTypesAsync(preview);
+                await MapDataTypesAsync(preview, response);
                 break;
         }
 
@@ -129,7 +129,11 @@ public class SyncPreviewController : uSyncControllerBase
     /// <summary>
     ///  the data types used by any property on either side, including inherited ones.
     /// </summary>
-    private async Task<List<DataTypeResponseModel>> MapDataTypesAsync(SyncItemPreview preview)
+    /// <remarks>
+    ///  data types that aren't in the site yet are built from the uSync files, 
+    ///  so new properties can still show their editor.
+    /// </remarks>
+    private async Task MapDataTypesAsync(SyncItemPreview preview, SyncItemPreviewResponse response)
     {
         var keys = ContentTypes(preview)
             .SelectMany(x => x.CompositionPropertyTypes)
@@ -138,10 +142,23 @@ public class SyncPreviewController : uSyncControllerBase
             .Distinct()
             .ToArray();
 
-        if (keys.Length == 0) return [];
+        if (keys.Length == 0) return;
 
-        var dataTypes = await _dataTypeService.GetAllAsync(keys);
-        return dataTypes
+        var dataTypes = (await _dataTypeService.GetAllAsync(keys)).ToList();
+
+        // data types that aren't in the site yet were built from the uSync files during the preview.
+        var pending = preview.PendingItems
+            .OfType<IDataType>()
+            .Where(x => keys.Contains(x.Key) && dataTypes.All(d => d.Key != x.Key))
+            .ToList();
+
+        if (pending.Count > 0)
+        {
+            dataTypes.AddRange(pending);
+            response.NewDataTypes = [.. pending.Select(x => x.Key)];
+        }
+
+        response.DataTypes = dataTypes
             .Select(x => _umbracoMapper.Map<DataTypeResponseModel>(x))
             .OfType<DataTypeResponseModel>()
             .ToList();

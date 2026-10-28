@@ -57,6 +57,7 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 	#sides: PreviewSides = { compositions: [] };
 	#compositions = new Map<string, USyncPreviewContentType>();
 	#dataTypes = new Map<string, DataTypeResponseModel>();
+	#newDataTypes = new Set<string>();
 	#diff?: USyncContentTypeDiff;
 
 	protected willUpdate(changed: PropertyValues<this>) {
@@ -65,6 +66,7 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		this.#sides = getSides(this.preview);
 		this.#compositions = new Map(this.#sides.compositions.map((c) => [c.id, c]));
 		this.#dataTypes = new Map(this.preview.dataTypes.map((d) => [d.id, d]));
+		this.#newDataTypes = new Set(this.preview.newDataTypes);
 		this.#diff = diffContentTypes(this.#sides.current, this.#sides.incoming);
 		this._activeTab = undefined;
 	}
@@ -290,6 +292,13 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 					<div class="property-meta">
 						<code>${p.alias}</code>
 						<span>${dataType?.name ?? p.dataType.id}</span>
+						${
+							this.#newDataTypes.has(p.dataType.id)
+								? html`<uui-tag size="s" look="outline"
+										>${this.localize.termOrDefault('uSync_previewNewDataType', 'new data type')}</uui-tag
+									>`
+								: nothing
+						}
 						${inheritedFrom ? html`<small class="inherited">from ${inheritedFrom}</small>` : nothing}
 						${p.variesByCulture ? html`<small>varies by culture</small>` : nothing}
 						${p.variesBySegment ? html`<small>varies by segment</small>` : nothing}

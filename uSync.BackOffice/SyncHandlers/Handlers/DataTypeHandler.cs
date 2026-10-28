@@ -91,6 +91,6 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler
         => GetItemAlias(item).ToSafeAlias(shortStringHelper);
 
     /// <inheritdoc/>
-    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings)
-        => BuildPreviewAsync(node, settings, SerializerFlags.None);
+    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings, SyncPreviewOptions? options = null)
+        => BuildPreviewAsync(node, settings, SerializerFlags.None, options);
 }

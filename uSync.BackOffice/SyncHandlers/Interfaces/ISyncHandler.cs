@@ -174,6 +174,6 @@ public interface ISyncHandler
     ///  returns null when the handler doesn't support previews. Callers should run this 
     ///  inside a scope that is never completed, so nothing can be written to the database.
     /// </remarks>
-    Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings)
+    Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings, SyncPreviewOptions? options = null)
         => Task.FromResult<SyncItemPreview?>(null);
 }

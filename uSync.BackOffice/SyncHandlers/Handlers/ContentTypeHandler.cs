@@ -85,6 +85,6 @@ public class ContentTypeHandler : ContentTypeBaseHandler<IContentType>, ISyncHan
         => await _contentTypeContainerService.DeleteAsync(key, Constants.Security.SuperUserKey);
 
     /// <inheritdoc/>
-    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings)
-        => BuildPreviewAsync(node, settings, SerializerFlags.OnePass);
+    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings, SyncPreviewOptions? options = null)
+        => BuildPreviewAsync(node, settings, SerializerFlags.OnePass, options);
 }

@@ -324,6 +324,7 @@ export type SyncItemPreviewResponse = {
     compositionMediaTypes: Array<MediaTypeResponseModel>;
     compositionMemberTypes: Array<MemberTypeResponseModel>;
     dataTypes: Array<DataTypeResponseModel>;
+    newDataTypes: Array<string>;
     details: Array<USyncChange>;
 };
 

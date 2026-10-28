@@ -10,12 +10,15 @@ using NUnit.Framework;
 
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.PropertyEditors;
+using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Cms.Tests.Common.Testing;
 using Umbraco.Cms.Tests.Integration.Testing;
 
 using uSync.BackOffice;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
 using uSync.Core.Serialization;
 
@@ -147,5 +150,43 @@ public class ContentTypePreviewTests : UmbracoIntegrationTest
         Assert.That(((IContentType)preview.Incoming!).Name, Is.EqualTo("Handler Preview (incoming)"));
 
         Assert.That(ContentTypeService.Get(contentType.Key)!.Name, Is.EqualTo("handlerPreview"));
+    }
+
+    /// <summary>
+    ///  a property can use a data type that only exists in the uSync files (the import creates it first).
+    /// </summary>
+    [Test]
+    public async Task Preview_NewPropertyWithPendingDataType_KeepsProperty()
+    {
+        var contentType = CreateContentType("pendingDataType");
+        var node = await SerializeAsync(contentType);
+
+        var pendingKey = Guid.NewGuid();
+        var editor = GetRequiredService<PropertyEditorCollection>()[UmbConstants.PropertyEditors.Aliases.TextBox];
+        var pending = new DataType(editor!, GetRequiredService<IConfigurationEditorJsonSerializer>()) { Key = pendingKey, Name = "Pending" };
+
+        var property = new XElement(node.Element("GenericProperties")!.Elements("GenericProperty").First());
+        property.Element("Key")!.Value = Guid.NewGuid().ToString();
+        property.Element("Alias")!.Value = "subtitle";
+        property.Element("Name")!.Value = "Subtitle";
+        property.Element("Definition")!.Value = pendingKey.ToString();
+        node.Element("GenericProperties")!.Add(property);
+
+        var handler = GetRequiredService<ISyncHandlerFactory>().GetValidHandler(uSync.BackOffice.uSyncConstants.Handlers.ContentTypeHandler)!;
+
+        var without = await handler.Handler.GetPreviewAsync(node, handler.Settings);
+        Assert.That(((IContentType)without!.Incoming!).PropertyTypes.Any(x => x.Alias == "subtitle"), Is.False);
+
+        var options = new SyncPreviewOptions
+        {
+            PendingItemResolver = (type, key) => Task.FromResult<object?>(type == typeof(IDataType) && key == pendingKey ? pending : null),
+        };
+
+        var with = await handler.Handler.GetPreviewAsync(node, handler.Settings, options);
+        var subtitle = ((IContentType)with!.Incoming!).PropertyTypes.SingleOrDefault(x => x.Alias == "subtitle");
+        Assert.That(subtitle, Is.Not.Null);
+        Assert.That(subtitle!.DataTypeKey, Is.EqualTo(pendingKey));
+
+        Assert.That(ContentTypeService.Get(contentType.Key)!.PropertyTypes.Any(x => x.Alias == "subtitle"), Is.False);
     }
 }

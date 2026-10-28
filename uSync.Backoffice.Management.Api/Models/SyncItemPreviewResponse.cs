@@ -60,5 +60,10 @@ public class SyncItemPreviewResponse
     /// </summary>
     public List<DataTypeResponseModel> DataTypes { get; set; } = [];
 
+    /// <summary>
+    ///  keys of the data types in <see cref="DataTypes"/> that aren't in the site yet (built from the uSync files).
+    /// </summary>
+    public List<Guid> NewDataTypes { get; set; } = [];
+
     public List<uSyncChange> Details { get; set; } = [];
 }

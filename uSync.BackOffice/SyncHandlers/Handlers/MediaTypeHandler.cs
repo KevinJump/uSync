@@ -81,6 +81,6 @@ public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType>, ISyncHandler
         => await _mediaTypeContainerService.GetAsync(key);
 
     /// <inheritdoc/>
-    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings)
-        => BuildPreviewAsync(node, settings, SerializerFlags.OnePass);
+    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings, SyncPreviewOptions? options = null)
+        => BuildPreviewAsync(node, settings, SerializerFlags.OnePass, options);
 }

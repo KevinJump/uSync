@@ -479,7 +479,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug(" > Property: {alias} {key} {definitionKey} {editorAlias}", alias, key, definitionKey, propertyEditorAlias);
 
-            var result = await GetOrCreatePropertyAsync(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties);
+            var result = await GetOrCreatePropertyAsync(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties, options);
             if (result.Property == null)
             {
                 changes.AddWarning($"Property/{alias}", alias, $"Property '{alias}' cannot be created (missing DataType?)");
@@ -1207,7 +1207,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         string alias,
         Guid definitionKey,
         string propertyEditorAlias,
-        List<string>? compositeProperties)
+        List<string>? compositeProperties,
+        SyncSerializerOptions options)
     {
         var result = new PropertyTypeResult
         {
@@ -1232,6 +1233,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         {
             dataType = await _dataTypeService.GetAsync(definitionKey);
         }
+
+        // a data type that is part of the import but not in Umbraco yet (only when previewing).
+        dataType ??= await options.FindPendingItemAsync<IDataType>(definitionKey);
 
         if (dataType is null && !string.IsNullOrEmpty(propertyEditorAlias))
         {
@@ -1281,6 +1285,10 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         if (result.Property.DataTypeId != dataType.Id)
             result.Property.DataTypeId = dataType.Id;
+
+        // a pending data type (preview only) has no id yet, so the key is the only link to it.
+        if (dataType.HasIdentity is false && result.Property.DataTypeKey != dataType.Key)
+            result.Property.DataTypeKey = dataType.Key;
 
         return result;
     }
