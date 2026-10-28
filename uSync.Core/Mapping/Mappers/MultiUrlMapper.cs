@@ -19,7 +19,8 @@ public class MultiUrlMapper : SyncValueMapperBase, ISyncMapper
     public override string Name => "MultiUrl Mapper";
 
     public override string[] Editors => [
-        Constants.PropertyEditors.Aliases.MultiUrlPicker
+        Constants.PropertyEditors.Aliases.MultiUrlPicker,
+        Constants.PropertyEditors.Aliases.SingleUrlPicker
     ];
 
     public override Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
