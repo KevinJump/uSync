@@ -364,13 +364,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
     /// <summary>
-    ///  method to get the merged folders, handlers that care about orders should override this. 
-    /// </summary>
-    [Obsolete("Use GetMergedItemsAsync with SyncMergeOptions will be removed in v18")]
-    protected virtual async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
-        => await GetMergedItemsAsync(folders, new SyncMergeOptions());
-
-    /// <summary>
     ///  given a file path, will give you the merged values across all folders. 
     /// </summary>
     protected virtual async Task<XElement?> GetMergedNodeAsync(string filePath)
@@ -702,18 +695,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         return Task.CompletedTask;
     }
-
-    /// <summary>
-    ///  Get the GUIDs for all items in a folder
-    /// </summary>
-    /// <remarks>
-    ///  This is disk intensive, (checking the .config files all the time)
-    ///  so we cache it, and if we are using the flat folder structure, then
-    ///  we only do it once, so its quicker. 
-    /// </remarks>
-    [Obsolete("Use GetFolderKeysAsync instead, will be removed in v19")]
-    protected IList<Guid> GetFolderKeys(string folder, bool flat)
-        => GetFolderKeysAsync(folder, flat).GetAwaiter().GetResult();
 
     /// <summary>
     ///  Get the GUIDs for all items in a folder

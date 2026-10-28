@@ -12,9 +12,4 @@ public class uSyncImportCompletedNotification : uSyncBulkNotification
     /// <inheritdoc/>
     public uSyncImportCompletedNotification(IEnumerable<uSyncAction> actions, string? group)
         : base(actions, group) { }
-
-    /// <inheritdoc/>
-    [Obsolete("Use the constructor with the group parameter instead will be removed in v19")]
-    public uSyncImportCompletedNotification(IEnumerable<uSyncAction> actions)
-        : base(actions, null) { }
 }

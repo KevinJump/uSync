@@ -76,10 +76,6 @@ public struct SyncAttempt<TObject>
     public static SyncAttempt<TObject> Succeed(string name, TObject item, Type itemType, ChangeType change)
         => new(true, name, item, itemType.Name, change, string.Empty, null, false);
 
-    [Obsolete("Pass details (even if empty) for consistency. Will be removed in v18.")]
-    public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change)
-        => new(true, name, item, typeof(TObject).Name, change, string.Empty, null, false);
-
     public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, IList<uSyncChange> details)
     {
         var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, string.Empty, null, false)

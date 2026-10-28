@@ -46,12 +46,6 @@ public interface ISyncActionService
     /// <summary>
     ///  run an export based on the options provided
     /// </summary>
-    [Obsolete("Use StartProcessAsync(SyncStartActionRequest request) will be removed in v18")]
-    Task StartProcessAsync(HandlerActions action);
-
-    /// <summary>
-    ///  run an export based on the options provided
-    /// </summary>
     Task StartProcessAsync(SyncStartActionRequest request);
 
     /// <summary>
@@ -64,13 +58,6 @@ public interface ISyncActionService
     /// </summary>
     /// <returns></returns>
     Stream GetExportFolderAsStream();
-
-    /// <summary>
-    ///  unpacks a zip archive (stream) to disk, checks it and copies it over the existing uSync folder. 
-    /// </summary>
-    [Obsolete("Use UnpackImportFromStreamAsync(Stream stream) will be removed in v19")]
-    UploadImportResult UnpackImportFromStream(Stream stream)
-        => UnpackImportFromStreamAsync(stream).GetAwaiter().GetResult();
 
     /// <summary>
     ///  unpacks a zip archive (stream) to disk, checks it and copies it over the existing uSync folder. 

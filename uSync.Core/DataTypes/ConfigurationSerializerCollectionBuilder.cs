@@ -18,10 +18,6 @@ public class ConfigurationSerializerCollection :
     {
     }
 
-    [Obsolete("Use GetSerializers instead to get all serializers for an editor alias, getting only the first is not recommended. will be removed in v19")]
-    public IConfigurationSerializer? GetSerializer(string editorAlias)
-        => this.FirstOrDefault(x => x.IsSerializer(editorAlias));
-
     public IEnumerable<IConfigurationSerializer> GetSerializers(string editorAlias)
         => this.Where(x => x.IsSerializer(editorAlias));
 

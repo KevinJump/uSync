@@ -11,11 +11,6 @@ public interface ISyncManagementService
 {
     Stream CompressExportFolder();
 
-    [Obsolete("Use GetActions(string setName) instead, this will be removed in v18")]
-    List<SyncActionGroup> GetActions();
-
-    [Obsolete("Use GetActionsAsync(string setName) instead, this will be removed in v19")]
-    List<SyncActionGroup> GetActions(string setName);
     
     Task<List<SyncActionGroup>> GetActionsAsync(string setName);
     
@@ -23,9 +18,6 @@ public interface ISyncManagementService
     Task<SyncFileVersionCheckResult> GetSyncFileInfo();
     Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user);
 
-    [Obsolete("use UnpackStreamAsync will be removed in v19")]
-    UploadImportResult UnpackStream(Stream stream)
-        => UnpackStreamAsync(stream).Result;
     Task<UploadImportResult> UnpackStreamAsync(Stream stream);
 
     /// <summary>

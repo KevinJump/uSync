@@ -211,12 +211,5 @@ public interface ISyncFileService
     /// <summary>
     ///  run some basic checks on a folder to see if it looks ok. 
     /// </summary>
-    [Obsolete("Use VerifyFolderAsync instead will be removed in v19")]
-    List<string> VerifyFolder(string folder, string extension)
-        => VerifyFolderAsync(folder, extension).GetAwaiter().GetResult();
-
-    /// <summary>
-    ///  run some basic checks on a folder to see if it looks ok. 
-    /// </summary>
     Task<List<string>> VerifyFolderAsync(string folder, string extension);
 }

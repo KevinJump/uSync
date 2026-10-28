@@ -52,10 +52,6 @@ public abstract class SyncValueMapperBase
         });
     }
 
-    [Obsolete("Use GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options) instead. will be removed in v19")]
-    public virtual Task<string?> GetImportValueAsync(string value, string editorAlias)
-        => GetImportValueAsync(value, editorAlias, new SyncSerializerOptions());
-
     public virtual Task<string?> GetImportValueAsync(string value, IPropertyType propertyType, SyncSerializerOptions options)
         => Task.FromResult<string?>(value);
 
