@@ -93,7 +93,7 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		if (!type) {
 			return html`<div class="side">
 				<h4 class="side-headline">${headline}</h4>
-				<uui-box><p class="empty">${this.#missingMessage(side)}</p></uui-box>
+				<uui-box class="info"><p class="empty">${this.#missingMessage(side)}</p></uui-box>
 			</div>`;
 		}
 
@@ -109,7 +109,7 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 						? html`<uui-tab-group>
 								${tabs.map((tab) => this.#renderTabButton(tab, tab === active))}
 							</uui-tab-group>`
-						: nothing
+						: html`<div></div>`
 				}
 				${
 					active
@@ -156,7 +156,7 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		}));
 
 		return html`
-			<uui-box>
+			<uui-box class="info">
 				<div slot="headline" class="headline">
 					<umb-icon
 						name=${type.icon.split(' ')[0]}
@@ -164,72 +164,78 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 					<span class=${classMap(changed('name'))}>${type.name}</span>
 					<code class=${classMap(changed('alias'))}>${type.alias}</code>
 				</div>
-				<div class="tags">
-					<uui-tag look="secondary" class=${classMap(changed('isElement'))}>
+				<div class="info-body">
+					<div class="tags">
+						<uui-tag look="secondary" class=${classMap(changed('isElement'))}>
+							${
+								type.isElement
+									? this.localize.termOrDefault(
+											'uSync_previewElementType',
+											'Element type',
+										)
+									: this.localize.termOrDefault(kindKey, kindDefault)
+							}
+						</uui-tag>
 						${
-							type.isElement
-								? this.localize.termOrDefault('uSync_previewElementType', 'Element type')
-								: this.localize.termOrDefault(kindKey, kindDefault)
+							type.allowedAsRoot
+								? html`<uui-tag
+										look="secondary"
+										class=${classMap(changed('allowedAsRoot'))}>
+										${this.localize.termOrDefault('uSync_previewAllowedAtRoot', 'Allowed at root')}
+									</uui-tag>`
+								: nothing
 						}
-					</uui-tag>
+						${
+							type.variesByCulture
+								? html`<uui-tag
+										look="secondary"
+										class=${classMap(changed('variesByCulture'))}>
+										${this.localize.termOrDefault('uSync_previewVariesByCulture', 'Varies by culture')}
+									</uui-tag>`
+								: nothing
+						}
+						${
+							type.variesBySegment
+								? html`<uui-tag
+										look="secondary"
+										class=${classMap(changed('variesBySegment'))}>
+										${this.localize.termOrDefault('uSync_previewVariesBySegment', 'Varies by segment')}
+									</uui-tag>`
+								: nothing
+						}
+					</div>
 					${
-						type.allowedAsRoot
-							? html`<uui-tag
-									look="secondary"
-									class=${classMap(changed('allowedAsRoot'))}>
-									${this.localize.termOrDefault('uSync_previewAllowedAtRoot', 'Allowed at root')}
-								</uui-tag>`
+						type.description
+							? html`<p
+									class=${classMap({ description: true, ...changed('description') })}>
+									${type.description}
+								</p>`
 							: nothing
 					}
 					${
-						type.variesByCulture
-							? html`<uui-tag
-									look="secondary"
-									class=${classMap(changed('variesByCulture'))}>
-									${this.localize.termOrDefault('uSync_previewVariesByCulture', 'Varies by culture')}
-								</uui-tag>`
-							: nothing
-					}
-					${
-						type.variesBySegment
-							? html`<uui-tag
-									look="secondary"
-									class=${classMap(changed('variesBySegment'))}>
-									${this.localize.termOrDefault('uSync_previewVariesBySegment', 'Varies by segment')}
-								</uui-tag>`
+						compositions.length
+							? html`<dl class="meta">
+									<dt>
+										${this.localize.termOrDefault('uSync_previewCompositions', 'Compositions')}
+									</dt>
+									<dd class=${classMap(changed('compositions'))}>
+										${compositions.map(
+											(c) =>
+												html`<uui-tag
+													look="outline"
+													color=${c.isNew ? 'positive' : 'default'}
+													>${c.name}${
+														c.isNew
+															? ` (${this.localize.termOrDefault('uSync_previewNew', 'new')})`
+															: ''
+													}</uui-tag
+												> `,
+										)}
+									</dd>
+								</dl>`
 							: nothing
 					}
 				</div>
-				${
-					type.description
-						? html`<p class=${classMap({ description: true, ...changed('description') })}>
-								${type.description}
-							</p>`
-						: nothing
-				}
-				${
-					compositions.length
-						? html`<dl class="meta">
-								<dt>
-									${this.localize.termOrDefault('uSync_previewCompositions', 'Compositions')}
-								</dt>
-								<dd class=${classMap(changed('compositions'))}>
-									${compositions.map(
-										(c) =>
-											html`<uui-tag
-												look="outline"
-												color=${c.isNew ? 'positive' : 'default'}
-												>${c.name}${
-													c.isNew
-														? ` (${this.localize.termOrDefault('uSync_previewNew', 'new')})`
-														: ''
-												}</uui-tag
-											> `,
-									)}
-								</dd>
-							</dl>`
-						: nothing
-				}
 			</uui-box>
 		`;
 	}
@@ -242,8 +248,10 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 			label=${label}
 			?active=${active}
 			@click=${() => (this._activeTab = tab.name)}>
-			${label}
-			${status ? html`<span class="dot ${status}" title=${status}></span>` : nothing}
+			<span class="tab-label">
+				${label}
+				${status ? html`<span class="dot ${status}" title=${status}></span>` : nothing}
+			</span>
 		</uui-tab>`;
 	}
 
@@ -266,7 +274,13 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		// readonly, which is empty here, so you wouldn't see the editor at all.
 		return html`
 			<umb-property-dataset .value=${[]} inert>
-				${tab.properties.length ? html`<uui-box>${this.#renderProperties(tab.properties)}</uui-box>` : nothing}
+				${
+					tab.properties.length
+						? html`<uui-box
+								>${this.#renderProperties(tab.properties, this.#ownStatus(tab.ids))}</uui-box
+							>`
+						: nothing
+				}
 				${repeat(
 					tab.groups,
 					(group) => group.name,
@@ -282,7 +296,10 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 							</div>
 							${
 								group.properties.length
-									? this.#renderProperties(group.properties)
+									? this.#renderProperties(
+											group.properties,
+											change?.status ?? this.#ownStatus(tab.ids),
+										)
 									: html`<p class="empty">
 											${this.localize.termOrDefault('uSync_previewNoProperties', 'No properties')}
 										</p>`
@@ -294,12 +311,22 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		`;
 	}
 
-	#renderProperties(properties: USyncLayoutProperty[]) {
+	/** the status of a container itself (not its contents) */
+	#ownStatus(ids: string[]) {
+		return ids.map((id) => this.#diff?.containers.get(id)).find(Boolean)?.status;
+	}
+
+	/**
+	 * @param parentStatus when the whole group (or tab) is added or removed, its
+	 * properties are too, so they aren't marked one by one.
+	 */
+	#renderProperties(properties: USyncLayoutProperty[], parentStatus?: string) {
+		const markItems = parentStatus !== 'added' && parentStatus !== 'removed';
 		return repeat(
 			properties,
 			(entry) => entry.property.id,
 			({ property: p, inheritedFrom }) => {
-				const change = this.#diff?.properties.get(p.id);
+				const change = markItems ? this.#diff?.properties.get(p.id) : undefined;
 				const dataType = this.#dataTypes.get(p.dataType.id);
 
 				return html`<div class="property ${change?.status ?? ''}">
@@ -308,7 +335,7 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 						<span>${dataType?.name ?? p.dataType.id}</span>
 						${
 							this.#newDataTypes.has(p.dataType.id)
-								? html`<uui-tag size="s" look="outline"
+								? html`<uui-tag size="s" look="outline" color="positive"
 										>${this.localize.termOrDefault('uSync_previewNewDataType', 'new data type')}</uui-tag
 									>`
 								: nothing
@@ -357,16 +384,47 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 	static styles = css`
 		:host {
 			display: block;
+			container-type: inline-size;
 		}
 
+		/* the two sides share rows (headline, info, tabs, content), so the
+		   tab bars and groups line up even when the info boxes differ. */
 		.sides {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-			align-items: start;
-			gap: var(--uui-size-space-5);
+			grid-template-columns: 1fr 1fr;
+			grid-template-rows: auto auto auto 1fr;
+			gap: var(--uui-size-space-4) var(--uui-size-space-5);
 		}
 
-		.side,
+		.side {
+			display: grid;
+			grid-row: span 4;
+			grid-template-rows: subgrid;
+			align-items: start;
+			min-width: 0;
+		}
+
+		/* info boxes match heights across the sides (but a lone "not here" box doesn't stretch). */
+		.side > .info:not(:last-child) {
+			align-self: stretch;
+		}
+
+		@container (max-width: 760px) {
+			.sides {
+				grid-template-columns: 1fr;
+				grid-template-rows: none;
+				row-gap: var(--uui-size-layout-1);
+			}
+
+			.side {
+				display: flex;
+				flex-direction: column;
+				align-items: stretch;
+				gap: var(--uui-size-space-4);
+				grid-row: auto;
+			}
+		}
+
 		umb-property-dataset {
 			display: flex;
 			flex-direction: column;
@@ -376,12 +434,28 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 
 		.side-headline {
 			margin: 0;
+			font-size: var(--uui-type-small-size);
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			color: var(--uui-color-text-alt);
 		}
 
 		.headline {
 			display: flex;
 			align-items: center;
-			gap: var(--uui-size-space-3);
+			flex-wrap: wrap;
+			gap: var(--uui-size-space-2) var(--uui-size-space-3);
+		}
+
+		.headline code {
+			font-size: var(--uui-type-small-size);
+			color: var(--uui-color-text-alt);
+		}
+
+		.info-body {
+			display: flex;
+			flex-direction: column;
+			gap: var(--uui-size-space-4);
 		}
 
 		.tags {
@@ -391,14 +465,15 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		}
 
 		.description {
-			margin: var(--uui-size-space-3) 0 0;
+			margin: 0;
 		}
 
 		.meta {
 			display: grid;
 			grid-template-columns: max-content 1fr;
+			align-items: center;
 			gap: var(--uui-size-space-2) var(--uui-size-space-5);
-			margin: var(--uui-size-space-3) 0 0;
+			margin: 0;
 		}
 
 		.meta dt {
@@ -406,13 +481,18 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		}
 
 		.meta dd {
+			display: flex;
+			flex-wrap: wrap;
+			gap: var(--uui-size-space-2);
 			margin: 0;
 		}
 
+		/* a changed field gets a soft highlight, spread with a shadow so the text doesn't move. */
 		.changed:not(.property):not(uui-box) {
-			outline: 2px solid var(--uui-color-warning);
-			outline-offset: 2px;
+			background: color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
 			border-radius: var(--uui-border-radius);
+			box-shadow: 0 0 0 var(--uui-size-space-1)
+				color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
 		}
 
 		uui-tab-group {
@@ -420,12 +500,18 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 			border-bottom: 1px solid var(--uui-color-border);
 		}
 
+		.tab-label {
+			display: inline-flex;
+			align-items: center;
+			gap: var(--uui-size-space-2);
+			white-space: nowrap;
+		}
+
 		.dot {
 			display: inline-block;
 			width: 8px;
 			height: 8px;
 			border-radius: 50%;
-			margin-left: var(--uui-size-space-1);
 		}
 
 		.dot.added {
@@ -440,36 +526,69 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 			background: var(--uui-color-warning);
 		}
 
-		uui-box.added,
-		.property.added {
+		uui-box.added {
 			border-left: 3px solid var(--uui-color-positive);
 		}
 
-		uui-box.removed,
-		.property.removed {
+		uui-box.removed {
 			border-left: 3px solid var(--uui-color-danger);
 		}
 
-		uui-box.changed,
-		.property.changed {
+		uui-box.changed {
 			border-left: 3px solid var(--uui-color-warning);
 		}
 
+		/* marked with an inset bar rather than a border, so the content doesn't shift. */
+		.property.added {
+			box-shadow: inset 3px 0 0 var(--uui-color-positive);
+			background: color-mix(in srgb, var(--uui-color-positive) 6%, transparent);
+		}
+
+		.property.removed {
+			box-shadow: inset 3px 0 0 var(--uui-color-danger);
+			background: color-mix(in srgb, var(--uui-color-danger) 6%, transparent);
+		}
+
+		.property.changed {
+			box-shadow: inset 3px 0 0 var(--uui-color-warning);
+			background: color-mix(in srgb, var(--uui-color-warning) 10%, transparent);
+		}
+
+		/* properties run edge to edge in their box, like the backoffice editor. */
 		.property {
-			padding: var(--uui-size-space-2) var(--uui-size-space-3);
+			padding: var(--uui-size-space-4) var(--uui-size-space-5) 0;
+			margin: 0 calc(-1 * var(--uui-size-space-5));
+		}
+
+		.property:first-child,
+		.headline + .property {
+			margin-top: calc(-1 * var(--uui-size-space-5));
+		}
+
+		.property:last-child {
+			margin-bottom: calc(-1 * var(--uui-size-space-5));
 		}
 
 		.property + .property {
 			border-top: 1px solid var(--uui-color-divider);
 		}
 
+		/* umb-property pads itself for a full workspace, tighten it up here. */
+		umb-property {
+			--uui-size-layout-1: var(--uui-size-space-4);
+		}
+
 		.property-meta {
 			display: flex;
 			flex-wrap: wrap;
 			align-items: center;
-			gap: var(--uui-size-space-3);
-			font-size: 12px;
+			gap: var(--uui-size-space-2) var(--uui-size-space-3);
+			font-size: var(--uui-type-small-size);
 			color: var(--uui-color-text-alt);
+		}
+
+		.property-meta code {
+			color: var(--uui-color-text);
 		}
 
 		.inherited {

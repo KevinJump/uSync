@@ -81,7 +81,7 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 							'The incoming item could not be built for the preview',
 						);
 
-		return html`<uui-box><p class="empty">${message}</p></uui-box>`;
+		return html`<uui-box class="info"><p class="empty">${message}</p></uui-box>`;
 	}
 
 	#renderInfo(dataType: DataTypeResponseModel, other?: DataTypeResponseModel) {
@@ -89,7 +89,7 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 			other !== undefined && other[field] !== dataType[field];
 
 		return html`
-			<uui-box>
+			<uui-box class="info">
 				<div slot="headline" class="headline">
 					<umb-icon name="icon-autofill"></umb-icon>
 					<span class=${classMap({ changed: changed('name') })}>${dataType.name}</span>
@@ -157,7 +157,7 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 						: html`<table>
 								${values.map((value) => {
 									const status = configStatus(value.alias, value.value, other, side);
-									return html`<tr class=${status}>
+									return html`<tr class="row-${status}">
 										<th><code>${value.alias}</code></th>
 										<td><pre>${formatConfigValue(value.value)}</pre></td>
 									</tr>`;
@@ -171,23 +171,50 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 	static styles = css`
 		:host {
 			display: block;
+			container-type: inline-size;
 		}
 
+		/* the two sides share rows (headline, info, editor, config), so the
+		   boxes line up across the sides. */
 		.sides {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-			gap: var(--uui-size-space-5);
+			grid-template-columns: 1fr 1fr;
+			grid-template-rows: auto auto auto 1fr;
+			gap: var(--uui-size-space-4) var(--uui-size-space-5);
 		}
 
 		.side {
-			display: flex;
-			flex-direction: column;
-			gap: var(--uui-size-space-4);
+			display: grid;
+			grid-row: span 4;
+			grid-template-rows: subgrid;
 			min-width: 0;
+		}
+
+		.side > :last-child {
+			align-self: start;
+		}
+
+		@container (max-width: 760px) {
+			.sides {
+				grid-template-columns: 1fr;
+				grid-template-rows: none;
+				row-gap: var(--uui-size-layout-1);
+			}
+
+			.side {
+				display: flex;
+				flex-direction: column;
+				gap: var(--uui-size-space-4);
+				grid-row: auto;
+			}
 		}
 
 		.side-headline {
 			margin: 0;
+			font-size: var(--uui-type-small-size);
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			color: var(--uui-color-text-alt);
 		}
 
 		.headline {
@@ -199,7 +226,8 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 		.meta {
 			display: grid;
 			grid-template-columns: max-content 1fr;
-			gap: var(--uui-size-space-2) var(--uui-size-space-5);
+			align-items: baseline;
+			gap: var(--uui-size-space-3) var(--uui-size-space-5);
 			margin: 0;
 		}
 
@@ -212,16 +240,23 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 			overflow-wrap: anywhere;
 		}
 
+		/* a changed field gets a soft highlight, spread with a shadow so the text doesn't move. */
 		.changed {
-			background-color: var(--uui-color-warning);
-			color: var(--uui-color-warning-contrast);
-			padding: 0 var(--uui-size-space-1);
+			background: color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
 			border-radius: var(--uui-border-radius);
+			box-shadow: 0 0 0 var(--uui-size-space-1)
+				color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
+		}
+
+		/* umb-property pads itself for a full workspace, tighten it up here. */
+		umb-property {
+			--uui-size-layout-1: var(--uui-size-space-2);
 		}
 
 		table {
 			width: 100%;
 			border-collapse: collapse;
+			margin: calc(-1 * var(--uui-size-space-2)) 0;
 		}
 
 		tr + tr {
@@ -231,34 +266,43 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 		th,
 		td {
 			text-align: left;
-			vertical-align: top;
-			padding: var(--uui-size-space-2);
+			vertical-align: baseline;
+			padding: var(--uui-size-space-3) var(--uui-size-space-3);
 		}
 
+		/* the alias column is as wide as the longest alias (up to 40%), so values sit beside their names. */
 		th {
-			width: 30%;
-			overflow-wrap: anywhere;
+			width: 1%;
+			max-width: 40%;
+			white-space: nowrap;
+			font-weight: 700;
+		}
+
+		th code,
+		td pre {
+			font-size: var(--uui-type-small-size);
 		}
 
 		td pre {
 			margin: 0;
 			white-space: pre-wrap;
 			word-break: break-word;
-			font-size: 12px;
 		}
 
-		tr.changed {
-			border-left: 3px solid var(--uui-color-warning);
-			background: none;
-			color: inherit;
+		/* marked with an inset bar rather than a border, so the content doesn't shift. */
+		tr.row-changed {
+			box-shadow: inset 3px 0 0 var(--uui-color-warning);
+			background: color-mix(in srgb, var(--uui-color-warning) 10%, transparent);
 		}
 
-		tr.added {
-			border-left: 3px solid var(--uui-color-positive);
+		tr.row-added {
+			box-shadow: inset 3px 0 0 var(--uui-color-positive);
+			background: color-mix(in srgb, var(--uui-color-positive) 6%, transparent);
 		}
 
-		tr.removed {
-			border-left: 3px solid var(--uui-color-danger);
+		tr.row-removed {
+			box-shadow: inset 3px 0 0 var(--uui-color-danger);
+			background: color-mix(in srgb, var(--uui-color-danger) 6%, transparent);
 		}
 
 		.empty {
