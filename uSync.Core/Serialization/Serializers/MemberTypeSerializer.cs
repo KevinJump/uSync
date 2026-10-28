@@ -132,6 +132,8 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         details.AddRange(DeserializeTabs(item, node));
         details.AddRange(await DeserializePropertiesAsync(item, node, options));
 
+        details.AddRange(await DeserializeCompositionsAsync(item, node));
+
         CleanTabs(item, node, options);
 
         // memberTypeService.Save(item);
@@ -141,8 +143,12 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
 
     public override async Task<SyncAttempt<IMemberType>> DeserializeSecondPassAsync(IMemberType item, XElement node, SyncSerializerOptions options)
     {
+        var details = new List<uSyncChange>();
+
+        details.AddRange(await DeserializeCompositionsAsync(item, node));
+
         CleanTabAliases(item);
-        var details = CleanTabs(item, node, options).ToList();
+        details.AddRange(CleanTabs(item, node, options));
 
         SetSafeAliasValue(item, node, false);
 
