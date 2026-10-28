@@ -1,14 +1,14 @@
 import { expect } from '@playwright/test';
-import { ConstantHelper, test } from '@umbraco/playwright-testhelpers';
+import { test } from '@umbraco/playwright-testhelpers';
 
 test.describe('uSync dashboard', () => {
 	test.beforeEach(async ({ umbracoUi }) => {
 		await umbracoUi.goToBackOffice();
-		await umbracoUi.content.goToSection(ConstantHelper.sections.settings);
+		await umbracoUi.content.goToSection('Synchronisation');
 		await umbracoUi.page.getByRole('link', { name: 'uSync', exact: true }).click();
 	});
 
-	test('opens from the settings menu', { tag: '@smoke' }, async ({ umbracoUi }) => {
+	test('opens from the synchronisation section', { tag: '@smoke' }, async ({ umbracoUi }) => {
 		const page = umbracoUi.page;
 
 		await expect(page.locator('usync-workspace-root')).toBeVisible();

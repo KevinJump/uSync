@@ -24,7 +24,8 @@ public class FirstBootMigrationPlan : MigrationPlan
     {
         From(string.Empty)
                 .To<FirstBootMigration>("FirstBoot-Migration")
-                .To<LogViewerMigration>("LogViewer-Migration");
+                .To<LogViewerMigration>("LogViewer-Migration")
+                .To<SyncSectionMigration>("Section-Migration");
     }
 }
 
