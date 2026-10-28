@@ -89,7 +89,11 @@ export const getCheckLegacy = <ThrowOnError extends boolean = false>(options?: O
 export const postCopyLegacy = <ThrowOnError extends boolean = false>(options?: Options<PostCopyLegacyData, ThrowOnError>): RequestResult<PostCopyLegacyResponses, PostCopyLegacyErrors, ThrowOnError> => (options?.client ?? client).post<PostCopyLegacyResponses, PostCopyLegacyErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/umbraco/usync/api/v1/CopyLegacy',
-    ...options
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
 });
 
 export const postIgnoreLegacy = <ThrowOnError extends boolean = false>(options?: Options<PostIgnoreLegacyData, ThrowOnError>): RequestResult<PostIgnoreLegacyResponses, PostIgnoreLegacyErrors, ThrowOnError> => (options?.client ?? client).post<PostIgnoreLegacyResponses, PostIgnoreLegacyErrors, ThrowOnError>({

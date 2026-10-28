@@ -136,8 +136,27 @@ export type SyncLegacyCheckResponse = {
     hasLegacy: boolean;
     legacyFolder?: null | string;
     legacyTypes: Array<string>;
+    migrations: Array<SyncLegacyMigrationResponse>;
     latestFolder: string;
     latestVersion: string;
+};
+
+export type SyncLegacyMigrationResponse = {
+    id: string;
+    name: string;
+    description: string;
+    notice?: null | string;
+    /**
+     * number of data types the migration will change.
+     */
+    count: number;
+};
+
+export type SyncLegacyCopyRequest = {
+    /**
+     * ids of the migrations to run as the folder is copied.
+     */
+    migrations: Array<string>;
 };
 
 export type SyncOperationStatusResponse = {
@@ -499,7 +518,7 @@ export type GetCheckLegacyResponses = {
 export type GetCheckLegacyResponse = GetCheckLegacyResponses[keyof GetCheckLegacyResponses];
 
 export type PostCopyLegacyData = {
-    body?: never;
+    body?: SyncLegacyCopyRequest;
     path?: never;
     query?: never;
     url: '/umbraco/usync/api/v1/CopyLegacy';

@@ -257,8 +257,8 @@ export class uSyncWorkspaceContext
 		return data ?? false;
 	}
 
-	async copyLegacy() {
-		const { data } = await this.#repository.copyLegacy();
+	async copyLegacy(migrations: Array<string> = []) {
+		const { data } = await this.#repository.copyLegacy(migrations);
 		return data ?? false;
 	}
 

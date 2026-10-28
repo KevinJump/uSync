@@ -121,10 +121,11 @@ export class uSyncActionRepository extends UmbControllerBase {
 
 	/**
 	 * copies the legacy folder to the new v14 folder.
+	 * @param migrations ids of the migrations to run on the files as they are copied.
 	 * @returns true if the legacy folder is copied to the new folder.
 	 */
-	async copyLegacy() {
-		return await this.#migrartionDataSource.copyLegacy();
+	async copyLegacy(migrations: Array<string> = []) {
+		return await this.#migrartionDataSource.copyLegacy(migrations);
 	}
 
 	async downloadFile() {
