@@ -86,7 +86,7 @@ public class SyncLegacyCheckResponse
 
     public SyncLegacyMigrationResponse[] Migrations { get; set; } = [];
 
-    public string LatestFolder { get; set; } = $"uSync/{uSync.BackOffice.uSync.Version.Major}";
+    public string LatestFolder { get; set; } = $"uSync/v{uSync.BackOffice.uSync.Version.Major}";
     public string LatestVersion { get; set; } = uSync.BackOffice.uSync.Version.Major.ToString();
 
 }
