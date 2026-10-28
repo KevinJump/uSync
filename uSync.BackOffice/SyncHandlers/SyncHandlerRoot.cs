@@ -1,6 +1,4 @@
-﻿using Lucene.Net.Util;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 using Org.BouncyCastle.Tls;
 

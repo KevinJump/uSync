@@ -1,6 +1,4 @@
-﻿using Lucene.Net.Analysis.Cjk;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 using Org.BouncyCastle.Security.Certificates;
 

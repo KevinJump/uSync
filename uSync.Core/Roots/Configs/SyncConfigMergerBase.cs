@@ -1,5 +1,4 @@
-﻿using Json.More;
-using Jumoo.Json;
+﻿using Jumoo.Json;
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -109,7 +108,7 @@ internal abstract class SyncConfigMergerBase
             targetOnly.Add(removedItem.Value);
         }
 
-        return targetOnly.ToJsonArray();
+        return new JsonArray([.. targetOnly.Select(x => x.DeepClone())]);
     }
 
     public JsonObject GetJsonPropertyDifferences(JsonObject sourceObject, JsonObject targetObject, string propertyKey)
