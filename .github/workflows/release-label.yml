@@ -1,0 +1,115 @@
+name: Release labels
+
+# Keeps a "release/x.y.z" label on the PRs that make up each release, so a release's
+# PRs can be listed with one label search. Nothing here needs editing between releases.
+#
+# - When a PR is opened against a "v{major}/main" branch it gets a provisional label:
+#   the next patch after that major's latest stable tag ("{major}.0.0" before the
+#   first release).
+# - When a version tag is pushed, every PR merged since the previous tag on that line
+#   is relabelled with the real version. This corrects the provisional label when a
+#   release turns out to be a minor rather than a patch.
+#
+# pull_request_target runs this file from the base branch and never checks out the
+# PR's code; the only thing it does to a PR is change its labels.
+on:
+  pull_request_target:
+    types: [ opened, reopened, edited ]
+    branches: [ "*/main" ]
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  provisional:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      BASE: ${{ github.event.pull_request.base.ref }}
+    steps:
+      - name: Add the expected release label
+        run: |
+          major="${BASE%%/*}"
+          major="${major#v}"
+          if ! [[ "$major" =~ ^[0-9]+$ ]]; then
+            echo "$BASE is not a v{major}/main branch, nothing to label."
+            exit 0
+          fi
+
+          latest=$(gh api "repos/$GH_REPO/git/matching-refs/tags/v$major." --jq '.[].ref' \
+            | sed 's#refs/tags/v##' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
+
+          if [ -z "$latest" ]; then
+            next="$major.0.0"
+          else
+            IFS=. read -r ma mi pa <<< "$latest"
+            next="$ma.$mi.$((pa + 1))"
+          fi
+
+          label="release/$next"
+          gh label create "$label" --description "uSync $next release" --color 1D76DB 2>/dev/null || true
+
+          # swap out any other release label, e.g. when a PR is retargeted.
+          for old in $(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name | select(startswith("release/"))'); do
+            if [ "$old" != "$label" ]; then
+              gh pr edit "$PR_NUMBER" --remove-label "$old"
+            fi
+          done
+          gh pr edit "$PR_NUMBER" --add-label "$label"
+
+  released:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Label the PRs in this release
+        run: |
+          version="${TAG#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "$TAG is not a stable release tag, nothing to label."
+            exit 0
+          fi
+          major="${version%%.*}"
+
+          previous=$(git tag -l "v$major.*" | sed 's#^v##' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -V | awk -v v="$version" '$0 == v { print prev; exit } { prev = $0 }')
+
+          if [ -n "$previous" ]; then
+            range="v$previous..$TAG"
+          else
+            range="$TAG"
+          fi
+
+          label="release/$version"
+          gh label create "$label" --description "uSync $version release" --color 1D76DB 2>/dev/null || true
+
+          # only PRs that targeted this line, older lines' PRs reachable through
+          # the branch point (or merged forward) keep their own labels.
+          for pr in $(git log --first-parent --merges --format=%s "$range" \
+            | sed -nE 's/^Merge pull request #([0-9]+) .*/\1/p'); do
+            if [ "$(gh pr view "$pr" --json baseRefName --jq .baseRefName)" != "v$major/main" ]; then
+              continue
+            fi
+            for old in $(gh pr view "$pr" --json labels --jq '.labels[].name | select(startswith("release/"))'); do
+              if [ "$old" != "$label" ]; then
+                gh pr edit "$pr" --remove-label "$old"
+              fi
+            done
+            gh pr edit "$pr" --add-label "$label"
+            echo "labelled #$pr $label"
+          done
