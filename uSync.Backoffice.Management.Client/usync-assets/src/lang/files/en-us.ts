@@ -123,7 +123,7 @@ export default {
 			'The sync file format version does not match the expected version. This may indicate a potential compatibility issue.',
 
 		legacyBanner:
-			'This site contains files from a previous version of uSync, view the details in the legacy tab.',
+			'This site contains files from a previous version of uSync, view the details in the Migrate tab.',
 
 		legacyCopyTitle: 'Overwrite v%0% files',
 		legacyCopyContent:
