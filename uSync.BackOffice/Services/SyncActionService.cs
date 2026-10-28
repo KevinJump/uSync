@@ -105,7 +105,8 @@ internal class SyncActionService : ISyncActionService
             HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
             Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders()),
             PauseDuringImport = true,
-            Flags = options.GetImportFlags()
+            Flags = options.GetImportFlags(),
+            UserId = options.UserId
         };
 
         var actions = (await _uSyncService.ImportHandlerAsync(options.Handler, importOptions)).ToList();

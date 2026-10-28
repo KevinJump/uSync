@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
@@ -316,6 +317,17 @@ public class uSyncSettings
     /// </summary>
     [DefaultValue(false)]
     public bool IncludeWindowsReservedNames { get; set; } = false;
+
+    /// <summary>
+    ///  Key of the backoffice user that imports run as when no backoffice user
+    ///  started them (import at startup, first boot, triggered imports).
+    ///  When blank, those imports run as the superuser.
+    /// </summary>
+    /// <remarks>
+    ///  Content and elements are saved and published as this user, so Umbraco's
+    ///  checks for that user (such as the invariant-for-variant permission) apply.
+    /// </remarks>
+    public Guid? BackgroundUser { get; set; }
 }
 
 /// <summary>

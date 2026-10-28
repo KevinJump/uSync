@@ -45,6 +45,14 @@ public class SyncActionOptions
     /// </summary>
     public string[] Folders { get; set; } = [];
 
+    /// <summary>
+    ///  id of the backoffice user who started the action.
+    /// </summary>
+    /// <remarks>
+    ///  left as <c>Constants.Security.UnknownUserId</c>, uSync uses the current backoffice
+    ///  user, then the configured background user, then the superuser.
+    /// </remarks>
+    public int UserId { get; set; } = Umbraco.Cms.Core.Constants.Security.UnknownUserId;
 }
 
 internal static class SyncActionOptionsExtensions

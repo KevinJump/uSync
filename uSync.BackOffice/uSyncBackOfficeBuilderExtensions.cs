@@ -80,6 +80,7 @@ public static class uSyncBackOfficeBuilderExtensions
             .Add(() => builder.TypeLoader.GetTypes<ISyncHandler>());
 
         builder.Services.AddSingleton<ISyncHandlerFactory, SyncHandlerFactory>();
+        builder.Services.AddSingleton<ISyncUserService, SyncUserService>();
         builder.Services.AddSingleton<ISyncService, SyncService>();
         builder.Services.AddSingleton<CacheLifecycleManager>();
 

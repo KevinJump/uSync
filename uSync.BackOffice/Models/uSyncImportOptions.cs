@@ -54,7 +54,11 @@ public class uSyncImportOptions
     /// <summary>
     ///  the user doing the import. 
     /// </summary>
-    public int UserId { get; set; } = -1;
+    /// <remarks>
+    ///  left as <c>Constants.Security.UnknownUserId</c>, uSync uses the current backoffice
+    ///  user, then the configured background user, then the superuser.
+    /// </remarks>
+    public int UserId { get; set; } = Umbraco.Cms.Core.Constants.Security.UnknownUserId;
 }
 
 /// <summary>

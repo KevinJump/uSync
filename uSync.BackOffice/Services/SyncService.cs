@@ -47,6 +47,7 @@ public partial class SyncService : ISyncService
     private readonly ISyncFileService _syncFileService;
     private readonly ISyncEventService _mutexService;
     private readonly ISyncVersionFileService _syncVersionFileService;
+    private readonly ISyncUserService _syncUserService;
 
     private readonly ICoreScopeProvider _scopeProvider;
 
@@ -71,7 +72,8 @@ public partial class SyncService : ISyncService
         ILoggerFactory loggerFactory,
         IBackgroundTaskQueue backgroundTaskQueue,
         DistributedCache distributedCache,
-        ISyncVersionFileService syncVersionFileService)
+        ISyncVersionFileService syncVersionFileService,
+        ISyncUserService syncUserService)
     {
         this._logger = logger;
 
@@ -92,6 +94,7 @@ public partial class SyncService : ISyncService
         _backgroundTaskQueue = backgroundTaskQueue;
         _distributedCache = distributedCache;
         _syncVersionFileService = syncVersionFileService;
+        _syncUserService = syncUserService;
     }
 
     /// <inheritdoc/>>
@@ -184,7 +187,7 @@ public partial class SyncService : ISyncService
                 Callbacks = callbacks,
                 Folders = folders,
                 HandlerSet = handlerOptions.Set,
-                UserId = handlerOptions.UserId,
+                UserId = await _syncUserService.GetImportUserIdAsync(handlerOptions.UserId),
             };
 
             foreach (var configuredHandler in handlers)
@@ -286,7 +289,13 @@ public partial class SyncService : ISyncService
         var node = await handlerConfig.Handler.TryFindItemNodeAsync(key);
         if (node is null) return uSyncAction.Fail("Unknown", handlerAlias, handlerConfig.Handler.ItemType, ChangeType.Fail , $"Could not find item with key {key}", new FileNotFoundException(key.ToString()));
 
-        var result = await handlerConfig.Handler.ImportElementAsync(node, $"Single Item {key}", handlerConfig.Settings, new uSyncImportOptions { Flags = SerializerFlags.Force });
+        var options = new uSyncImportOptions
+        {
+            Flags = SerializerFlags.Force,
+            UserId = await _syncUserService.GetImportUserIdAsync(Umbraco.Cms.Core.Constants.Security.UnknownUserId)
+        };
+
+        var result = await handlerConfig.Handler.ImportElementAsync(node, $"Single Item {key}", handlerConfig.Settings, options);
         return result.FirstOrDefault();
     }
 
@@ -443,7 +452,6 @@ public partial class SyncService : ISyncService
 
             var syncHandlerOptions = new SyncHandlerOptions
             {
-                UserId = -1,
                 Set = _uSyncConfig.Settings.DefaultSet,
                 Action = HandlerActions.Import,
             };

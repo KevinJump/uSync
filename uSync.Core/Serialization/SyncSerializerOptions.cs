@@ -38,7 +38,10 @@ public class SyncSerializerOptions
     public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, object?> settings, int userId)
         : this(flags, settings)
     {
-        UserId = userId;
+        // an unknown user (nobody resolved one) falls back to the superuser.
+        UserId = userId == Umbraco.Cms.Core.Constants.Security.UnknownUserId
+            ? Umbraco.Cms.Core.Constants.Security.SuperUserId
+            : userId;
     }
 
     /// <summary>

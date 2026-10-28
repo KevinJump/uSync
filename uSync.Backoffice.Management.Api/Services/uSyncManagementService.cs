@@ -426,6 +426,9 @@ internal class uSyncManagementService : ISyncManagementService
             Group = actionRequest.Options?.Group ?? "all",
             Force = actionRequest.Options?.Force ?? false,
             Actions = [],
+            // in background mode there is no request (so no backoffice user)
+            // by the time this runs, so the user is passed through explicitly.
+            UserId = user?.Id ?? Umbraco.Cms.Core.Constants.Security.UnknownUserId,
         };
 
         if (actionRequest.StepNumber >= handlers.Count)

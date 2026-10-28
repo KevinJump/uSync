@@ -71,6 +71,8 @@ public partial class SyncService
                 if (handlerPair == null) return [];
                 var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
 
+                options.UserId = await _syncUserService.GetImportUserIdAsync(options.UserId);
+
                 // _logger.LogDebug("> Import Handler {handler}", handlerAlias);
 
                 using var scope = _scopeProvider.CreateNotificationScope(

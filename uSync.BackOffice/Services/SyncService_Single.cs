@@ -91,6 +91,7 @@ public partial class SyncService
 
                 var range = options.ProgressMax - options.ProgressMin;
 
+                options.UserId = await _syncUserService.GetImportUserIdAsync(options.UserId);
                 SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
                 HandlerConfigPair? handlerPair = null;
@@ -173,6 +174,7 @@ public partial class SyncService
         {
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
+                options.UserId = await _syncUserService.GetImportUserIdAsync(options.UserId);
                 SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
                 var secondPassActions = new List<uSyncAction>();
@@ -247,6 +249,7 @@ public partial class SyncService
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
 
+                options.UserId = await _syncUserService.GetImportUserIdAsync(options.UserId);
                 SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
                 var aliases = actions.Select(x => x.HandlerAlias).Distinct();
