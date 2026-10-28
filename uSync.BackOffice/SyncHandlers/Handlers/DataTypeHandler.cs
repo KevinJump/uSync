@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using System.Xml.XPath;
 
 using Umbraco.Cms.Core;
@@ -88,4 +89,8 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler
     /// </summary>
     protected override string GetItemFileName(IDataType item)
         => GetItemAlias(item).ToSafeAlias(shortStringHelper);
+
+    /// <inheritdoc/>
+    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings)
+        => BuildPreviewAsync(node, settings, SerializerFlags.None);
 }

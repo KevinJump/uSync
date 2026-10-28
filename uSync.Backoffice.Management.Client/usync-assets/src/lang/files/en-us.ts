@@ -30,6 +30,20 @@ export default {
 		detailHeadline: 'Detected Changes',
 		detailHeader: 'Things that are different',
 
+		previewTab: 'Preview',
+		changesTab: 'Changes',
+		previewCurrent: 'Current (this site)',
+		previewIncoming: 'Incoming (uSync files)',
+		previewNotInSite: 'This item does not exist in the site yet',
+		previewDeleted: 'This item will be deleted or renamed by the import',
+		previewFailed: 'The incoming item could not be built for the preview',
+		previewEditor: 'Editor preview',
+		previewEditorDesc: 'How this data type looks to editors',
+		previewConfiguration: 'Configuration',
+		previewNoConfiguration: 'No configuration',
+		previewPropertyEditor: 'Property editor',
+		previewPropertyEditorUi: 'Property editor UI',
+
 		runningInBackground:
 			'uSync is running this process in background, if you navigate away from this page it will continue to run.',
 

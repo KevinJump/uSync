@@ -64,7 +64,10 @@ public class SyncSerializerOptions
     /// </summary>
     public bool Force => Flags.HasFlag(SerializerFlags.Force);
 
-    // public bool DoNotSave => Flags.HasFlag(SerializerFlags.DoNotSave);
+    /// <summary>
+    ///  don't save anything - the item is built in memory only (dry run / preview)
+    /// </summary>
+    public bool DoNotSave => Flags.HasFlag(SerializerFlags.DoNotSave);
 
     public bool FailOnMissingParent => Flags.HasFlag(SerializerFlags.FailMissingParent);
 

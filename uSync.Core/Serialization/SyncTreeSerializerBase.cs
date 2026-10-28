@@ -31,6 +31,16 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
 
     protected abstract Task<Attempt<TObject?>> FindOrCreateAsync(XElement node);
 
+    /// <summary>
+    ///  find or create an item, taking the serializer options into account.
+    /// </summary>
+    /// <remarks>
+    ///  when the options have the DoNotSave flag, implementations should not 
+    ///  create or save anything in Umbraco (e.g. folders) while finding the item.
+    /// </remarks>
+    protected virtual Task<Attempt<TObject?>> FindOrCreateAsync(XElement node, SyncSerializerOptions options)
+        => FindOrCreateAsync(node);
+
     protected async Task<TObject?> FindItemAsync(Guid key, string alias)
     {
         var item = await FindItemAsync(key);

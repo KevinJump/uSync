@@ -32,6 +32,21 @@ export enum ChangeType {
     REMOVED = 'Removed'
 }
 
+export type DataTypePropertyPresentationModel = {
+    alias: string;
+    value?: unknown;
+};
+
+export type DataTypeResponseModel = {
+    name: string;
+    editorAlias: string;
+    editorUiAlias: string;
+    values: Array<DataTypePropertyPresentationModel>;
+    id: string;
+    isDeletable: boolean;
+    canIgnoreStartNodes: boolean;
+};
+
 export type HandlerSettings = {
     enabled: boolean;
     actions: Array<string>;
@@ -108,6 +123,19 @@ export type SyncHandlerSummary = {
     status: HandlerStatus;
     changes: number;
     inError: boolean;
+};
+
+export type SyncItemPreviewResponse = {
+    key: string;
+    handler: string;
+    itemType: string;
+    entityType: string;
+    isDelete: boolean;
+    success: boolean;
+    message?: string | null;
+    currentDataType?: DataTypeResponseModel | null;
+    incomingDataType?: DataTypeResponseModel | null;
+    details: Array<USyncChange>;
 };
 
 export type SyncLegacyCheckResponse = {
@@ -381,6 +409,36 @@ export type PerformActionResponses = {
 };
 
 export type PerformActionResponse2 = PerformActionResponses[keyof PerformActionResponses];
+
+export type GetPreviewData = {
+    body?: never;
+    path?: never;
+    query?: {
+        handler?: string;
+        key?: string;
+    };
+    url: '/umbraco/usync/api/v1/Preview';
+};
+
+export type GetPreviewErrors = {
+    /**
+     * The resource is protected and requires an authentication token
+     */
+    401: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+};
+
+export type GetPreviewResponses = {
+    /**
+     * OK
+     */
+    200: SyncItemPreviewResponse;
+};
+
+export type GetPreviewResponse = GetPreviewResponses[keyof GetPreviewResponses];
 
 export type ProcessUploadData = {
     body?: never;

@@ -166,4 +166,14 @@ public interface ISyncHandler
     /// <param name="key"></param>
     /// <returns></returns>
     Task<XElement?> TryFindItemNodeAsync(Guid key) => Task.FromResult<XElement?>(null);
+
+    /// <summary>
+    ///  build the current and incoming versions of an item without saving anything.
+    /// </summary>
+    /// <remarks>
+    ///  returns null when the handler doesn't support previews. Callers should run this 
+    ///  inside a scope that is never completed, so nothing can be written to the database.
+    /// </remarks>
+    Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings)
+        => Task.FromResult<SyncItemPreview?>(null);
 }

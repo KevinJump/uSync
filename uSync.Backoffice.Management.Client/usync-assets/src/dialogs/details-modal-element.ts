@@ -11,10 +11,15 @@ import {
 } from '@umbraco-cms/backoffice/external/lit';
 import {
 	USYNC_IMPORT_SINGLE_MODAL,
+	uSyncActionRepository,
 	uSyncDetailsModalData,
 	uSyncDetailsModalValue,
+	type SyncItemPreviewResponse,
 } from '@jumoo/uSync';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
+import '../components/usync-data-type-preview.js';
+
+type DetailsTab = 'changes' | 'preview';
 
 @customElement('usync-details-modal')
 export class uSyncDetailsModalElement extends UmbModalBaseElement<
@@ -24,12 +29,37 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 	@state()
 	importState: UUIButtonState;
 
+	@state()
+	private _preview?: SyncItemPreviewResponse;
+
+	@state()
+	private _tab: DetailsTab = 'changes';
+
+	#repository = new uSyncActionRepository(this);
+
 	constructor() {
 		super();
 		// this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
 		// 	if (!_instance) return;
 		// 	this.#actionContext = _instance;
 		// });
+	}
+
+	connectedCallback() {
+		super.connectedCallback();
+		this.#loadPreview();
+	}
+
+	async #loadPreview() {
+		const item = this.data?.item;
+		if (!item?.handler || !item.key) return;
+
+		// only some handlers support previews, the rest return a 404
+		// and the modal stays as it was (just the changes list).
+		const { data } = await this.#repository.getPreview(item.handler, item.key);
+		if (data?.entityType) {
+			this._preview = data;
+		}
 	}
 
 	async #onImport(e: Event) {
@@ -65,9 +95,14 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 						</div>
 						<div slot="header-actions">${this.renderActions()}</div>
 					</uui-box>
-					<uui-box style="--uui-box-default-padding: 0;">
-						<usync-change-view .item=${this.data?.item}></usync-change-view>
-					</uui-box>
+					${this.renderTabs()}
+					${
+						this._tab === 'preview' && this._preview
+							? this.renderPreview(this._preview)
+							: html`<uui-box style="--uui-box-default-padding: 0;">
+									<usync-change-view .item=${this.data?.item}></usync-change-view>
+								</uui-box>`
+					}
 				</div>
 				<div slot="actions">
 					<uui-button
@@ -77,6 +112,31 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 				</div>
 			</umb-body-layout>
 		`;
+	}
+
+	renderTabs() {
+		if (!this._preview) return nothing;
+
+		return html`<uui-tab-group>
+			<uui-tab
+				.label=${this.localize.termOrDefault('uSync_changesTab', 'Changes')}
+				?active=${this._tab === 'changes'}
+				@click=${() => (this._tab = 'changes')}></uui-tab>
+			<uui-tab
+				.label=${this.localize.termOrDefault('uSync_previewTab', 'Preview')}
+				?active=${this._tab === 'preview'}
+				@click=${() => (this._tab = 'preview')}></uui-tab>
+		</uui-tab-group>`;
+	}
+
+	renderPreview(preview: SyncItemPreviewResponse) {
+		switch (preview.entityType) {
+			case 'data-type':
+				return html`<usync-data-type-preview
+					.preview=${preview}></usync-data-type-preview>`;
+			default:
+				return nothing;
+		}
 	}
 
 	renderActions() {

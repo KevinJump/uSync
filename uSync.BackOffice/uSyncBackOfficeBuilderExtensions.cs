@@ -78,6 +78,7 @@ public static class uSyncBackOfficeBuilderExtensions
 
         builder.Services.AddSingleton<ISyncHandlerFactory, SyncHandlerFactory>();
         builder.Services.AddSingleton<ISyncService, SyncService>();
+        builder.Services.AddSingleton<ISyncPreviewService, SyncPreviewService>();
         builder.Services.AddSingleton<CacheLifecycleManager>();
 
         // first boot should happen before any other bits of uSync export on a blank site. 
