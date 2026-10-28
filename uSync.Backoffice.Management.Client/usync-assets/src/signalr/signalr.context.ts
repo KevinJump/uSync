@@ -23,7 +23,7 @@ export class uSyncSignalRContext extends UmbControllerBase {
 
 			const authConfig = auth?.getOpenApiConfiguration();
 			if (!authConfig) return;
-			this.#setupConnection('/umbraco/SyncHub', auth);
+			this.#setupConnection('/umbraco/SyncHub');
 		});
 	}
 
@@ -79,11 +79,11 @@ export class uSyncSignalRContext extends UmbControllerBase {
 	#complete = new UmbObjectState<SyncCompleteMessage | undefined>(undefined);
 	public readonly complete = this.#complete.asObservable();
 
-	#setupConnection(url: string, auth: typeof UMB_AUTH_CONTEXT.TYPE) {
-		// the token is fetched on every (re)connect, so a reconnect after
-		// the original token has expired still authenticates.
+	#setupConnection(url: string) {
+		// backoffice auth is cookie-only (Umbraco 19): the httpOnly auth cookie
+		// is sent with every (re)connect, so there is no token to supply.
 		this.#connection = new signalR.HubConnectionBuilder()
-			.withUrl(url, { accessTokenFactory: () => auth.getLatestToken() })
+			.withUrl(url, { withCredentials: true })
 			.withAutomaticReconnect(new uSyncSignalRReconnectPolicy())
 			.configureLogging(signalR.LogLevel.Warning)
 			.build();
