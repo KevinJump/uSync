@@ -265,11 +265,12 @@ public class uSyncSettings
 
 
     /// <summary>
-    ///  Move the uSync tree to it's own section in the back office. 
+    ///  Show uSync in its own 'Synchronisation' section in the back office,
+    ///  set to false to put it back in the settings section.
     ///  (requires a restart to take effect).
     /// </summary>
-    [DefaultValue(false)]
-    public bool MoveToSection { get; set; } = false;
+    [DefaultValue(true)]
+    public bool MoveToSection { get; set; } = true;
 
     /// <summary>
     ///  What type of mode the folder should work in (default, root, or production)

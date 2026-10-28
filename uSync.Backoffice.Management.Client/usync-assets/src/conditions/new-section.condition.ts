@@ -9,6 +9,7 @@ import {
 	umbExtensionsRegistry,
 } from '@umbraco-cms/backoffice/extension-registry';
 import { UMB_SECTION_CONTEXT } from '@umbraco-cms/backoffice/section';
+import { UMB_CURRENT_USER_CONTEXT } from '@umbraco-cms/backoffice/current-user';
 import { USYNC_SECTION_ALIAS } from '../tree/constants';
 
 export type SyncNewSectionConditionConfig = UmbConditionConfigBase & {};
@@ -16,6 +17,7 @@ export type SyncNewSectionConditionConfig = UmbConditionConfigBase & {};
 export class SyncNewSectionCondition extends UmbConditionBase<SyncNewSectionConditionConfig> {
 	#currentSection: string | undefined;
 	#allSections: string[] | undefined;
+	#userSections: string[] | undefined;
 
 	constructor(
 		host: UmbControllerHost,
@@ -35,6 +37,15 @@ export class SyncNewSectionCondition extends UmbConditionBase<SyncNewSectionCond
 			'uSyncAllSectionsManifestFilter',
 		);
 
+		this.consumeContext(UMB_CURRENT_USER_CONTEXT, (_context) => {
+			if (!_context) return;
+
+			this.observe(_context.allowedSections, (_sections) => {
+				this.#userSections = _sections;
+				this.permitted = this.#checkPermission();
+			});
+		});
+
 		this.consumeContext(UMB_SECTION_CONTEXT, (_context) => {
 			if (!_context) return;
 
@@ -53,6 +64,10 @@ export class SyncNewSectionCondition extends UmbConditionBase<SyncNewSectionCond
 		if (!this.#allSections.includes(USYNC_SECTION_ALIAS)) return true;
 
 		if (this.#currentSection === USYNC_SECTION_ALIAS) return true;
+
+		// the section exists, but this user hasn't been given it, so keep
+		// showing uSync in settings (the api allows settings or usync access).
+		if (this.#userSections && !this.#userSections.includes(USYNC_SECTION_ALIAS)) return true;
 
 		return false;
 	}
