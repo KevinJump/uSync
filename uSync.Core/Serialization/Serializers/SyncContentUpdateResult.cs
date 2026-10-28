@@ -43,7 +43,7 @@ public static class SyncContentUpdateResultExtensions
         var message = $"Publish Failed: {result.Result} [{errorMessage}]";
         if (result.InvalidProperties != null && result.InvalidProperties.Any())
         {
-            message += string.Join(",", result.InvalidProperties.Select(x => x.Alias));
+            message += $" Invalid properties: {string.Join(", ", result.InvalidProperties.Select(x => x.Alias))}";
         }
 
         return new SyncContentUpdateResult<TObject>(false, result.Content as TObject ?? null, message);
