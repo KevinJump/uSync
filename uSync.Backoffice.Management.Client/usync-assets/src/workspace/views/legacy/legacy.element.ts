@@ -10,6 +10,7 @@ import {
 	UMB_CONFIRM_MODAL,
 	UMB_MODAL_MANAGER_CONTEXT,
 } from '@umbraco-cms/backoffice/modal';
+import { USYNC_LEGACY_MODAL } from '../../../dialogs/legacy-modal-element.js';
 import {
 	uSyncWorkspaceContext,
 	USYNC_CORE_CONTEXT_TOKEN,
@@ -22,6 +23,7 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 
 	@state()
 	_legacy?: SyncLegacyCheckResponse;
+
 
 	constructor() {
 		super();
@@ -40,19 +42,14 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 	async #onCopy() {
 		const modalContext = await this.getContext(UMB_MODAL_MANAGER_CONTEXT);
 
-		const confirmContext = modalContext?.open(this, UMB_CONFIRM_MODAL, {
-			data: {
-				headline: this.localize.termOrDefault('uSync_legacyCopyTitle', 'Overwrite files', this._legacy?.latestVersion),
-				content: html`${this.localize.termOrDefault('uSync_legacyCopyContent', 'Are you sure you want to overwrite the contents of the folder with the legacy uSync folder files?', this._legacy?.latestFolder)}`,
-				color: 'danger',
-				confirmLabel: 'Copy',
-			},
+		const copyModal = modalContext?.open(this, USYNC_LEGACY_MODAL, {
+			data: this._legacy,
 		});
 
-		confirmContext
+		copyModal
 			?.onSubmit()
-			.then(async () => {
-				await this.#actionContext?.copyLegacy();
+			.then(async (value) => {
+				await this.#actionContext?.copyLegacy(value?.migrations ?? []);
 				window.location.reload();
 			})
 			.catch(() => {

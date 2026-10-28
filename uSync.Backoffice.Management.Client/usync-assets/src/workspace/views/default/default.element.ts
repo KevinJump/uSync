@@ -264,7 +264,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			: html`
 					<div class="legacy-banner">
 						<umb-icon name="icon-alert"></umb-icon>
-						${this.localize.termOrDefault('uSync_legacyBanner', 'This site contains files from a previous version of uSync, view the details in the legacy tab.')}
+						${this.localize.termOrDefault('uSync_legacyBanner', 'This site contains files from a previous version of uSync, view the details in the Migrate tab.')}
 					</div>
 				`;
 	}

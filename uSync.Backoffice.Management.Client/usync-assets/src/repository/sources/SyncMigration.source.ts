@@ -27,7 +27,7 @@ export class uSyncMigrationDataSource {
 		return await tryExecute(this.#host, postIgnoreLegacy());
 	}
 
-	async copyLegacy(): Promise<UmbDataSourceResponse<boolean>> {
-		return await tryExecute(this.#host, postCopyLegacy());
+	async copyLegacy(migrations: Array<string> = []): Promise<UmbDataSourceResponse<boolean>> {
+		return await tryExecute(this.#host, postCopyLegacy({ body: { migrations } }));
 	}
 }
