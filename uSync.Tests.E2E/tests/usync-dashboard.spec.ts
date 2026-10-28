@@ -24,8 +24,9 @@ test.describe('uSync dashboard', () => {
 			.filter({ has: umbracoUi.page.getByRole('heading', { name: 'Settings' }) });
 
 		await expect(settings).toBeVisible();
+		// actions with options render as a button group, so find them by role, not by the uui-button class.
 		for (const action of ['Report', 'Import', 'Export']) {
-			await expect(settings.locator('uui-button.action-button[label="' + action + '"]')).toBeVisible();
+			await expect(settings.getByRole('button', { name: action, exact: true }).first()).toBeVisible();
 		}
 	});
 
@@ -37,7 +38,7 @@ test.describe('uSync dashboard', () => {
 			.locator('usync-action-box')
 			.filter({ has: page.getByRole('heading', { name: 'Settings' }) });
 
-		await settings.locator('uui-button.action-button[label="Report"]').click();
+		await settings.getByRole('button', { name: 'Report', exact: true }).first().click();
 
 		await expect(page.locator('usync-progress-box')).toBeVisible();
 		await expect(page.locator('usync-results')).toBeVisible({ timeout: 2 * 60 * 1000 });
