@@ -347,7 +347,8 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
         var date = scheduleNode.Element("Date").ValueOrDefault(DateTime.MinValue);
         var action = scheduleNode.Element("Action").ValueOrDefault(ContentScheduleAction.Release);
 
-        return new ContentSchedule(key, culture, date, action);
+        // TODO: (v19 section 9) invariant-for-variant is not exported yet, so default to false.
+        return new ContentSchedule(key, culture, date, action, includeInvariantForVariant: false);
     }
 
     /// <summary>

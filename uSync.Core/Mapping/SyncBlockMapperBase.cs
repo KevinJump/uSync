@@ -118,7 +118,7 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         if (blockValue.Expose.Count == 0)
         {
             // migration from v14 to v15+ block values.
-            blockValue.Expose = [.. blockValue.ContentData.Select(x => new BlockItemVariation(x.Key, null, null))];
+            blockValue.Expose = [.. blockValue.ContentData.Select(x => new BlockItemVariation(x.Key, null))];
         }
 
         if (isImport)
