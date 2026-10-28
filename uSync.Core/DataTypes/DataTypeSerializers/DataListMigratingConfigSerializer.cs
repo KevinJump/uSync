@@ -11,7 +11,8 @@ internal class DataListMigratingConfigSerializer : ConfigurationSerializerBase, 
     public string Name => nameof(DataListMigratingConfigSerializer);
     public string[] Editors => [
         Constants.PropertyEditors.Aliases.CheckBoxList,
-        Constants.PropertyEditors.Aliases.DropDownListFlexible,
+        Constants.PropertyEditors.Aliases.MultipleDropDown,
+        Constants.PropertyEditors.Aliases.SingleDropDown,
         Constants.PropertyEditors.Aliases.RadioButtonList
     ];
 

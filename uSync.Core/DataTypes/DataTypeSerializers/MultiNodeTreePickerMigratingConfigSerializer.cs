@@ -29,7 +29,13 @@ internal class MultiNodeTreePickerMigratingConfigSerializer : ConfigurationSeria
         Constants.PropertyEditors.Aliases.MultiNodeTreePicker
     ];
 
+    // MNTP is deprecated in v19 but not migrated by Umbraco, so it stays on its editor,
+    // only its min/max move to a single validation limit.
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
+        => MigrateFilter(configuration)
+            .MigrateMinMaxToRange("minNumber", "maxNumber", "validationLimit");
+
+    private IDictionary<string, object> MigrateFilter(IDictionary<string, object> configuration)
     {
         if (configuration.TryGetValue("filter", out var filterValue) is false || filterValue is null)
             return configuration;

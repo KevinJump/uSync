@@ -45,13 +45,11 @@ internal class MediaPickerMigrationTests : MigrationTestBase
     // Test migrating filter from aliases to GUIDs
     private static string FilterAliasSource = @"{
   ""filter"": ""Image,Video"",
-  ""multiple"": false,
   ""validationLimit"": {}
 }";
 
     private static string FilterAliasTarget = @"{
   ""filter"": ""cc07b313-0843-4aa8-bbda-871c8da728c8,f6c515bb-653c-4bdc-821c-987729ebe327"",
-  ""multiple"": false,
   ""validationLimit"": {}
 }";
 
@@ -62,7 +60,6 @@ internal class MediaPickerMigrationTests : MigrationTestBase
     // Test that already migrated filter (GUIDs) remain unchanged
     private static string FilterGuidSource = @"{
   ""filter"": ""cc07b313-0843-4aa8-bbda-871c8da728c8,f6c515bb-653c-4bdc-821c-987729ebe327"",
-  ""multiple"": false,
   ""validationLimit"": {}
 }";
 
@@ -73,13 +70,11 @@ internal class MediaPickerMigrationTests : MigrationTestBase
     // Test migrating startNodeId from UDI to GUID
     private static string StartNodeUdiSource = @"{
   ""startNodeId"": ""umb://media/71332aa78bea44f19aa600de961b66e8"",
-  ""multiple"": false,
   ""validationLimit"": {}
 }";
 
     private static string StartNodeUdiTarget = @"{
   ""startNodeId"": ""71332aa7-8bea-44f1-9aa6-00de961b66e8"",
-  ""multiple"": false,
   ""validationLimit"": {}
 }";
 
@@ -90,7 +85,6 @@ internal class MediaPickerMigrationTests : MigrationTestBase
     // Test that already migrated startNodeId (GUID) remains unchanged
     private static string StartNodeGuidSource = @"{
   ""startNodeId"": ""71332aa7-8bea-44f1-9aa6-00de961b66e8"",
-  ""multiple"": false,
   ""validationLimit"": {}
 }";
 
@@ -109,7 +103,6 @@ internal class MediaPickerMigrationTests : MigrationTestBase
     private static string BothTarget = @"{
   ""filter"": ""cc07b313-0843-4aa8-bbda-871c8da728c8,4c52d8ab-54e6-40cd-999c-7a5f24903e4d"",
   ""startNodeId"": ""71332aa7-8bea-44f1-9aa6-00de961b66e8"",
-  ""multiple"": true,
   ""validationLimit"": {}
 }";
 
@@ -120,7 +113,6 @@ internal class MediaPickerMigrationTests : MigrationTestBase
     // Test with null/empty filter
     private static string NullFilterSource = @"{
   ""filter"": null,
-  ""multiple"": false,
   ""validationLimit"": {}
 }";
 
@@ -131,7 +123,6 @@ internal class MediaPickerMigrationTests : MigrationTestBase
     // Test with unknown alias (should preserve the alias)
     private static string UnknownAliasSource = @"{
   ""filter"": ""UnknownMediaType"",
-  ""multiple"": false,
   ""validationLimit"": {}
 }";
 

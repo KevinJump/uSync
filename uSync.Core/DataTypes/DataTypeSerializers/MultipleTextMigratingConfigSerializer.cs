@@ -13,5 +13,7 @@ internal class MultipleTextMigratingConfigSerializer : ConfigurationSerializerBa
         {
             { "maximum", "max" },
             { "minimum", "min" }
-        });
+        })
+        // v19: min/max are a single validation limit.
+        .MigrateMinMaxToRange("min", "max", "validationLimit");
 }

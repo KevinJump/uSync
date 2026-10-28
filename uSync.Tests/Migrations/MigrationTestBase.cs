@@ -35,4 +35,13 @@ internal class MigrationTestBase
 
         Assert.That(resultJson, Is.EqualTo(targetDictionary));
     }
+
+    protected void TestSerializerEditorReplacement(IConfigurationSerializer serializer, string editorAlias, string source, string? expectedEditorAlias)
+    {
+        Assert.That(source.TryDeserialize(out IDictionary<string, object> dictionaryData), Is.True);
+
+        var replacement = serializer.GetEditorReplacement(editorAlias, dictionaryData.ConvertToCamelCase());
+
+        Assert.That(replacement?.EditorAlias, Is.EqualTo(expectedEditorAlias));
+    }
 }

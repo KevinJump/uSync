@@ -16,7 +16,7 @@ public class MediaPicker3ConfigSerializer : SyncDataTypeSerializerBase, IConfigu
 
     public string Name => "MediaPicker3NodeSerializer";
 
-    public string[] Editors => ["Umbraco.MediaPicker3"];
+    public string[] Editors => ["Umbraco.MediaPicker3", "Umbraco.MediaPicker.Single"];
 
     private const string _startNodeIdKey = "startNodeId";
 
