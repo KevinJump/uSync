@@ -31,7 +31,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
     , Icon = "icon-blueprint", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
 public class ContentTemplateHandler : ContentHandlerBase<IContent>, ISyncHandler,
     INotificationAsyncHandler<ContentSavedBlueprintNotification>,
-    INotificationAsyncHandler<ContentDeletedBlueprintNotification>
+    INotificationAsyncHandler<ContentDeletedBlueprintNotification>,
+    INotificationAsyncHandler<ContentMovedBlueprintNotification>,
+    INotificationAsyncHandler<ContentMovingBlueprintNotification>
 {
     /// <summary>
     /// ContentTypeHandler belongs to the Content group by default
@@ -134,6 +136,40 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent>, ISyncHandler
                 logger.LogWarning(ex, "Failed to create delete marker");
                 notification.Messages.Add(new EventMessage("uSync", $"Failed to mark as deleted : {ex.Message}", EventMessageType.Warning));
             }
+        }
+    }
+
+    /// <summary>
+    ///  manage the notification when a blueprint (or a blueprint folder) is moved
+    /// </summary>
+    /// <remarks>
+    ///  Umbraco 19 raises this for a blueprint move, and for every blueprint inside
+    ///  a moved folder. The blueprint is exported again at its new path, and the
+    ///  file at the old path is cleaned up.
+    /// </remarks>
+    public async Task HandleAsync(ContentMovedBlueprintNotification notification, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (!ShouldProcessEvent()) return;
+            await HandleMoveAsync(notification.MoveInfoCollection, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to export blueprint move operation");
+            notification.Messages.Add(new EventMessage("uSync", $"Failed to export move : {ex.Message}", EventMessageType.Warning));
+        }
+    }
+
+    /// <summary>
+    ///  check the root lock isn't blocking the blueprint move
+    /// </summary>
+    public async Task HandleAsync(ContentMovingBlueprintNotification notification, CancellationToken cancellationToken)
+    {
+        if (await ShouldBlockRootChangesAsync(notification.MoveInfoCollection.Select(x => x.Entity)))
+        {
+            notification.Cancel = true;
+            notification.Messages.Add(GetCancelMessageForRoots());
         }
     }
 }

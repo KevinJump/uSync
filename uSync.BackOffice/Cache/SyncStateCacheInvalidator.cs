@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,6 +49,7 @@ internal class SyncStateCacheInvalidator :
     INotificationAsyncHandler<ContentUnpublishedNotification>,
     INotificationAsyncHandler<ContentSavedBlueprintNotification>,
     INotificationAsyncHandler<ContentDeletedBlueprintNotification>,
+    INotificationAsyncHandler<ContentMovedBlueprintNotification>,
     INotificationAsyncHandler<MediaSavedNotification>,
     INotificationAsyncHandler<MediaDeletedNotification>,
     INotificationAsyncHandler<ElementSavedNotification>,
@@ -128,6 +129,10 @@ internal class SyncStateCacheInvalidator :
     /// <inheritdoc/>
     public Task HandleAsync(ContentDeletedBlueprintNotification n, CancellationToken c)
         => InvalidateAsync(Core.uSyncConstants.Serialization.Content, n.DeletedBlueprints);
+
+    /// <inheritdoc/>
+    public Task HandleAsync(ContentMovedBlueprintNotification n, CancellationToken c)
+        => _stateCache.InvalidateTypeAsync(Core.uSyncConstants.Serialization.Content);
 
     /// <inheritdoc/>
     public Task HandleAsync(ContentMovedNotification n, CancellationToken c)

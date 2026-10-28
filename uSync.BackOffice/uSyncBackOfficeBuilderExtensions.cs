@@ -262,6 +262,8 @@ public static class uSyncBackOfficeBuilderExtensions
 
         builder.AddNotificationAsyncHandler<ContentSavedBlueprintNotification, ContentTemplateHandler>();
         builder.AddNotificationAsyncHandler<ContentDeletedBlueprintNotification, ContentTemplateHandler>();
+        builder.AddNotificationAsyncHandler<ContentMovedBlueprintNotification, ContentTemplateHandler>();
+        builder.AddNotificationAsyncHandler<ContentMovingBlueprintNotification, ContentTemplateHandler>();
 
         // cache lifecycle manager
         builder.
@@ -316,6 +318,7 @@ public static class uSyncBackOfficeBuilderExtensions
             AddNotificationAsyncHandler<ContentUnpublishedNotification, SyncStateCacheInvalidator>().
             AddNotificationAsyncHandler<ContentSavedBlueprintNotification, SyncStateCacheInvalidator>().
             AddNotificationAsyncHandler<ContentDeletedBlueprintNotification, SyncStateCacheInvalidator>().
+            AddNotificationAsyncHandler<ContentMovedBlueprintNotification, SyncStateCacheInvalidator>().
             AddNotificationAsyncHandler<ContentMovedNotification, SyncStateCacheInvalidator>().
             AddNotificationAsyncHandler<ContentMovedToRecycleBinNotification, SyncStateCacheInvalidator>().
 
