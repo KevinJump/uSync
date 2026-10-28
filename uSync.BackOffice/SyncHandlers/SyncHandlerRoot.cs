@@ -2281,6 +2281,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             Key = node.GetKey(),
             Handler = Alias,
             ItemType = ItemType,
+            Node = node,
             Current = await serializer.FindItemAsync(node),
         };
 

@@ -56,6 +56,17 @@ export default {
 		previewMissingDataType: 'el tipo de dato de esta propiedad aún no existe en el sitio',
 		previewNewDataType: 'nuevo tipo de dato',
 		previewNew: 'nuevo',
+		previewParent: 'Padre',
+		previewRoot: '(raíz)',
+		previewSortOrder: 'Orden',
+		previewTemplate: 'Plantilla',
+		previewPublished: 'Publicado',
+		previewNotPublished: 'No publicado',
+		previewTrashed: 'En la papelera',
+		previewCulture: 'Idioma',
+		previewOnlyChanges: 'Mostrar solo cambios',
+		previewNoValueChanges: 'Ningún valor cambia',
+		previewNoValue: 'Sin valor',
 
 		runningInBackground:
 			'uSync está ejecutando este proceso en segundo plano. Si navega fuera de esta página, continuará ejecutándose.',

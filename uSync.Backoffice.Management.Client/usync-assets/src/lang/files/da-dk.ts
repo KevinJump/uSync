@@ -56,6 +56,17 @@ export default {
 		previewMissingDataType: 'datatypen for denne egenskab findes ikke på sitet endnu',
 		previewNewDataType: 'ny datatype',
 		previewNew: 'ny',
+		previewParent: 'Overordnet',
+		previewRoot: '(roden)',
+		previewSortOrder: 'Sorteringsrækkefølge',
+		previewTemplate: 'Skabelon',
+		previewPublished: 'Udgivet',
+		previewNotPublished: 'Ikke udgivet',
+		previewTrashed: 'I papirkurven',
+		previewCulture: 'Sprog',
+		previewOnlyChanges: 'Vis kun ændringer',
+		previewNoValueChanges: 'Ingen værdier ændres',
+		previewNoValue: 'Ingen værdi',
 
 		runningInBackground:
 			'uSync kører denne proces i baggrunden. Hvis du navigerer væk fra denne side, vil den fortsætte med at køre.',

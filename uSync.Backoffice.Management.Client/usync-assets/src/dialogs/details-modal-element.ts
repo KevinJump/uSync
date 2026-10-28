@@ -19,6 +19,7 @@ import {
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 import '../components/usync-data-type-preview.js';
 import '../components/usync-content-type-preview.js';
+import '../components/usync-content-preview.js';
 
 type DetailsTab = 'changes' | 'preview';
 
@@ -140,6 +141,10 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 			case 'member-type':
 				return html`<usync-content-type-preview
 					.preview=${preview}></usync-content-type-preview>`;
+			case 'document':
+			case 'media':
+				return html`<usync-content-preview
+					.preview=${preview}></usync-content-preview>`;
 			default:
 				return nothing;
 		}

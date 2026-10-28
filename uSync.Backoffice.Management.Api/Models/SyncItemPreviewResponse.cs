@@ -1,5 +1,7 @@
 using Umbraco.Cms.Api.Management.ViewModels.DataType;
+using Umbraco.Cms.Api.Management.ViewModels.Document;
 using Umbraco.Cms.Api.Management.ViewModels.DocumentType;
+using Umbraco.Cms.Api.Management.ViewModels.Media;
 using Umbraco.Cms.Api.Management.ViewModels.MediaType;
 using Umbraco.Cms.Api.Management.ViewModels.MemberType;
 
@@ -33,10 +35,16 @@ public class SyncItemPreviewResponse
 
     public DataTypeResponseModel? IncomingDataType { get; set; }
 
+    /// <remarks>
+    ///  for a document, this is the document type of the item (as it is in the site).
+    /// </remarks>
     public DocumentTypeResponseModel? CurrentDocumentType { get; set; }
 
     public DocumentTypeResponseModel? IncomingDocumentType { get; set; }
 
+    /// <remarks>
+    ///  for a media item, this is the media type of the item (as it is in the site).
+    /// </remarks>
     public MediaTypeResponseModel? CurrentMediaType { get; set; }
 
     public MediaTypeResponseModel? IncomingMediaType { get; set; }
@@ -44,6 +52,21 @@ public class SyncItemPreviewResponse
     public MemberTypeResponseModel? CurrentMemberType { get; set; }
 
     public MemberTypeResponseModel? IncomingMemberType { get; set; }
+
+    public DocumentResponseModel? CurrentDocument { get; set; }
+
+    public DocumentResponseModel? IncomingDocument { get; set; }
+
+    public MediaResponseModel? CurrentMedia { get; set; }
+
+    public MediaResponseModel? IncomingMedia { get; set; }
+
+    /// <summary>
+    ///  parent, sort order, template and published state of a content or media item.
+    /// </summary>
+    public SyncContentPreviewInfo? CurrentInfo { get; set; }
+
+    public SyncContentPreviewInfo? IncomingInfo { get; set; }
 
     /// <summary>
     ///  the content types either side is composed of (as they are in the site), 

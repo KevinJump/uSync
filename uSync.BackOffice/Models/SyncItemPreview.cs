@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 using uSync.Core.Models;
 
@@ -27,6 +28,11 @@ public class SyncItemPreview
     ///  item type (e.g IDataType)
     /// </summary>
     public required string ItemType { get; set; }
+
+    /// <summary>
+    ///  the uSync file the preview was built from
+    /// </summary>
+    public XElement? Node { get; set; }
 
     /// <summary>
     ///  the item as it currently is in Umbraco (null if it doesn't exist yet)

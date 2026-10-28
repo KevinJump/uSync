@@ -56,6 +56,17 @@ export default {
 		previewMissingDataType: 'het datatype voor deze eigenschap bestaat nog niet op de site',
 		previewNewDataType: 'nieuw datatype',
 		previewNew: 'nieuw',
+		previewParent: 'Bovenliggend',
+		previewRoot: '(root)',
+		previewSortOrder: 'Sorteervolgorde',
+		previewTemplate: 'Sjabloon',
+		previewPublished: 'Gepubliceerd',
+		previewNotPublished: 'Niet gepubliceerd',
+		previewTrashed: 'In de prullenbak',
+		previewCulture: 'Taal',
+		previewOnlyChanges: 'Alleen wijzigingen tonen',
+		previewNoValueChanges: 'Geen waarden veranderen',
+		previewNoValue: 'Geen waarde',
 
 		runningInBackground:
 			'uSync voert dit proces op de achtergrond uit. Als u van deze pagina navigeert, blijft het doorlopen.',

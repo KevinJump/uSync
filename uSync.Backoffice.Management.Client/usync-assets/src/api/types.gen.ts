@@ -52,6 +52,16 @@ export type DataTypeResponseModel = {
     canIgnoreStartNodes: boolean;
 };
 
+export type DocumentResponseModel = {
+    values: Array<DocumentValueResponseModel>;
+    variants: Array<DocumentVariantResponseModel>;
+    id: string;
+    flags: Array<FlagModel>;
+    documentType: DocumentTypeReferenceResponseModel;
+    template?: ReferenceByIdModel | null;
+    isTrashed: boolean;
+};
+
 export type DocumentTypeCleanupModel = {
     preventCleanup: boolean;
     keepAllVersionsNewerThanDays?: number | null;
@@ -85,6 +95,12 @@ export type DocumentTypePropertyTypeResponseModel = {
     appearance: PropertyTypeAppearanceModel;
 };
 
+export type DocumentTypeReferenceResponseModel = {
+    id: string;
+    icon: string;
+    collection?: ReferenceByIdModel | null;
+};
+
 export type DocumentTypeResponseModel = {
     alias: string;
     name: string;
@@ -110,6 +126,40 @@ export type DocumentTypeSortModel = {
     sortOrder: number;
 };
 
+export type DocumentValueResponseModel = {
+    culture?: string | null;
+    segment?: string | null;
+    alias: string;
+    value?: unknown;
+    editorAlias: string;
+};
+
+export type DocumentVariantResponseModel = {
+    culture?: string | null;
+    segment?: string | null;
+    name: string;
+    createDate: string;
+    updateDate: string;
+    state: DocumentVariantStateModel;
+    publishDate?: string | null;
+    scheduledPublishDate?: string | null;
+    scheduledUnpublishDate?: string | null;
+    readonly id: string;
+    flags: Array<FlagModel>;
+};
+
+export enum DocumentVariantStateModel {
+    NOT_CREATED = 'NotCreated',
+    DRAFT = 'Draft',
+    PUBLISHED = 'Published',
+    PUBLISHED_PENDING_CHANGES = 'PublishedPendingChanges',
+    TRASHED = 'Trashed'
+}
+
+export type FlagModel = {
+    alias: string;
+};
+
 export type HandlerSettings = {
     enabled: boolean;
     actions: Array<string>;
@@ -130,6 +180,15 @@ export enum HandlerStatus {
     COMPLETE = 'Complete',
     ERROR = 'Error'
 }
+
+export type MediaResponseModel = {
+    values: Array<MediaValueResponseModel>;
+    variants: Array<MediaVariantResponseModel>;
+    id: string;
+    flags: Array<FlagModel>;
+    isTrashed: boolean;
+    mediaType: MediaTypeReferenceResponseModel;
+};
 
 export type MediaTypeCompositionModel = {
     mediaType: ReferenceByIdModel;
@@ -158,6 +217,12 @@ export type MediaTypePropertyTypeResponseModel = {
     appearance: PropertyTypeAppearanceModel;
 };
 
+export type MediaTypeReferenceResponseModel = {
+    id: string;
+    icon: string;
+    collection?: ReferenceByIdModel | null;
+};
+
 export type MediaTypeResponseModel = {
     alias: string;
     name: string;
@@ -180,6 +245,22 @@ export type MediaTypeResponseModel = {
 export type MediaTypeSortModel = {
     mediaType: ReferenceByIdModel;
     sortOrder: number;
+};
+
+export type MediaValueResponseModel = {
+    culture?: string | null;
+    segment?: string | null;
+    alias: string;
+    value?: unknown;
+    editorAlias: string;
+};
+
+export type MediaVariantResponseModel = {
+    culture?: string | null;
+    segment?: string | null;
+    name: string;
+    createDate: string;
+    updateDate: string;
 };
 
 export type MemberTypeCompositionModel = {
@@ -284,6 +365,19 @@ export type SyncActionGroup = {
     lastSync?: string | null;
 };
 
+export type SyncContentPreviewCulture = {
+    culture: string;
+    published: boolean;
+};
+
+export type SyncContentPreviewInfo = {
+    parent?: string | null;
+    sortOrder: number;
+    trashed: boolean;
+    template?: string | null;
+    published: Array<SyncContentPreviewCulture>;
+};
+
 export type SyncFileVersionCheckResult = {
     isCurrent: boolean;
     formatVersion?: string | null;
@@ -320,6 +414,12 @@ export type SyncItemPreviewResponse = {
     incomingMediaType?: MediaTypeResponseModel | null;
     currentMemberType?: MemberTypeResponseModel | null;
     incomingMemberType?: MemberTypeResponseModel | null;
+    currentDocument?: DocumentResponseModel | null;
+    incomingDocument?: DocumentResponseModel | null;
+    currentMedia?: MediaResponseModel | null;
+    incomingMedia?: MediaResponseModel | null;
+    currentInfo?: SyncContentPreviewInfo | null;
+    incomingInfo?: SyncContentPreviewInfo | null;
     compositionDocumentTypes: Array<DocumentTypeResponseModel>;
     compositionMediaTypes: Array<MediaTypeResponseModel>;
     compositionMemberTypes: Array<MemberTypeResponseModel>;
@@ -459,6 +559,60 @@ export type USyncSettings = {
     productionFolder: string;
     additionalBadNames: Array<string>;
     includeWindowsReservedNames: boolean;
+};
+
+export type DocumentResponseModelWritable = {
+    values: Array<DocumentValueResponseModel>;
+    variants: Array<DocumentVariantResponseModelWritable>;
+    id: string;
+    flags: Array<FlagModel>;
+    documentType: DocumentTypeReferenceResponseModel;
+    template?: ReferenceByIdModel | null;
+    isTrashed: boolean;
+};
+
+export type DocumentVariantResponseModelWritable = {
+    culture?: string | null;
+    segment?: string | null;
+    name: string;
+    createDate: string;
+    updateDate: string;
+    state: DocumentVariantStateModel;
+    publishDate?: string | null;
+    scheduledPublishDate?: string | null;
+    scheduledUnpublishDate?: string | null;
+    flags: Array<FlagModel>;
+};
+
+export type SyncItemPreviewResponseWritable = {
+    key: string;
+    handler: string;
+    itemType: string;
+    entityType: string;
+    isDelete: boolean;
+    success: boolean;
+    message?: string | null;
+    currentDataType?: DataTypeResponseModel | null;
+    incomingDataType?: DataTypeResponseModel | null;
+    currentDocumentType?: DocumentTypeResponseModel | null;
+    incomingDocumentType?: DocumentTypeResponseModel | null;
+    currentMediaType?: MediaTypeResponseModel | null;
+    incomingMediaType?: MediaTypeResponseModel | null;
+    currentMemberType?: MemberTypeResponseModel | null;
+    incomingMemberType?: MemberTypeResponseModel | null;
+    currentDocument?: DocumentResponseModelWritable | null;
+    incomingDocument?: DocumentResponseModelWritable | null;
+    currentMedia?: MediaResponseModel | null;
+    incomingMedia?: MediaResponseModel | null;
+    currentInfo?: SyncContentPreviewInfo | null;
+    incomingInfo?: SyncContentPreviewInfo | null;
+    compositionDocumentTypes: Array<DocumentTypeResponseModel>;
+    compositionMediaTypes: Array<MediaTypeResponseModel>;
+    compositionMemberTypes: Array<MemberTypeResponseModel>;
+    dataTypes: Array<DataTypeResponseModel>;
+    newDataTypes: Array<string>;
+    newCompositions: Array<string>;
+    details: Array<USyncChange>;
 };
 
 export type GetActionsData = {
