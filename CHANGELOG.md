@@ -9,6 +9,83 @@ re-export), see [`changes/format.md`](changes/format.md).
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 History is backfilled from the v18 release history starting at `v18.0.0`.
 
+## [19.0.0-beta01] - 2026-10-28
+
+First beta of uSync for **Umbraco 19**, built against Umbraco 19.0.0-beta1 on
+.NET 11.
+
+### Added
+
+- **Legacy folders can be migrated as they're copied.** When a pre-v19 uSync
+  folder is copied into `uSync/v19`, the copy dialog lists the migrations that
+  apply (multi node tree pickers, single media pickers and single dropdowns
+  move to Umbraco 19's dedicated editors) and runs the ticked ones on the
+  files, so the import that follows is a normal import. The legacy banner now
+  points at the Migrate tab. (#1155)
+
+- **Value and dependency mappers for the new v19 picker editors.**
+
+- **Segment values sync as overrides of their culture**, and block expose
+  entries duplicated by segment-era values are cleaned up on import.
+
+- **A schedule's invariant-for-variant flag is exported and imported.**
+
+- **Library elements referenced by blocks are tracked as dependencies.**
+
+### Changed
+
+- **uSync shows in its own Synchronisation section by default.** A one-off
+  migration gives the section to the Admin group. Users without the section
+  but with Settings access still see uSync in the Settings tree, and
+  `uSync:Settings:MoveToSection: false` puts it back there. (#1156)
+
+- **The uSync API is secured with the uSync tree policy.** It used to accept
+  any user with the Content section and refuse users who only had the uSync
+  section. It now accepts the Settings or uSync sections. (#1156)
+
+- **Pre-v19 data type config is imported the way Umbraco 19 migrates it**,
+  including moving a data type onto another editor when its config calls for
+  it (e.g. a media picker with `multiple: false` onto the single media picker).
+
+- **Imports run as the requesting or background user**, and content is saved
+  and published as the file's writer or the importing user rather than the
+  super user.
+
+- **Blueprints are exported again when they or their folder move**, and
+  imports fail cleanly for content types that can't have blueprints. Spaces in
+  blueprint folder names created on import are kept.
+
+- **Publish failure messages label the invalid properties.**
+
+- **SignalR and the uSync API accept the backoffice cookie scheme**, matching
+  Umbraco 19's cookie-based backoffice auth.
+
+- **`@jumoo/usync` is published to npmjs.org** with trusted publishing.
+
+### Removed
+
+- **Members marked obsolete for removal in v18 or v19.** This is a breaking
+  change for code that still calls them. Members marked for v20 stay. (#1161)
+  - uSync.Core: the sync `IConfigurationSerializer.GetConfigurationExport/Import`
+    defaults, `ConfigurationSerializerCollection.GetSerializer`,
+    `ISyncMapper.GetImportValueAsync(value, editorAlias)` (the overload with
+    `SyncSerializerOptions` is now required), `SyncAttempt.Succeed` without
+    details, `AddNew(..., success)` and the `HandleTrashedState` overload
+    without `relationAlias`.
+  - uSync.BackOffice: the bulk notification constructors without a group,
+    `ISyncActionService.StartProcessAsync(HandlerActions)` and
+    `UnpackImportFromStream`, `ISyncService.FinishBulkProcessAsync` without a
+    group, `ISyncFileService.VerifyFolder`, and `SyncHandlerRoot`'s
+    `GetMergedItemsAsync(folders)` and `GetFolderKeys`.
+  - uSync.Backoffice.Management.Api: `ISyncManagementService.GetActions`,
+    `UnpackStream` and the `ToActionView` extension.
+
+### Known issues
+
+- uSync still uses `Constants.Security.SuperUserId`, which Umbraco 19 marks
+  obsolete. It works on 19.0.0-beta1 and will be moved over in a later
+  release. (#1162)
+
 ## [18.2.0] - 2026-10-26
 
 ### Added
