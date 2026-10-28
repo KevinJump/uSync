@@ -121,7 +121,7 @@ public class BlockListMapperPublishTests
             {
                 Values = [.. elementType.PropertyTypes.Select(p => new BlockPropertyValue { Alias = p.Alias, Value = $"{p.Alias} value", PropertyType = p })]
             }],
-            Expose = [new BlockItemVariation(blockKey, null, null)]
+            Expose = [new BlockItemVariation(blockKey, null)]
         };
 
         var source = _jsonSerializer.Serialize(blockValue);
@@ -165,7 +165,7 @@ public class BlockListMapperPublishTests
         var blockValue = new BlockListValue([new BlockListLayoutItem(blockKey)])
         {
             ContentData = [new BlockItemData(blockKey, _elementType.Key, _elementType.Alias) { Values = values }],
-            Expose = [.. _cultures.Select(c => new BlockItemVariation(blockKey, c, null))]
+            Expose = [.. _cultures.Select(c => new BlockItemVariation(blockKey, c))]
         };
 
         return _jsonSerializer.Serialize(blockValue);
@@ -254,7 +254,6 @@ public class BlockListMapperPublishTests
         return new BlockListPropertyEditor(
             dataValueEditorFactory,
             Mock.Of<IIOHelper>(),
-            Mock.Of<IBlockValuePropertyIndexValueFactory>(),
             jsonSerializer);
     }
 
