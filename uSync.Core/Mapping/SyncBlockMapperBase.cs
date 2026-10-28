@@ -120,6 +120,12 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
             // migration from v14 to v15+ block values.
             blockValue.Expose = [.. blockValue.ContentData.Select(x => new BlockItemVariation(x.Key, null))];
         }
+        else
+        {
+            // v19: expose entries no longer have a segment (a block is exposed for a culture in all segments).
+            // older values can have one entry per segment, which now read as duplicates, Umbraco removes them the same way.
+            blockValue.Expose = [.. blockValue.Expose.DistinctBy(x => $"{x.ContentKey}.{x.Culture}")];
+        }
 
         if (isImport)
             return JsonSerializer.Serialize(blockValue, _importOptions);

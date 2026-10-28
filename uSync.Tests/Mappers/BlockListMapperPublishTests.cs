@@ -169,6 +169,48 @@ public class BlockListMapperPublishTests
         Assert.That(dependencies.Select(x => x.Udi), Does.Contain(Udi.Create(UmbConstants.UdiEntityType.Element, libraryElementKey)));
     }
 
+    [Test]
+    public async Task SegmentExposeEntries_FromOlderExport_AreDroppedAndDeduplicated()
+    {
+        // pre v19 a block could be exposed per segment, v19 only exposes per culture (in all segments).
+        var source = BuildSourceValue();
+        var node = System.Text.Json.Nodes.JsonNode.Parse(source)!;
+        var contentKey = node["contentData"]![0]!["key"]!.GetValue<Guid>();
+
+        node["expose"] = new System.Text.Json.Nodes.JsonArray(
+            ExposeEntry(contentKey, "en-US", null),
+            ExposeEntry(contentKey, "en-US", "vip"),
+            ExposeEntry(contentKey, "da-DK", "vip"));
+
+        var imported = await ImportAsync(node.ToJsonString());
+
+        var expose = System.Text.Json.Nodes.JsonNode.Parse(imported)!["expose"]!.AsArray();
+        Assert.Multiple(() =>
+        {
+            Assert.That(expose.Select(x => x!["culture"]!.GetValue<string>()), Is.EqualTo(new[] { "en-US", "da-DK" }));
+            Assert.That(expose.ToJsonString(), Does.Not.Contain("segment"));
+        });
+    }
+
+    [Test]
+    public async Task ExposeEntries_WithoutSegments_AreUnchanged()
+    {
+        var source = BuildSourceValue();
+
+        var imported = await ImportAsync(source);
+
+        Assert.That(System.Text.Json.Nodes.JsonNode.Parse(imported)!["expose"]!.ToJsonString(),
+            Is.EqualTo(System.Text.Json.Nodes.JsonNode.Parse(source)!["expose"]!.ToJsonString()));
+    }
+
+    private static System.Text.Json.Nodes.JsonObject ExposeEntry(Guid contentKey, string culture, string segment)
+        => new()
+        {
+            ["contentKey"] = contentKey,
+            ["culture"] = culture,
+            ["segment"] = segment
+        };
+
     /// <summary>
     ///  a block list with one local block and one block that references a library element.
     /// </summary>
