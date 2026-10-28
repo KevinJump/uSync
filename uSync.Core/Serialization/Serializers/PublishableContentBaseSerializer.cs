@@ -172,13 +172,15 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
                 new Exception("Import failed because of warnings, and fail on warnings is true"));
         }
 
-        // read user ids from the xml, 
-        var userId = DeserializeWriterInfo(item, node);
+        // read user ids from the xml,
+        var writerId = DeserializeWriterInfo(item, node);
 
-        // if the userId hasn't been set in the options , we use the one from the xml.
-        if (options.UserId == -1)
+        // the file's writer saves and publishes the item when they exist on this site,
+        // otherwise it's the importing user (options.UserId). A writer we can't find
+        // comes back as the superuser id, so that can't win over the importing user.
+        if (writerId != Constants.Security.SuperUserId)
         {
-            options.UserId = userId;
+            options.UserId = writerId;
         }
 
         // published status
