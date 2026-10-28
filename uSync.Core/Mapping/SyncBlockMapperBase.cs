@@ -230,8 +230,26 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
             dependencies.AddRange(await GetBlockDependencies(block, flags));
         }
 
+        dependencies.AddRange(GetLibraryElementDependencies(blockValue, flags));
+
         return dependencies;
     }
+
+    /// <summary>
+    ///  v19 blocks can reference a library element (isExternalContent) rather than
+    ///  hold their own content, so the element has to be there before this value is.
+    /// </summary>
+    private IEnumerable<uSyncDependency> GetLibraryElementDependencies(TBlockValue blockValue, DependencyFlags flags)
+        => blockValue.Layout.Values
+            .SelectMany(GetAllLayouts)
+            .Where(x => x.IsExternalContent && x.ContentKey != Guid.Empty)
+            .Select(x => x.ContentKey)
+            .Distinct()
+            .Select(key => CreateDependency(new GuidUdi(Constants.UdiEntityType.Element, key), flags))
+            .OfType<uSyncDependency>();
+
+    private static IEnumerable<IBlockLayoutItem> GetAllLayouts(IEnumerable<IBlockLayoutItem> layouts)
+        => layouts.SelectMany(x => GetAllLayouts(x.GetContainedLayouts()).Prepend(x));
 
     private async Task<IEnumerable<uSyncDependency>> GetBlockDependencies(BlockItemData block, DependencyFlags flags)
     {

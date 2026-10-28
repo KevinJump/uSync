@@ -11,6 +11,7 @@ using Moq;
 
 using NUnit.Framework;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Cache.PropertyEditors;
 using Umbraco.Cms.Core.IO;
@@ -25,6 +26,7 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Cms.Infrastructure.Serialization;
 
 using uSync.Core.Cache;
+using uSync.Core.Dependency;
 using uSync.Core.Mapping;
 using uSync.Core.Mapping.Mappers;
 using uSync.Core.Mapping.Tracking;
@@ -129,6 +131,64 @@ public class BlockListMapperPublishTests
         var imported = (await mappers.GetImportValueAsync(source, _blockListPropertyType, new SyncSerializerOptions()))?.ToString();
 
         Assert.That(imported, Is.EqualTo(source));
+    }
+
+    [Test]
+    public async Task LibraryElementBlock_RoundTripsLayoutKeyAndReference()
+    {
+        // v19: layout items have their own key, and a block can reference a library element
+        // (isExternalContent) instead of holding the content in contentData.
+        var elementType = BuildElementType(variesByCulture: false);
+        var mappers = BuildMapperCollection(elementType);
+
+        var source = BuildLibraryBlockValue(elementType, out _);
+
+        var imported = (await mappers.GetImportValueAsync(source, _blockListPropertyType, new SyncSerializerOptions()))?.ToString();
+        var exported = (await mappers.GetExportValueAsync(source, UmbConstants.PropertyEditors.Aliases.BlockList))?.ToString();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(imported, Is.EqualTo(source));
+            Assert.That(exported, Does.Contain("isExternalContent"));
+        });
+
+        var reimported = (await mappers.GetImportValueAsync(exported!, _blockListPropertyType, new SyncSerializerOptions()))?.ToString();
+        Assert.That(reimported, Is.EqualTo(source));
+    }
+
+    [Test]
+    public async Task LibraryElementBlock_IsADependency()
+    {
+        var elementType = BuildElementType(variesByCulture: false);
+        var mappers = BuildMapperCollection(elementType);
+
+        var source = BuildLibraryBlockValue(elementType, out var libraryElementKey);
+
+        var dependencies = await mappers.GetDependenciesAsync(source, UmbConstants.PropertyEditors.Aliases.BlockList, DependencyFlags.None);
+
+        Assert.That(dependencies.Select(x => x.Udi), Does.Contain(Udi.Create(UmbConstants.UdiEntityType.Element, libraryElementKey)));
+    }
+
+    /// <summary>
+    ///  a block list with one local block and one block that references a library element.
+    /// </summary>
+    private string BuildLibraryBlockValue(IContentType elementType, out Guid libraryElementKey)
+    {
+        var localKey = Guid.NewGuid();
+        libraryElementKey = Guid.NewGuid();
+
+        var blockValue = new BlockListValue([
+            new BlockListLayoutItem(localKey) { Key = Guid.NewGuid() },
+            new BlockListLayoutItem(libraryElementKey) { Key = Guid.NewGuid(), IsExternalContent = true }])
+        {
+            ContentData = [new BlockItemData(localKey, elementType.Key, elementType.Alias)
+            {
+                Values = [.. elementType.PropertyTypes.Select(p => new BlockPropertyValue { Alias = p.Alias, Value = $"{p.Alias} value", PropertyType = p })]
+            }],
+            Expose = [new BlockItemVariation(localKey, null)]
+        };
+
+        return _jsonSerializer.Serialize(blockValue);
     }
 
     private async Task<string> ImportAsync(string value)
