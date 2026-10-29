@@ -29,8 +29,9 @@ export default {
 
 		detailHeadline: 'Registrerede ændringer',
 		detailHeader: 'Ting der er anderledes',
+		detailPosition: '%0% af %1%',
 
-		previewTab: 'Forhåndsvisning',
+		previewTab: 'Visuel',
 		changesTab: 'Ændringer',
 		previewCurrent: 'Nuværende (dette site)',
 		previewIncoming: 'Indkommende (uSync-filer)',
@@ -56,6 +57,16 @@ export default {
 		previewMissingDataType: 'datatypen for denne egenskab findes ikke på sitet endnu',
 		previewNewDataType: 'ny datatype',
 		previewNew: 'ny',
+		previewParent: 'Overordnet',
+		previewRoot: '(roden)',
+		previewSortOrder: 'Sorteringsrækkefølge',
+		previewTemplate: 'Skabelon',
+		previewPublished: 'Udgivet',
+		previewNotPublished: 'Ikke udgivet',
+		previewTrashed: 'I papirkurven',
+		previewCulture: 'Sprog',
+		previewOnlyChanges: 'Vis kun ændringer',
+		previewNoValueChanges: 'Ingen værdier ændres',
 
 		runningInBackground:
 			'uSync kører denne proces i baggrunden. Hvis du navigerer væk fra denne side, vil den fortsætte med at køre.',

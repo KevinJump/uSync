@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import { ConstantHelper, test } from '@umbraco/playwright-testhelpers';
-import { existsSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -206,5 +206,85 @@ test.describe('uSync item preview', () => {
 		const inherited = preview.locator('.property').filter({ hasText: 'e2eSummary' });
 		await expect(inherited).toContainText('from E2E Preview Composition');
 		await expect(inherited.locator('umb-property-editor-ui-text-box')).toBeVisible();
+	});
+});
+
+const newPageKey = 'e2e9a2b3-4c5d-46e7-8f80-91a2b3c4d5e6';
+
+test.describe('uSync content preview', () => {
+	test.skip(!canWriteFixtures, 'needs the local uSyncSource.Site uSync folder');
+
+	// the about page is changed in place (and put back afterwards), the new page is a copy of contact.
+	const aboutFile = join(syncFolder, 'Content/about.config');
+	const newPageFile = join(syncFolder, 'Content/e2e-preview-page.config');
+	let about = '';
+
+	test.beforeAll(() => {
+		about = readFileSync(aboutFile, 'utf-8');
+		writeFileSync(
+			aboutFile,
+			about
+				.replace('<![CDATA[All about this starter kit]]>', '<![CDATA[E2E preview subtitle]]>')
+				.replace('<SortOrder>1</SortOrder>', '<SortOrder>7</SortOrder>'),
+		);
+
+		const contact = readFileSync(join(syncFolder, 'Content/contact.config'), 'utf-8');
+		writeFileSync(
+			newPageFile,
+			contact
+				.replace(/<Content Key="[^"]+" Alias="[^"]+"/, `<Content Key="${newPageKey}" Alias="E2E Preview Content"`)
+				.replace(/<NodeName Default="[^"]+"/, '<NodeName Default="E2E Preview Content"'),
+		);
+	});
+
+	test.afterAll(() => {
+		if (about) writeFileSync(aboutFile, about);
+		rmSync(newPageFile, { force: true });
+	});
+
+	test.beforeEach(async ({ umbracoUi }) => {
+		test.setTimeout(3 * 60 * 1000);
+
+		await umbracoUi.goToBackOffice();
+		await umbracoUi.content.goToSection(ConstantHelper.sections.settings);
+		await umbracoUi.page.getByRole('link', { name: 'uSync', exact: true }).click();
+
+		const content = umbracoUi.page
+			.locator('usync-action-box')
+			.filter({ has: umbracoUi.page.getByRole('heading', { name: 'Content', exact: true }) });
+		await content.locator('uui-button.action-button[label="Report"]').click();
+		await expect(umbracoUi.page.locator('usync-results')).toBeVisible({ timeout: 2 * 60 * 1000 });
+	});
+
+	test('previews changed values with the real editors', async ({ umbracoUi }) => {
+		const modal = await openPreview(umbracoUi.page, 'Content', 'About');
+		const preview = modal.locator('usync-content-preview');
+		const [current, incoming] = [preview.locator('.side').first(), preview.locator('.side').last()];
+
+		await expect(preview).toBeVisible();
+		await expect(current.locator('.meta')).toContainText('1');
+		await expect(incoming.locator('.meta')).toContainText('7');
+
+		// opens on the tab with the change, and marks the property that changes.
+		const changed = incoming.locator('.property.changed');
+		await expect(changed).toContainText('Subtitle');
+		await expect(changed.locator('umb-property-editor-ui-text-box input')).toHaveValue('E2E preview subtitle');
+		await expect(current.locator('.property.changed umb-property-editor-ui-text-box input')).toHaveValue(
+			'All about this starter kit',
+		);
+
+		// only show changes hides the properties that are the same.
+		await preview.locator('uui-toggle').click();
+		await expect(incoming.locator('.property')).toHaveCount(1);
+	});
+
+	test('previews a new page', async ({ umbracoUi }) => {
+		const modal = await openPreview(umbracoUi.page, 'Content', 'E2E Preview Content');
+		const preview = modal.locator('usync-content-preview');
+
+		await expect(preview).toBeVisible();
+		await expect(preview).toContainText('This item does not exist in the site yet');
+		await expect(preview.locator('.side').last()).toContainText('E2E Preview Content');
+		await expect(preview.locator('umb-property').first()).toBeVisible();
 	});
 });

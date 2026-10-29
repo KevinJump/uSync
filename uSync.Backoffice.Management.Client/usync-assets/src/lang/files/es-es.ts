@@ -29,8 +29,9 @@ export default {
 
 		detailHeadline: 'Cambios detectados',
 		detailHeader: 'Cosas que son diferentes',
+		detailPosition: '%0% de %1%',
 
-		previewTab: 'Vista previa',
+		previewTab: 'Visual',
 		changesTab: 'Cambios',
 		previewCurrent: 'Actual (este sitio)',
 		previewIncoming: 'Entrante (archivos de uSync)',
@@ -56,6 +57,16 @@ export default {
 		previewMissingDataType: 'el tipo de dato de esta propiedad aún no existe en el sitio',
 		previewNewDataType: 'nuevo tipo de dato',
 		previewNew: 'nuevo',
+		previewParent: 'Padre',
+		previewRoot: '(raíz)',
+		previewSortOrder: 'Orden',
+		previewTemplate: 'Plantilla',
+		previewPublished: 'Publicado',
+		previewNotPublished: 'No publicado',
+		previewTrashed: 'En la papelera',
+		previewCulture: 'Idioma',
+		previewOnlyChanges: 'Mostrar solo cambios',
+		previewNoValueChanges: 'Ningún valor cambia',
 
 		runningInBackground:
 			'uSync está ejecutando este proceso en segundo plano. Si navega fuera de esta página, continuará ejecutándose.',

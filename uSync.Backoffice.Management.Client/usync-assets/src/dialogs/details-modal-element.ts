@@ -15,10 +15,12 @@ import {
 	uSyncDetailsModalData,
 	uSyncDetailsModalValue,
 	type SyncItemPreviewResponse,
+	type USyncActionView,
 } from '@jumoo/uSync';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 import '../components/usync-data-type-preview.js';
 import '../components/usync-content-type-preview.js';
+import '../components/usync-content-preview.js';
 
 type DetailsTab = 'changes' | 'preview';
 
@@ -36,6 +38,12 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 	@state()
 	private _tab: DetailsTab = 'changes';
 
+	@state()
+	private _item?: USyncActionView;
+
+	@state()
+	private _index = -1;
+
 	#repository = new uSyncActionRepository(this);
 
 	constructor() {
@@ -48,30 +56,60 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 	connectedCallback() {
 		super.connectedCallback();
+		this._item = this.data?.item;
+		this._index = this.data?.items?.indexOf(this.data.item) ?? -1;
+		this.#loadPreview();
+	}
+
+	#moveTo(index: number) {
+		const item = this.data?.items?.[index];
+		if (!item) return;
+
+		this._index = index;
+		this._item = item;
+		this._preview = undefined;
 		this.#loadPreview();
 	}
 
 	async #loadPreview() {
-		const item = this.data?.item;
-		if (!item?.handler || !item.key) return;
+		const item = this._item;
+		if (!item?.handler || !item.key) {
+			this._tab = 'changes';
+			return;
+		}
 
 		// only some handlers support previews, the rest return a 404
 		// and the modal stays as it was (just the changes list).
 		const { data } = await this.#repository.getPreview(item.handler, item.key);
+
+		// moving through the list quickly can return previews out of order,
+		// so drop anything that isn't for the item we are now showing.
+		if (item !== this._item) return;
+
 		if (data?.entityType) {
 			this._preview = data;
+		} else {
+			this._tab = 'changes';
 		}
+	}
+
+	#showActions() {
+		const showActions = this.data?.showActions;
+		if (typeof showActions === 'function') {
+			return this._item ? showActions(this._item) : false;
+		}
+		return showActions ?? false;
 	}
 
 	async #onImport(e: Event) {
 		e.stopPropagation();
-		if (!this.data?.item) return;
+		if (!this._item) return;
 
 		const modalContext = await this.getContext(UMB_MODAL_MANAGER_CONTEXT);
 		if (!modalContext) return;
 
 		const modal = modalContext.open(this, USYNC_IMPORT_SINGLE_MODAL, {
-			data: { action: this.data?.item },
+			data: { action: this._item },
 		});
 
 		const data = await modal?.onSubmit().catch(() => {
@@ -87,7 +125,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 	render() {
 		return html`
-			<umb-body-layout headline="Changes : ${this.data?.item.name ?? ''}">
+			<umb-body-layout headline="Changes : ${this._item?.name ?? ''}">
 				<div class="layout">
 					<uui-box style="--uui-box-default-padding: 0;">
 						<div slot="header" id="header">
@@ -101,10 +139,11 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 						this._tab === 'preview' && this._preview
 							? this.renderPreview(this._preview)
 							: html`<uui-box style="--uui-box-default-padding: 0;">
-									<usync-change-view .item=${this.data?.item}></usync-change-view>
+									<usync-change-view .item=${this._item}></usync-change-view>
 								</uui-box>`
 					}
 				</div>
+				${this.renderNavigation()}
 				<div slot="actions">
 					<uui-button
 						id="cancel"
@@ -113,6 +152,38 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 				</div>
 			</umb-body-layout>
 		`;
+	}
+
+	renderNavigation() {
+		const count = this.data?.items?.length ?? 0;
+		if (count < 2 || this._index < 0) return nothing;
+
+		return html`<div slot="footer-info" id="navigation">
+			<uui-button
+				compact
+				look="secondary"
+				.label=${this.localize.term('general_previous')}
+				?disabled=${this._index === 0}
+				@click=${() => this.#moveTo(this._index - 1)}>
+				<uui-icon name="icon-arrow-left"></uui-icon>
+			</uui-button>
+			<span>
+				${this.localize.termOrDefault(
+					'uSync_detailPosition',
+					`${this._index + 1} of ${count}`,
+					this.localize.number(this._index + 1),
+					this.localize.number(count),
+				)}
+			</span>
+			<uui-button
+				compact
+				look="secondary"
+				.label=${this.localize.term('general_next')}
+				?disabled=${this._index === count - 1}
+				@click=${() => this.#moveTo(this._index + 1)}>
+				<uui-icon name="icon-arrow-right"></uui-icon>
+			</uui-button>
+		</div>`;
 	}
 
 	renderTabs() {
@@ -140,13 +211,17 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 			case 'member-type':
 				return html`<usync-content-type-preview
 					.preview=${preview}></usync-content-type-preview>`;
+			case 'document':
+			case 'media':
+				return html`<usync-content-preview
+					.preview=${preview}></usync-content-preview>`;
 			default:
 				return nothing;
 		}
 	}
 
 	renderActions() {
-		if (!this.data?.showActions) return nothing;
+		if (!this.#showActions()) return nothing;
 		return html` <uui-button
 			id="import"
 			type="button"
@@ -165,6 +240,13 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 		#header h3 {
 			margin: 0;
+		}
+
+		#navigation {
+			display: flex;
+			align-items: center;
+			gap: var(--uui-size-space-3);
+			padding-left: var(--uui-size-space-4);
 		}
 	`;
 }
