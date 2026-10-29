@@ -30,7 +30,7 @@ export default {
 		detailHeadline: 'Registrerede ændringer',
 		detailHeader: 'Ting der er anderledes',
 
-		previewTab: 'Forhåndsvisning',
+		previewTab: 'Visuel',
 		changesTab: 'Ændringer',
 		previewCurrent: 'Nuværende (dette site)',
 		previewIncoming: 'Indkommende (uSync-filer)',

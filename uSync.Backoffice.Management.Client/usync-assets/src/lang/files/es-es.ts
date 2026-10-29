@@ -30,7 +30,7 @@ export default {
 		detailHeadline: 'Cambios detectados',
 		detailHeader: 'Cosas que son diferentes',
 
-		previewTab: 'Vista previa',
+		previewTab: 'Visual',
 		changesTab: 'Cambios',
 		previewCurrent: 'Actual (este sitio)',
 		previewIncoming: 'Entrante (archivos de uSync)',
