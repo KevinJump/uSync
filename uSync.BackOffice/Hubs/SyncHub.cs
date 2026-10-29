@@ -26,6 +26,16 @@ public class SyncHub : Hub<ISyncHub>
     /// </remarks>
     public string GetTime()
         => DateTime.Now.ToString(CultureInfo.InvariantCulture);
+
+    /// <summary>
+    ///  Get the connection id for the calling client
+    /// </summary>
+    /// <remarks>
+    ///  when a client skips negotiation it never gets told its
+    ///  connection id, so it asks for it here to pass on with requests.
+    /// </remarks>
+    public string GetConnectionId()
+        => Context.ConnectionId;
 }
 
 /// <summary>
