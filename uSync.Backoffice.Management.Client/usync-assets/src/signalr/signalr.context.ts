@@ -39,6 +39,7 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		if (this.#connection) {
 			this.#connection.stop();
 			this.#connection = undefined;
+			this.#clientId = null;
 			this.#connected.setValue(false);
 		}
 
@@ -67,8 +68,10 @@ export class uSyncSignalRContext extends UmbControllerBase {
 	}
 
 	getClientId(): string | null {
-		return this.#connection?.connectionId ?? null;
+		return this.#clientId;
 	}
+
+	#clientId: string | null = null;
 
 	/**
 	 * Synchronous read of the current connection state - used by callers
@@ -141,12 +144,25 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		// a stopped connection can still report state while it winds down,
 		// only the current one may update connected.
 		const setConnected = (connected: boolean) => {
-			if (this.#connection === connection) this.#connected.setValue(connected);
+			if (this.#connection !== connection) return;
+			if (!connected) this.#clientId = null;
+			this.#connected.setValue(connected);
+		};
+
+		// the connection id comes from the negotiate response, so when
+		// negotiation is skipped we have to ask the hub for it.
+		const onConnected = async () => {
+			const clientId =
+				connection.connectionId ??
+				(await connection.invoke<string>('GetConnectionId').catch(() => null));
+			if (this.#connection !== connection) return;
+			this.#clientId = clientId;
+			setConnected(true);
 		};
 
 		connection
 			.start()
-			.then(() => setConnected(true))
+			.then(onConnected)
 			.catch((error) => {
 				// with negotiation skipped there is no transport fallback, so a
 				// blocked WebSocket ends here; status polling covers progress.
@@ -157,7 +173,7 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		// the client id changes on reconnect, requests made after this
 		// pick up the new one via getClientId().
 		connection.onreconnecting(() => setConnected(false));
-		connection.onreconnected(() => setConnected(true));
+		connection.onreconnected(onConnected);
 		connection.onclose(() => setConnected(false));
 	}
 }
