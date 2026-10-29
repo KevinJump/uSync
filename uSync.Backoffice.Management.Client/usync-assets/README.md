@@ -8,3 +8,9 @@ show things like changes, and updates ,etc.
 as a npm package, unless your client library is also going
 to be used by child packages.
 
+### SignalR negotiation
+
+The uSync SignalR client respects `Umbraco:Cms:SignalR:ClientShouldSkipNegotiation`
+when exposed by Umbraco's server context. When enabled, the client connects using
+WebSockets without negotiation. When disabled, or on older Umbraco versions
+that do not expose the setting, negotiation and transport fallback remain enabled.
