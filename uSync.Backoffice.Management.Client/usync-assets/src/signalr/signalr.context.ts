@@ -8,6 +8,7 @@ import {
 	SyncCompleteMessage,
 } from '@jumoo/uSync';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { UMB_SERVER_CONTEXT } from '@umbraco-cms/backoffice/server';
 import * as signalR from '@jumoo/uSync/external/signalr';
 import { uSyncSignalRReconnectPolicy } from './signalr-reconnect-policy.js';
 
@@ -19,12 +20,40 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		this.provideContext(USYNC_SIGNALR_CONTEXT_TOKEN, this);
 
 		this.consumeContext(UMB_AUTH_CONTEXT, (auth) => {
-			if (!auth) return;
-
-			const authConfig = auth?.getOpenApiConfiguration();
-			if (!authConfig) return;
-			this.#setupConnection('/umbraco/SyncHub', auth);
+			this.#auth = auth;
+			this.#connect();
 		});
+
+		this.consumeContext(UMB_SERVER_CONTEXT, (server) => {
+			this.#server = server;
+			this.#connect();
+		});
+	}
+
+	#auth?: typeof UMB_AUTH_CONTEXT.TYPE;
+	#server?: typeof UMB_SERVER_CONTEXT.TYPE;
+
+	#connect() {
+		// either context being re-provided replaces the connection, so
+		// stop the old one rather than leave it running alongside.
+		if (this.#connection) {
+			this.#connection.stop();
+			this.#connection = undefined;
+			this.#clientId = null;
+			this.#connected.setValue(false);
+		}
+
+		if (!this.#auth || !this.#server) return;
+		if (!this.#auth.getOpenApiConfiguration()) return;
+
+		const connection = this.#server.getServerConnection();
+		// Older Umbraco versions do not expose this setting.
+		const skipNegotiation =
+			'getSignalRSkipNegotiation' in connection &&
+			typeof connection.getSignalRSkipNegotiation === 'function' &&
+			connection.getSignalRSkipNegotiation() === true;
+
+		this.#setupConnection('/umbraco/SyncHub', this.#auth, skipNegotiation);
 	}
 
 	hostConnected(): void {
@@ -39,8 +68,10 @@ export class uSyncSignalRContext extends UmbControllerBase {
 	}
 
 	getClientId(): string | null {
-		return this.#connection?.connectionId ?? null;
+		return this.#clientId;
 	}
+
+	#clientId: string | null = null;
 
 	/**
 	 * Synchronous read of the current connection state - used by callers
@@ -79,11 +110,19 @@ export class uSyncSignalRContext extends UmbControllerBase {
 	#complete = new UmbObjectState<SyncCompleteMessage | undefined>(undefined);
 	public readonly complete = this.#complete.asObservable();
 
-	#setupConnection(url: string, auth: typeof UMB_AUTH_CONTEXT.TYPE) {
+	#setupConnection(
+		url: string,
+		auth: typeof UMB_AUTH_CONTEXT.TYPE,
+		skipNegotiation: boolean,
+	) {
 		// the token is fetched on every (re)connect, so a reconnect after
 		// the original token has expired still authenticates.
 		this.#connection = new signalR.HubConnectionBuilder()
-			.withUrl(url, { accessTokenFactory: () => auth.getLatestToken() })
+			.withUrl(url, {
+				accessTokenFactory: () => auth.getLatestToken(),
+				skipNegotiation,
+				transport: skipNegotiation ? signalR.HttpTransportType.WebSockets : undefined,
+			})
 			.withAutomaticReconnect(new uSyncSignalRReconnectPolicy())
 			.configureLogging(signalR.LogLevel.Warning)
 			.build();
@@ -100,23 +139,42 @@ export class uSyncSignalRContext extends UmbControllerBase {
 			this.#complete.setValue(data);
 		});
 
-		this.#connection.start().then(() => {
-			this.#connected.setValue(true);
-		});
+		const connection = this.#connection;
+
+		// a stopped connection can still report state while it winds down,
+		// only the current one may update connected.
+		const setConnected = (connected: boolean) => {
+			if (this.#connection !== connection) return;
+			if (!connected) this.#clientId = null;
+			this.#connected.setValue(connected);
+		};
+
+		// the connection id comes from the negotiate response, so when
+		// negotiation is skipped we have to ask the hub for it.
+		const onConnected = async () => {
+			const clientId =
+				connection.connectionId ??
+				(await connection.invoke<string>('GetConnectionId').catch(() => null));
+			if (this.#connection !== connection) return;
+			this.#clientId = clientId;
+			setConnected(true);
+		};
+
+		connection
+			.start()
+			.then(onConnected)
+			.catch((error) => {
+				// with negotiation skipped there is no transport fallback, so a
+				// blocked WebSocket ends here; status polling covers progress.
+				console.warn('uSync: SignalR connection failed', error);
+				setConnected(false);
+			});
 
 		// the client id changes on reconnect, requests made after this
 		// pick up the new one via getClientId().
-		this.#connection.onreconnecting(() => {
-			this.#connected.setValue(false);
-		});
-
-		this.#connection.onreconnected(() => {
-			this.#connected.setValue(true);
-		});
-
-		this.#connection.onclose(() => {
-			this.#connected.setValue(false);
-		});
+		connection.onreconnecting(() => setConnected(false));
+		connection.onreconnected(onConnected);
+		connection.onclose(() => setConnected(false));
 	}
 }
 
