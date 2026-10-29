@@ -8,6 +8,7 @@ import {
 	SyncCompleteMessage,
 } from '@jumoo/uSync';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import { UMB_SERVER_CONTEXT } from '@umbraco-cms/backoffice/server';
 import * as signalR from '@jumoo/uSync/external/signalr';
 import { uSyncSignalRReconnectPolicy } from './signalr-reconnect-policy.js';
 
@@ -23,7 +24,18 @@ export class uSyncSignalRContext extends UmbControllerBase {
 
 			const authConfig = auth?.getOpenApiConfiguration();
 			if (!authConfig) return;
-			this.#setupConnection('/umbraco/SyncHub', auth);
+			this.consumeContext(UMB_SERVER_CONTEXT, (server) => {
+				if (!server) return;
+
+				const connection = server.getServerConnection();
+				// Older Umbraco versions do not expose this setting.
+				const skipNegotiation =
+					'getSignalRSkipNegotiation' in connection &&
+					typeof connection.getSignalRSkipNegotiation === 'function' &&
+					connection.getSignalRSkipNegotiation() === true;
+
+				this.#setupConnection('/umbraco/SyncHub', auth, skipNegotiation);
+			});
 		});
 	}
 
@@ -79,11 +91,19 @@ export class uSyncSignalRContext extends UmbControllerBase {
 	#complete = new UmbObjectState<SyncCompleteMessage | undefined>(undefined);
 	public readonly complete = this.#complete.asObservable();
 
-	#setupConnection(url: string, auth: typeof UMB_AUTH_CONTEXT.TYPE) {
+	#setupConnection(
+		url: string,
+		auth: typeof UMB_AUTH_CONTEXT.TYPE,
+		skipNegotiation: boolean,
+	) {
 		// the token is fetched on every (re)connect, so a reconnect after
 		// the original token has expired still authenticates.
 		this.#connection = new signalR.HubConnectionBuilder()
-			.withUrl(url, { accessTokenFactory: () => auth.getLatestToken() })
+			.withUrl(url, {
+				accessTokenFactory: () => auth.getLatestToken(),
+				skipNegotiation,
+				transport: skipNegotiation ? signalR.HttpTransportType.WebSockets : undefined,
+			})
 			.withAutomaticReconnect(new uSyncSignalRReconnectPolicy())
 			.configureLogging(signalR.LogLevel.Warning)
 			.build();
