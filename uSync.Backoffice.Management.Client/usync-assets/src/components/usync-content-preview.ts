@@ -116,8 +116,8 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 			tabs[0];
 
 		return html`
-			${this.#renderToolbar()}
 			<div class="sides">
+				${this.#renderToolbar()}
 				${this.#renderSide('current', this.#current, tabs, active)}
 				${this.#renderSide('incoming', this.#incoming, tabs, active)}
 			</div>
@@ -171,14 +171,14 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 				: this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)');
 
 		if (!data.item) {
-			return html`<div class="side">
+			return html`<div class="side ${side}">
 				<h4 class="side-headline">${headline}</h4>
 				<uui-box class="info"><p class="empty">${this.#missingMessage(side)}</p></uui-box>
 			</div>`;
 		}
 
 		return html`
-			<div class="side">
+			<div class="side ${side}">
 				<h4 class="side-headline">${headline}</h4>
 				${this.#renderInfo(data)}
 				${
@@ -336,27 +336,26 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 		// but nothing in the preview can be changed.
 		return html`
 			<umb-property-dataset .value=${this.#datasetValue(item)} inert>
-				${tab.properties.length ? html`<uui-box>${this.#renderProperties(item, tab.properties)}</uui-box>` : nothing}
+				${tab.properties.length ? html`<uui-box>${this.#renderProperties(tab.properties)}</uui-box>` : nothing}
 				${repeat(
 					tab.groups,
 					(group) => group.name,
 					(group) =>
 						html`<uui-box headline=${group.name}
-							>${this.#renderProperties(item, group.properties)}</uui-box
+							>${this.#renderProperties(group.properties)}</uui-box
 						>`,
 				)}
 			</umb-property-dataset>
 		`;
 	}
 
-	#renderProperties(item: PreviewItem, properties: USyncLayoutProperty[]) {
+	#renderProperties(properties: USyncLayoutProperty[]) {
 		return repeat(
 			properties,
 			(entry) => entry.property.id,
 			({ property: p }) => {
 				const dataType = this.#dataTypes.get(p.dataType.id);
 				const status = this.#valueStatus(p);
-				const hasValue = this.#value(item, p) !== undefined;
 
 				return html`<div class="property ${status ?? ''}">
 					${
@@ -369,13 +368,6 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 									.config=${dataType.values}
 									.appearance=${p.appearance}></umb-property>`
 							: html`<p class="empty">${p.name}</p>`
-					}
-					${
-						status && !hasValue
-							? html`<p class="empty no-value">
-									${this.localize.termOrDefault('uSync_previewNoValue', 'No value')}
-								</p>`
-							: nothing
 					}
 				</div>`;
 			},
@@ -437,13 +429,17 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 			container-type: inline-size;
 		}
 
+		/* the toolbar shares the headline row with the incoming side, on the right. */
 		.toolbar {
+			grid-column: 2;
+			grid-row: 1;
+			justify-self: end;
+			align-self: center;
+			z-index: 1;
 			display: flex;
 			flex-wrap: wrap;
 			align-items: center;
-			justify-content: flex-end;
 			gap: var(--uui-size-space-4);
-			margin-bottom: var(--uui-size-space-4);
 		}
 
 		/* the two sides share rows (headline, info, tabs, content), so the
@@ -463,6 +459,16 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 			min-width: 0;
 		}
 
+		.side.current {
+			grid-column: 1;
+			grid-row: 1 / span 4;
+		}
+
+		.side.incoming {
+			grid-column: 2;
+			grid-row: 1 / span 4;
+		}
+
 		.side > .info:not(:last-child) {
 			align-self: stretch;
 		}
@@ -474,11 +480,23 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 				row-gap: var(--uui-size-layout-1);
 			}
 
+			.side,
+			.side.current,
+			.side.incoming,
+			.toolbar {
+				grid-column: 1;
+				grid-row: auto;
+			}
+
 			.side {
 				display: flex;
 				flex-direction: column;
+				align-items: stretch;
 				gap: var(--uui-size-space-4);
-				grid-row: auto;
+			}
+
+			.side > .side-headline {
+				align-self: auto;
 			}
 		}
 
@@ -490,6 +508,7 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 		}
 
 		.side-headline {
+			align-self: center;
 			margin: 0;
 			font-size: var(--uui-type-small-size);
 			text-transform: uppercase;
@@ -596,11 +615,6 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 		/* umb-property pads itself for a full workspace, tighten it up here. */
 		umb-property {
 			--uui-size-layout-1: var(--uui-size-space-4);
-		}
-
-		.no-value {
-			margin-top: calc(-1 * var(--uui-size-space-4));
-			padding-bottom: var(--uui-size-space-4);
 		}
 
 		.empty {

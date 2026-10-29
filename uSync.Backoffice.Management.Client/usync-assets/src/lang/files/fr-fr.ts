@@ -66,7 +66,6 @@ export default {
 		previewCulture: 'Langue',
 		previewOnlyChanges: 'Afficher uniquement les modifications',
 		previewNoValueChanges: 'Aucune valeur ne change',
-		previewNoValue: 'Aucune valeur',
 
 		runningInBackground:
 			'uSync exécute ce processus en arrière-plan. Si vous quittez cette page, il continuera de fonctionner.',

@@ -66,7 +66,6 @@ export default {
 		previewCulture: 'Taal',
 		previewOnlyChanges: 'Alleen wijzigingen tonen',
 		previewNoValueChanges: 'Geen waarden veranderen',
-		previewNoValue: 'Geen waarde',
 
 		runningInBackground:
 			'uSync voert dit proces op de achtergrond uit. Als u van deze pagina navigeert, blijft het doorlopen.',
