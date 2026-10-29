@@ -29,6 +29,7 @@ export default {
 
 		detailHeadline: 'Registrerede ændringer',
 		detailHeader: 'Ting der er anderledes',
+		detailPosition: '%0% af %1%',
 
 		previewTab: 'Visuel',
 		changesTab: 'Ændringer',

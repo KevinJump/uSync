@@ -29,6 +29,7 @@ export default {
 
 		detailHeadline: 'Erkannte Änderungen',
 		detailHeader: 'Was sich unterscheidet',
+		detailPosition: '%0% von %1%',
 
 		previewTab: 'Visuell',
 		changesTab: 'Änderungen',

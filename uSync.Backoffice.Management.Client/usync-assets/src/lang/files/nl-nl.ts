@@ -29,6 +29,7 @@ export default {
 
 		detailHeadline: 'Gedetecteerde wijzigingen',
 		detailHeader: 'Wat er anders is',
+		detailPosition: '%0% van %1%',
 
 		previewTab: 'Visueel',
 		changesTab: 'Wijzigingen',
