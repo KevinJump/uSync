@@ -21,6 +21,7 @@ using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.Core;
 using uSync.Core.Extensions;
+using uSync.Core.Serialization;
 
 using UdiEntityType = Umbraco.Cms.Core.Constants.UdiEntityType;
 
@@ -115,8 +116,8 @@ public class SyncPreviewController : uSyncControllerBase
                 response.EntityType = UdiEntityType.Document;
                 response.CurrentDocument = MapItem<IContent, DocumentResponseModel>(preview.Current);
                 response.IncomingDocument = MapItem<IContent, DocumentResponseModel>(preview.Incoming);
-                response.CurrentInfo = await MapContentInfoAsync(preview.Current as IContent, UmbracoObjectTypes.Document, null);
-                response.IncomingInfo = await MapContentInfoAsync(preview.Incoming as IContent, UmbracoObjectTypes.Document, preview.Node);
+                response.CurrentInfo = await MapContentInfoAsync(preview.Current as IContent, UmbracoObjectTypes.Document, null, preview.Options);
+                response.IncomingInfo = await MapContentInfoAsync(preview.Incoming as IContent, UmbracoObjectTypes.Document, preview.Node, preview.Options);
 
                 var contentType = ContentTypeOf<IContent, IContentType>(preview, x => _contentTypeService.Get(x.ContentType.Key));
                 if (contentType is not null)
@@ -131,8 +132,8 @@ public class SyncPreviewController : uSyncControllerBase
                 response.EntityType = UdiEntityType.Media;
                 response.CurrentMedia = MapItem<IMedia, MediaResponseModel>(preview.Current);
                 response.IncomingMedia = MapItem<IMedia, MediaResponseModel>(preview.Incoming);
-                response.CurrentInfo = await MapContentInfoAsync(preview.Current as IMedia, UmbracoObjectTypes.Media, null);
-                response.IncomingInfo = await MapContentInfoAsync(preview.Incoming as IMedia, UmbracoObjectTypes.Media, preview.Node);
+                response.CurrentInfo = await MapContentInfoAsync(preview.Current as IMedia, UmbracoObjectTypes.Media, null, preview.Options);
+                response.IncomingInfo = await MapContentInfoAsync(preview.Incoming as IMedia, UmbracoObjectTypes.Media, preview.Node, preview.Options);
 
                 var mediaType = ContentTypeOf<IMedia, IMediaType>(preview, x => _mediaTypeService.Get(x.ContentType.Key));
                 if (mediaType is not null)
@@ -235,16 +236,22 @@ public class SyncPreviewController : uSyncControllerBase
         return item is null ? null : getType(item);
     }
 
-    private async Task<SyncContentPreviewInfo?> MapContentInfoAsync(IContentBase? item, UmbracoObjectTypes objectType, XElement? node)
+    private async Task<SyncContentPreviewInfo?> MapContentInfoAsync(IContentBase? item, UmbracoObjectTypes objectType, XElement? node, SyncSerializerOptions? options)
     {
         if (item is null) return null;
+
+        // content sets the sort order and trashed state in the second pass (which a preview doesn't run),
+        // so for the incoming item they are read from the file, following the same settings as the import.
+        var nodeInfo = node?.Element(uSyncConstants.Xml.Info);
+        var ignoreSortOrder = options?.GetSetting(uSyncConstants.DefaultSettings.IgnoreSortOrder, uSyncConstants.DefaultSettings.IgnoreSortOrder_Default) ?? false;
 
         var info = new SyncContentPreviewInfo
         {
             Parent = GetParentName(item, objectType, node),
-            // content sets the sort order in the second pass (which a preview doesn't run), so read it from the file.
-            SortOrder = node?.Element(uSyncConstants.Xml.Info)?.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(item.SortOrder) ?? item.SortOrder,
-            Trashed = item.Trashed,
+            SortOrder = nodeInfo is null || ignoreSortOrder
+                ? item.SortOrder
+                : nodeInfo.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(item.SortOrder),
+            Trashed = nodeInfo?.Element("Trashed").ValueOrDefault(item.Trashed) ?? item.Trashed,
         };
 
         if (item is IContent content)
@@ -252,9 +259,10 @@ public class SyncPreviewController : uSyncControllerBase
             if (content.TemplateId is int templateId)
                 info.Template = (await _templateService.GetAsync(templateId))?.Alias;
 
-            info.Published = node is null
-                ? GetPublishedState(content)
-                : GetPublishedState(node);
+            // only the cultures uSync is set to sync are compared, the import leaves the others alone.
+            var cultures = options?.GetCultures() ?? [];
+            info.Published = [.. (node is null ? GetPublishedState(content) : GetPublishedState(node))
+                .Where(x => cultures.IsValidOrBlank(x.Culture))];
         }
 
         return info;

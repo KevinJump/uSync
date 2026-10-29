@@ -161,6 +161,7 @@ public class ContentPreviewTests : UmbracoIntegrationTest
         Assert.That(preview, Is.Not.Null);
         Assert.That(preview!.Success, Is.True, preview.Message);
         Assert.That(preview.Node, Is.SameAs(node));
+        Assert.That(preview.Options, Is.Not.Null);
         Assert.That(((IContent)preview.Current!).GetValue<string>("title"), Is.EqualTo("Old title"));
         Assert.That(((IContent)preview.Incoming!).GetValue<string>("title"), Is.EqualTo("New title"));
 

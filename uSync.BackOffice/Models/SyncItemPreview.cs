@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 
 using uSync.Core.Models;
+using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.Models;
 
@@ -33,6 +34,11 @@ public class SyncItemPreview
     ///  the uSync file the preview was built from
     /// </summary>
     public XElement? Node { get; set; }
+
+    /// <summary>
+    ///  the serializer options the dry run used (handler settings, cultures)
+    /// </summary>
+    public SyncSerializerOptions? Options { get; set; }
 
     /// <summary>
     ///  the item as it currently is in Umbraco (null if it doesn't exist yet)

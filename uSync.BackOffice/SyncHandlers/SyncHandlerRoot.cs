@@ -2299,6 +2299,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         };
         var attempt = await serializer.DeserializeAsync(node, options);
 
+        preview.Options = options;
         preview.Incoming = attempt.Item;
         preview.Success = attempt.Success;
         preview.Message = attempt.Message;
