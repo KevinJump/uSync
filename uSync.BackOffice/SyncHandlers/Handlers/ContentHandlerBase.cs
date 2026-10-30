@@ -114,36 +114,83 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
 
     private bool ImportPaths(XElement node, HandlerSettings config)
     {
-        var include = config.GetSetting("Include", "")
-            .Split([','], StringSplitOptions.RemoveEmptyEntries);
+        var path = node.GetPath();
+        if (string.IsNullOrWhiteSpace(path)) return true;
 
-        if (include.Length > 0)
+        if (IsIncludedPath(path, GetPathSetting(config, "Include")) is false)
         {
-            var path = node.GetPath();
-            if (!string.IsNullOrWhiteSpace(path) && !include.Any(x => path.InvariantStartsWith(x)))
-            {
-                if (logger.IsEnabled(LogLevel.Debug))
-                    logger.LogDebug("Not processing item, {alias} path {path} not in include path", node.GetAlias(), path);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Not processing item, {alias} path {path} not in include path", node.GetAlias(), path);
 
-                return false;
-            }
+            return false;
         }
 
-        var exclude = config.GetSetting("Exclude", "")
-            .Split([','], StringSplitOptions.RemoveEmptyEntries);
-        if (exclude.Length > 0)
+        if (IsExcludedPath(path, GetPathSetting(config, "Exclude")))
         {
-            var path = node.GetPath();
-            if (!string.IsNullOrWhiteSpace(path) && exclude.Any(x => path.InvariantStartsWith(x)))
-            {
-                if (logger.IsEnabled(LogLevel.Debug))
-                    logger.LogDebug("Not processing item, {alias} path {path} is excluded", node.GetAlias(), path);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Not processing item, {alias} path {path} is excluded", node.GetAlias(), path);
 
-                return false;
-            }
+            return false;
         }
 
         return true;
+    }
+
+    private static string[] GetPathSetting(HandlerSettings config, string key)
+        => config.GetSetting(key, "").Split([','], StringSplitOptions.RemoveEmptyEntries);
+
+    private static bool IsIncludedPath(string path, string[] include)
+        => include.Length == 0 || include.Any(x => path.InvariantStartsWith(x));
+
+    private static bool IsExcludedPath(string path, string[] exclude)
+        => exclude.Any(x => path.InvariantStartsWith(x));
+
+    /// <summary>
+    ///  could anything at or below this path pass the Include and Exclude rules?
+    /// </summary>
+    /// <remarks>
+    ///  everything below an item has a path that starts with the item's path, so a branch
+    ///  can only hold an included item if an include path starts with the item's path (it's
+    ///  further down the branch) or the item's path starts with an include path (it's in there already).
+    /// </remarks>
+    private static bool CanBranchHaveIncludedPaths(string path, string[] include, string[] exclude)
+    {
+        if (IsExcludedPath(path, exclude)) return false;
+        return include.Length == 0
+            || include.Any(x => path.InvariantStartsWith(x) || x.InvariantStartsWith(path));
+    }
+
+    private bool TryGetExportRulesPath(TObject item, HandlerSettings config, out string path)
+    {
+        path = string.Empty;
+        if (config.GetSetting("RulesOnExport", false) is false) return false;
+        if (serializer is not ISyncContentSerializer<TObject> contentSerializer) return false;
+
+        path = contentSerializer.GetItemPath(item);
+        return string.IsNullOrWhiteSpace(path) is false;
+    }
+
+    /// <summary>
+    ///  skip items the Include and Exclude rules will not export (when RulesOnExport is on)
+    /// </summary>
+    protected override Task<bool> CanSkipExportAsync(TObject item, HandlerSettings config)
+    {
+        if (TryGetExportRulesPath(item, config, out var path) is false) return Task.FromResult(false);
+
+        return Task.FromResult(
+            IsIncludedPath(path, GetPathSetting(config, "Include")) is false
+            || IsExcludedPath(path, GetPathSetting(config, "Exclude")));
+    }
+
+    /// <summary>
+    ///  skip branches the Include and Exclude rules will not export anything from (when RulesOnExport is on)
+    /// </summary>
+    protected override Task<bool> CanSkipChildExportsAsync(TObject item, HandlerSettings config)
+    {
+        if (TryGetExportRulesPath(item, config, out var path) is false) return Task.FromResult(false);
+
+        return Task.FromResult(
+            CanBranchHaveIncludedPaths(path, GetPathSetting(config, "Include"), GetPathSetting(config, "Exclude")) is false);
     }
 
     private bool ByDocTypeConfigCheck(XElement node, HandlerSettings config)
