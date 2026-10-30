@@ -920,7 +920,11 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             if (concreteType is not null)
             {  // only export the items (not the containers).
                 callback?.Invoke(GetItemName(concreteType), item.Index, items.Length);
-                actions.AddRange(await ExportAsync(concreteType, folders, config));
+                if (await CanSkipExportAsync(concreteType, config) is false)
+                    actions.AddRange(await ExportAsync(concreteType, folders, config));
+
+                if (await CanSkipChildExportsAsync(concreteType, config))
+                    continue;
             }
             actions.AddRange(await ExportAllAsync(item.Value, folders, config, callback));
         }
@@ -929,7 +933,27 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
     /// <summary>
-    /// Fetch all child items beneath a given container 
+    ///  can an export all skip this item, without serializing it to check?
+    /// </summary>
+    /// <remarks>
+    ///  only return true for items <see cref="ShouldExportAsync(XElement, HandlerSettings)"/>
+    ///  would turn down anyway.
+    /// </remarks>
+    protected virtual Task<bool> CanSkipExportAsync(TObject item, HandlerSettings config)
+        => Task.FromResult(false);
+
+    /// <summary>
+    ///  can an export all skip everything beneath this item?
+    /// </summary>
+    /// <remarks>
+    ///  lets handlers with path rules avoid walking (and serializing) whole branches
+    ///  of the tree that they will never export.
+    /// </remarks>
+    protected virtual Task<bool> CanSkipChildExportsAsync(TObject item, HandlerSettings config)
+        => Task.FromResult(false);
+
+    /// <summary>
+    /// Fetch all child items beneath a given container
     /// </summary>
     abstract protected Task<IEnumerable<TContainer>> GetChildItemsAsync(TContainer? parent);
 
