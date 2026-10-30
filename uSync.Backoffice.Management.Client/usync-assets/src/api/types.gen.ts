@@ -110,6 +110,18 @@ export type SyncHandlerSummary = {
     inError: boolean;
 };
 
+export type SyncItemPreviewResponse = {
+    key: string;
+    handler: string;
+    itemType: string;
+    entityType: string;
+    isDelete: boolean;
+    success: boolean;
+    message?: string | null;
+    preview?: unknown;
+    details: Array<USyncChange>;
+};
+
 export type SyncLegacyCheckResponse = {
     hasLegacy: boolean;
     legacyFolder?: string | null;
@@ -381,6 +393,36 @@ export type PerformActionResponses = {
 };
 
 export type PerformActionResponse2 = PerformActionResponses[keyof PerformActionResponses];
+
+export type GetPreviewData = {
+    body?: never;
+    path?: never;
+    query?: {
+        handler?: string;
+        key?: string;
+    };
+    url: '/umbraco/usync/api/v1/Preview';
+};
+
+export type GetPreviewErrors = {
+    /**
+     * The resource is protected and requires an authentication token
+     */
+    401: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+};
+
+export type GetPreviewResponses = {
+    /**
+     * OK
+     */
+    200: SyncItemPreviewResponse;
+};
+
+export type GetPreviewResponse = GetPreviewResponses[keyof GetPreviewResponses];
 
 export type ProcessUploadData = {
     body?: never;

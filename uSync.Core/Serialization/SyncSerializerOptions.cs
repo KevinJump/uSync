@@ -64,7 +64,28 @@ public class SyncSerializerOptions
     /// </summary>
     public bool Force => Flags.HasFlag(SerializerFlags.Force);
 
-    // public bool DoNotSave => Flags.HasFlag(SerializerFlags.DoNotSave);
+    /// <summary>
+    ///  don't save anything - the item is built in memory only (dry run / preview)
+    /// </summary>
+    public bool DoNotSave => Flags.HasFlag(SerializerFlags.DoNotSave);
+
+    /// <summary>
+    ///  finds items that are part of the import but are not in Umbraco yet (item type, key).
+    /// </summary>
+    /// <remarks>
+    ///  set when previewing, so an item can use things (e.g. a new data type) 
+    ///  that the import would create before it. 
+    /// </remarks>
+    public Func<Type, Guid, Task<object?>>? PendingItemResolver { get; set; }
+
+    /// <summary>
+    ///  find an item that is part of the import, but isn't in Umbraco yet.
+    /// </summary>
+    public async Task<TItem?> FindPendingItemAsync<TItem>(Guid key)
+    {
+        if (PendingItemResolver is null || key == Guid.Empty) return default;
+        return await PendingItemResolver(typeof(TItem), key) is TItem item ? item : default;
+    }
 
     public bool FailOnMissingParent => Flags.HasFlag(SerializerFlags.FailMissingParent);
 

@@ -4,6 +4,7 @@ import { manifests as localization } from './lang/manifest.js';
 import { manifests as dialogs } from './dialogs/manifest.js';
 import { manifests as conditions } from './conditions/manifest.js';
 import { manifests as icons } from './icons/manifest.js';
+import { manifests as previews } from './preview/manifest.js';
 
 export const manifests = [
 	...localization,
@@ -12,4 +13,5 @@ export const manifests = [
 	...dialogs,
 	...conditions,
 	...icons,
+	...previews,
 ];

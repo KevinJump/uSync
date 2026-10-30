@@ -166,4 +166,11 @@ export class uSyncActionRepository extends UmbControllerBase {
 	async getSyncFileInfo() {
 		return await this.#actionDataSource.getSyncFileInfo();
 	}
+
+	/**
+	 * gets the current and incoming versions of an item, when its handler supports previews.
+	 */
+	async getPreview(handler: string, key: string) {
+		return await this.#actionDataSource.getPreview(handler, key);
+	}
 }

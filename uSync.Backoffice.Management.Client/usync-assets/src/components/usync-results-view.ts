@@ -54,11 +54,12 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {
 			data: {
 				item: e.action,
-				showActions:
+				items: this.#visibleItems(),
+				showActions: (item) =>
 					!this.hideActions &&
-					(e.action.change == ChangeType.CREATE ||
-						e.action.change == ChangeType.UPDATE ||
-						e.action.change == ChangeType.IMPORT),
+					(item.change == ChangeType.CREATE ||
+						item.change == ChangeType.UPDATE ||
+						item.change == ChangeType.IMPORT),
 			},
 		});
 
@@ -66,6 +67,22 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 			return;
 		});
 		if (!data) return;
+	}
+
+	/**
+	 * the items in the order they are shown in the list (grouped by type,
+	 * no-change items only when 'show all' is on), so the details dialog
+	 * can step through them. exports have no details, so are left out.
+	 */
+	#visibleItems() {
+		const groups = this.groupBy(this.results || [], (result) => result.itemType);
+		return Object.values(groups)
+			.flat()
+			.filter(
+				(r) =>
+					r.change !== ChangeType.EXPORT &&
+					(this.showAll || r.change !== ChangeType.NO_CHANGE),
+			);
 	}
 
 	groupBy<T>(arr: T[], fn: (item: T) => any) {

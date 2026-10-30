@@ -126,7 +126,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
     protected override async Task<SyncAttempt<IContentType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
-        var attempt = await FindOrCreateAsync(node);
+        var attempt = await FindOrCreateAsync(node, options);
         if (attempt.Success == false || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
@@ -134,10 +134,10 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         var details = new List<uSyncChange>();
 
-        details.AddRange(await DeserializeBaseAsync(item, node));
+        details.AddRange(await DeserializeBaseAsync(item, node, options));
 
         // compositions
-        details.AddRange(await DeserializeCompositionsAsync(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node, options));
 
         // tabs
         details.AddRange(DeserializeTabs(item, node));
@@ -178,7 +178,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         // we can do this here, hopefully its not needed 
         // as we graph sort at the start,
         // so it should say 'no changes' on a second pass.
-        details.AddRange(await DeserializeCompositionsAsync(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node, options));
 
         details.AddRange(await DeserializeStructureAsync(item, node));
 
@@ -212,7 +212,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             }
         }
 
-        await CleanFolderAsync(item, node);
+        await CleanFolderAsync(item, node, options);
 
         return SyncAttempt<IContentType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, "", saveInSerializer, details);
     }
