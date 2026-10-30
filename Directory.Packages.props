@@ -22,7 +22,7 @@
   </ItemGroup>
   <!-- source link -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.402" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.403" />
   </ItemGroup>
   <!-- testing -->
   <ItemGroup>
