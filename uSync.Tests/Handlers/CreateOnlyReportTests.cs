@@ -11,7 +11,6 @@ using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
-using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_15_0_0.LocalLinks;
 using Umbraco.Cms.Tests.Common.Testing;
 using Umbraco.Cms.Tests.Integration.Testing;
 
@@ -47,9 +46,6 @@ public class CreateOnlyReportTests : UmbracoIntegrationTest
 
     protected override void CustomTestSetup(IUmbracoBuilder builder)
     {
-        // the RTE mapper needs the local link processor, which the test host doesn't register.
-        new ConvertLocalLinkComposer().Compose(builder);
-
         builder.AdduSync(settings =>
         {
             settings.ExportAtStartup = "None";
@@ -68,11 +64,11 @@ public class CreateOnlyReportTests : UmbracoIntegrationTest
     private ContentHandler Handler
         => GetRequiredService<SyncHandlerCollection>().OfType<ContentHandler>().Single();
 
-    private IContent CreateContent()
+    private async Task<IContent> CreateContent()
     {
         var shortStringHelper = GetRequiredService<IShortStringHelper>();
         var contentType = new ContentType(shortStringHelper, -1) { Alias = "page", Name = "Page" };
-        GetRequiredService<IContentTypeService>().Save(contentType);
+        await GetRequiredService<IContentTypeService>().CreateAsync(contentType, Umbraco.Cms.Core.Constants.Security.SuperUserKey);
 
         var contentService = GetRequiredService<IContentService>();
         var content = contentService.Create("home", -1, contentType);
@@ -91,7 +87,7 @@ public class CreateOnlyReportTests : UmbracoIntegrationTest
     [Test]
     public async Task Report_CreateOnly_RenamedContent_IsNotAChange()
     {
-        var content = CreateContent();
+        var content = await CreateContent();
         var config = CreateOnlyConfig();
         var folders = new[] { $"{_root}/{Guid.NewGuid():N}/" };
 
@@ -110,7 +106,7 @@ public class CreateOnlyReportTests : UmbracoIntegrationTest
     [Test]
     public async Task Report_RenamedContent_IsAChange()
     {
-        var content = CreateContent();
+        var content = await CreateContent();
         var config = Handler.DefaultConfig.Clone();
         var folders = new[] { $"{_root}/{Guid.NewGuid():N}/" };
 
@@ -163,8 +159,6 @@ public class CreateOnlyReportConfigTests : UmbracoIntegrationTest
 
     protected override void CustomTestSetup(IUmbracoBuilder builder)
     {
-        new ConvertLocalLinkComposer().Compose(builder);
-
         builder.AdduSync(settings =>
         {
             settings.ExportAtStartup = "None";
@@ -177,7 +171,7 @@ public class CreateOnlyReportConfigTests : UmbracoIntegrationTest
     {
         var shortStringHelper = GetRequiredService<IShortStringHelper>();
         var contentType = new ContentType(shortStringHelper, -1) { Alias = "page", Name = "Page" };
-        GetRequiredService<IContentTypeService>().Save(contentType);
+        await GetRequiredService<IContentTypeService>().CreateAsync(contentType, Umbraco.Cms.Core.Constants.Security.SuperUserKey);
 
         var contentService = GetRequiredService<IContentService>();
         var content = contentService.Create("home", -1, contentType);

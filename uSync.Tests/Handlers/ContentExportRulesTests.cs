@@ -11,7 +11,6 @@ using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
-using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_15_0_0.LocalLinks;
 using Umbraco.Cms.Tests.Common.Testing;
 using Umbraco.Cms.Tests.Integration.Testing;
 
@@ -47,9 +46,6 @@ public class ContentExportRulesTests : UmbracoIntegrationTest
 
     protected override void CustomTestSetup(IUmbracoBuilder builder)
     {
-        // the RTE mapper needs the local link processor, which the test host doesn't register.
-        new ConvertLocalLinkComposer().Compose(builder);
-
         builder.AdduSync(settings =>
         {
             settings.ExportAtStartup = "None";
@@ -69,11 +65,11 @@ public class ContentExportRulesTests : UmbracoIntegrationTest
     /// <summary>
     ///  /home/products/widget, /home/about/team and /other/page
     /// </summary>
-    private Dictionary<string, Guid> CreateTree()
+    private async Task<Dictionary<string, Guid>> CreateTree()
     {
         var shortStringHelper = GetRequiredService<IShortStringHelper>();
         var contentType = new ContentType(shortStringHelper, -1) { Alias = "page", Name = "Page", AllowedAsRoot = true };
-        GetRequiredService<IContentTypeService>().Save(contentType);
+        await GetRequiredService<IContentTypeService>().CreateAsync(contentType, Umbraco.Cms.Core.Constants.Security.SuperUserKey);
 
         var contentService = GetRequiredService<IContentService>();
         var keys = new Dictionary<string, Guid>();
@@ -113,7 +109,7 @@ public class ContentExportRulesTests : UmbracoIntegrationTest
     [Test]
     public async Task ExportAll_Include_OnlyVisitsIncludedBranch()
     {
-        var keys = CreateTree();
+        var keys = await CreateTree();
 
         var exported = await ExportAll(keys, Config(include: "/home/products"));
 
@@ -123,7 +119,7 @@ public class ContentExportRulesTests : UmbracoIntegrationTest
     [Test]
     public async Task ExportAll_Exclude_SkipsExcludedBranch()
     {
-        var keys = CreateTree();
+        var keys = await CreateTree();
 
         var exported = await ExportAll(keys, Config(exclude: "/home/about"));
 
@@ -133,7 +129,7 @@ public class ContentExportRulesTests : UmbracoIntegrationTest
     [Test]
     public async Task ExportAll_IncludeWithoutRulesOnExport_ExportsEverything()
     {
-        var keys = CreateTree();
+        var keys = await CreateTree();
 
         var exported = await ExportAll(keys, Config(include: "/home/products", rulesOnExport: false));
 
