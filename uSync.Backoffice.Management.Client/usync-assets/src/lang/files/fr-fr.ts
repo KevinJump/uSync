@@ -31,8 +31,8 @@ export default {
 		detailHeader: 'Ce qui est différent',
 		detailPosition: '%0% sur %1%',
 
-		previewTab: 'Visuel',
 		changesTab: 'Modifications',
+		diffTab: 'Diff',
 		previewCurrent: 'Actuel (ce site)',
 		previewIncoming: 'Entrant (fichiers uSync)',
 		previewNotInSite: "Cet élément n'existe pas encore sur le site",

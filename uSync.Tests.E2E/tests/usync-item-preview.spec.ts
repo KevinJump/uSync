@@ -139,7 +139,7 @@ async function openPreview(page: Page, group: string, item: string) {
 	await groupView.locator('usync-result-row').filter({ hasText: item }).locator('.row').click();
 
 	const modal = page.locator('usync-details-modal');
-	await modal.locator('uui-tab').filter({ hasText: 'Preview' }).click();
+	await modal.locator('uui-tab').filter({ hasText: 'Changes' }).click();
 	return modal;
 }
 

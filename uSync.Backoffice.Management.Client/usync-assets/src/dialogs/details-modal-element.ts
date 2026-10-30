@@ -22,7 +22,7 @@ import '../components/usync-data-type-preview.js';
 import '../components/usync-content-type-preview.js';
 import '../components/usync-content-preview.js';
 
-type DetailsTab = 'changes' | 'preview';
+type DetailsTab = 'changes' | 'diff';
 
 @customElement('usync-details-modal')
 export class uSyncDetailsModalElement extends UmbModalBaseElement<
@@ -37,6 +37,9 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 	@state()
 	private _tab: DetailsTab = 'changes';
+
+	@state()
+	private _loading = false;
 
 	@state()
 	private _item?: USyncActionView;
@@ -73,23 +76,21 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 	async #loadPreview() {
 		const item = this._item;
-		if (!item?.handler || !item.key) {
-			this._tab = 'changes';
-			return;
-		}
+		if (!item?.handler || !item.key) return;
 
 		// only some handlers support previews, the rest return a 404
-		// and the modal stays as it was (just the changes list).
+		// and the modal shows the diff on its own. we leave _tab alone
+		// so a user who picked the diff stays on it as they move through.
+		this._loading = true;
 		const { data } = await this.#repository.getPreview(item.handler, item.key);
 
 		// moving through the list quickly can return previews out of order,
 		// so drop anything that isn't for the item we are now showing.
 		if (item !== this._item) return;
 
+		this._loading = false;
 		if (data?.entityType) {
 			this._preview = data;
-		} else {
-			this._tab = 'changes';
 		}
 	}
 
@@ -125,7 +126,8 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 	render() {
 		return html`
-			<umb-body-layout headline="Changes : ${this._item?.name ?? ''}">
+			<umb-body-layout>
+				${this.renderHeadline()}
 				<div class="layout">
 					<uui-box style="--uui-box-default-padding: 0;">
 						<div slot="header" id="header">
@@ -135,13 +137,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 						<div slot="header-actions">${this.renderActions()}</div>
 					</uui-box>
 					${this.renderTabs()}
-					${
-						this._tab === 'preview' && this._preview
-							? this.renderPreview(this._preview)
-							: html`<uui-box style="--uui-box-default-padding: 0;">
-									<usync-change-view .item=${this._item}></usync-change-view>
-								</uui-box>`
-					}
+					${this.renderTabContent()}
 				</div>
 				${this.renderNavigation()}
 				<div slot="actions">
@@ -152,6 +148,23 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 				</div>
 			</umb-body-layout>
 		`;
+	}
+
+	renderHeadline() {
+		const item = this._item;
+		if (!item) return nothing;
+
+		// singular names first (Content type), then the plural group
+		// names the results use (Content Types), then the raw type.
+		const itemType = this.localize.termOrDefault(
+			`uSync_itemType${item.itemType}`,
+			this.localize.termOrDefault(`uSync_${item.itemType}`, item.itemType),
+		);
+
+		return html`<div slot="header" id="headline">
+			<h3 title=${item.name}>Changes : ${item.name}</h3>
+			<span class="item-info">${itemType} · ${item.change}</span>
+		</div>`;
 	}
 
 	renderNavigation() {
@@ -190,15 +203,34 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		if (!this._preview) return nothing;
 
 		return html`<uui-tab-group>
-			<uui-tab
-				.label=${this.localize.termOrDefault('uSync_changesTab', 'Changes')}
-				?active=${this._tab === 'changes'}
-				@click=${() => (this._tab = 'changes')}></uui-tab>
-			<uui-tab
-				.label=${this.localize.termOrDefault('uSync_previewTab', 'Preview')}
-				?active=${this._tab === 'preview'}
-				@click=${() => (this._tab = 'preview')}></uui-tab>
+			${this.renderTab('changes', 'uSync_changesTab', 'Changes', 'icon-eye')}
+			${this.renderTab('diff', 'uSync_diffTab', 'Diff', 'icon-code')}
 		</uui-tab-group>`;
+	}
+
+	renderTab(tab: DetailsTab, key: string, fallback: string, icon: string) {
+		const label = this.localize.termOrDefault(key, fallback);
+		return html`<uui-tab
+			.label=${label}
+			?active=${this._tab === tab}
+			@click=${() => (this._tab = tab)}>
+			<!-- uui-tab stacks its icon slot above the label, so the icon
+			     goes in the label to keep them on one line. -->
+			<span class="tab-label"><umb-icon name=${icon}></umb-icon>${label}</span>
+		</uui-tab>`;
+	}
+
+	renderTabContent() {
+		// the visual changes view is the default, the raw diff is there
+		// for anything that doesn't have a preview (or if you ask for it).
+		if (this._tab === 'changes') {
+			if (this._loading) return html`<uui-loader-bar></uui-loader-bar>`;
+			if (this._preview) return this.renderPreview(this._preview);
+		}
+
+		return html`<uui-box style="--uui-box-default-padding: 0;">
+			<usync-change-view .item=${this._item}></usync-change-view>
+		</uui-box>`;
 	}
 
 	renderPreview(preview: SyncItemPreviewResponse) {
@@ -240,6 +272,41 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 		#header h3 {
 			margin: 0;
+		}
+
+		#headline {
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+		}
+
+		#headline h3 {
+			margin: 0;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		#headline .item-info {
+			font-size: var(--uui-type-small-size);
+			color: var(--uui-color-text-alt);
+		}
+
+		uui-tab-group {
+			background-color: var(--uui-color-surface);
+			border-radius: var(--uui-border-radius);
+			box-shadow: var(--uui-shadow-depth-1);
+			padding: 0 var(--uui-size-space-2);
+		}
+
+		.tab-label {
+			display: inline-flex;
+			align-items: center;
+			gap: var(--uui-size-space-2);
+		}
+
+		.tab-label umb-icon {
+			font-size: 16px;
 		}
 
 		#navigation {

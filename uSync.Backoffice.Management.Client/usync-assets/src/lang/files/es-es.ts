@@ -31,8 +31,8 @@ export default {
 		detailHeader: 'Cosas que son diferentes',
 		detailPosition: '%0% de %1%',
 
-		previewTab: 'Visual',
 		changesTab: 'Cambios',
+		diffTab: 'Diff',
 		previewCurrent: 'Actual (este sitio)',
 		previewIncoming: 'Entrante (archivos de uSync)',
 		previewNotInSite: 'Este elemento aún no existe en el sitio',

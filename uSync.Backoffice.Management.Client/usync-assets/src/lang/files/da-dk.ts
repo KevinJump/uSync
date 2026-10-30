@@ -31,8 +31,8 @@ export default {
 		detailHeader: 'Ting der er anderledes',
 		detailPosition: '%0% af %1%',
 
-		previewTab: 'Visuel',
 		changesTab: 'Ændringer',
+		diffTab: 'Diff',
 		previewCurrent: 'Nuværende (dette site)',
 		previewIncoming: 'Indkommende (uSync-filer)',
 		previewNotInSite: 'Dette element findes ikke på sitet endnu',
