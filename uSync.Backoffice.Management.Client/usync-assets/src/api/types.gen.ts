@@ -32,134 +32,6 @@ export enum ChangeType {
     REMOVED = 'Removed'
 }
 
-export enum CompositionTypeModel {
-    COMPOSITION = 'Composition',
-    INHERITANCE = 'Inheritance'
-}
-
-export type DataTypePropertyPresentationModel = {
-    alias: string;
-    value?: unknown;
-};
-
-export type DataTypeResponseModel = {
-    name: string;
-    editorAlias: string;
-    editorUiAlias: string;
-    values: Array<DataTypePropertyPresentationModel>;
-    id: string;
-    isDeletable: boolean;
-    canIgnoreStartNodes: boolean;
-};
-
-export type DocumentResponseModel = {
-    values: Array<DocumentValueResponseModel>;
-    variants: Array<DocumentVariantResponseModel>;
-    id: string;
-    flags: Array<FlagModel>;
-    documentType: DocumentTypeReferenceResponseModel;
-    template?: ReferenceByIdModel | null;
-    isTrashed: boolean;
-};
-
-export type DocumentTypeCleanupModel = {
-    preventCleanup: boolean;
-    keepAllVersionsNewerThanDays?: number | null;
-    keepLatestVersionPerDayForDays?: number | null;
-};
-
-export type DocumentTypeCompositionModel = {
-    documentType: ReferenceByIdModel;
-    compositionType: CompositionTypeModel;
-};
-
-export type DocumentTypePropertyTypeContainerResponseModel = {
-    id: string;
-    parent?: ReferenceByIdModel | null;
-    name?: string | null;
-    type: string;
-    sortOrder: number;
-};
-
-export type DocumentTypePropertyTypeResponseModel = {
-    id: string;
-    container?: ReferenceByIdModel | null;
-    sortOrder: number;
-    alias: string;
-    name: string;
-    description?: string | null;
-    dataType: ReferenceByIdModel;
-    variesByCulture: boolean;
-    variesBySegment: boolean;
-    validation: PropertyTypeValidationModel;
-    appearance: PropertyTypeAppearanceModel;
-};
-
-export type DocumentTypeReferenceResponseModel = {
-    id: string;
-    icon: string;
-    collection?: ReferenceByIdModel | null;
-};
-
-export type DocumentTypeResponseModel = {
-    alias: string;
-    name: string;
-    description?: string | null;
-    icon: string;
-    allowedAsRoot: boolean;
-    variesByCulture: boolean;
-    variesBySegment: boolean;
-    collection?: ReferenceByIdModel | null;
-    isElement: boolean;
-    properties: Array<DocumentTypePropertyTypeResponseModel>;
-    containers: Array<DocumentTypePropertyTypeContainerResponseModel>;
-    id: string;
-    allowedTemplates: Array<ReferenceByIdModel>;
-    defaultTemplate?: ReferenceByIdModel | null;
-    cleanup: DocumentTypeCleanupModel;
-    allowedDocumentTypes: Array<DocumentTypeSortModel>;
-    compositions: Array<DocumentTypeCompositionModel>;
-};
-
-export type DocumentTypeSortModel = {
-    documentType: ReferenceByIdModel;
-    sortOrder: number;
-};
-
-export type DocumentValueResponseModel = {
-    culture?: string | null;
-    segment?: string | null;
-    alias: string;
-    value?: unknown;
-    editorAlias: string;
-};
-
-export type DocumentVariantResponseModel = {
-    culture?: string | null;
-    segment?: string | null;
-    name: string;
-    createDate: string;
-    updateDate: string;
-    state: DocumentVariantStateModel;
-    publishDate?: string | null;
-    scheduledPublishDate?: string | null;
-    scheduledUnpublishDate?: string | null;
-    readonly id: string;
-    flags: Array<FlagModel>;
-};
-
-export enum DocumentVariantStateModel {
-    NOT_CREATED = 'NotCreated',
-    DRAFT = 'Draft',
-    PUBLISHED = 'Published',
-    PUBLISHED_PENDING_CHANGES = 'PublishedPendingChanges',
-    TRASHED = 'Trashed'
-}
-
-export type FlagModel = {
-    alias: string;
-};
-
 export type HandlerSettings = {
     enabled: boolean;
     actions: Array<string>;
@@ -181,138 +53,6 @@ export enum HandlerStatus {
     ERROR = 'Error'
 }
 
-export type MediaResponseModel = {
-    values: Array<MediaValueResponseModel>;
-    variants: Array<MediaVariantResponseModel>;
-    id: string;
-    flags: Array<FlagModel>;
-    isTrashed: boolean;
-    mediaType: MediaTypeReferenceResponseModel;
-};
-
-export type MediaTypeCompositionModel = {
-    mediaType: ReferenceByIdModel;
-    compositionType: CompositionTypeModel;
-};
-
-export type MediaTypePropertyTypeContainerResponseModel = {
-    id: string;
-    parent?: ReferenceByIdModel | null;
-    name?: string | null;
-    type: string;
-    sortOrder: number;
-};
-
-export type MediaTypePropertyTypeResponseModel = {
-    id: string;
-    container?: ReferenceByIdModel | null;
-    sortOrder: number;
-    alias: string;
-    name: string;
-    description?: string | null;
-    dataType: ReferenceByIdModel;
-    variesByCulture: boolean;
-    variesBySegment: boolean;
-    validation: PropertyTypeValidationModel;
-    appearance: PropertyTypeAppearanceModel;
-};
-
-export type MediaTypeReferenceResponseModel = {
-    id: string;
-    icon: string;
-    collection?: ReferenceByIdModel | null;
-};
-
-export type MediaTypeResponseModel = {
-    alias: string;
-    name: string;
-    description?: string | null;
-    icon: string;
-    allowedAsRoot: boolean;
-    variesByCulture: boolean;
-    variesBySegment: boolean;
-    collection?: ReferenceByIdModel | null;
-    isElement: boolean;
-    properties: Array<MediaTypePropertyTypeResponseModel>;
-    containers: Array<MediaTypePropertyTypeContainerResponseModel>;
-    id: string;
-    allowedMediaTypes: Array<MediaTypeSortModel>;
-    compositions: Array<MediaTypeCompositionModel>;
-    isDeletable: boolean;
-    aliasCanBeChanged: boolean;
-};
-
-export type MediaTypeSortModel = {
-    mediaType: ReferenceByIdModel;
-    sortOrder: number;
-};
-
-export type MediaValueResponseModel = {
-    culture?: string | null;
-    segment?: string | null;
-    alias: string;
-    value?: unknown;
-    editorAlias: string;
-};
-
-export type MediaVariantResponseModel = {
-    culture?: string | null;
-    segment?: string | null;
-    name: string;
-    createDate: string;
-    updateDate: string;
-};
-
-export type MemberTypeCompositionModel = {
-    memberType: ReferenceByIdModel;
-    compositionType: CompositionTypeModel;
-};
-
-export type MemberTypePropertyTypeContainerResponseModel = {
-    id: string;
-    parent?: ReferenceByIdModel | null;
-    name?: string | null;
-    type: string;
-    sortOrder: number;
-};
-
-export type MemberTypePropertyTypeResponseModel = {
-    id: string;
-    container?: ReferenceByIdModel | null;
-    sortOrder: number;
-    alias: string;
-    name: string;
-    description?: string | null;
-    dataType: ReferenceByIdModel;
-    variesByCulture: boolean;
-    variesBySegment: boolean;
-    validation: PropertyTypeValidationModel;
-    appearance: PropertyTypeAppearanceModel;
-    isSensitive: boolean;
-    visibility: MemberTypePropertyTypeVisibilityModel;
-};
-
-export type MemberTypePropertyTypeVisibilityModel = {
-    memberCanView: boolean;
-    memberCanEdit: boolean;
-};
-
-export type MemberTypeResponseModel = {
-    alias: string;
-    name: string;
-    description?: string | null;
-    icon: string;
-    allowedAsRoot: boolean;
-    variesByCulture: boolean;
-    variesBySegment: boolean;
-    collection?: ReferenceByIdModel | null;
-    isElement: boolean;
-    properties: Array<MemberTypePropertyTypeResponseModel>;
-    containers: Array<MemberTypePropertyTypeContainerResponseModel>;
-    id: string;
-    compositions: Array<MemberTypeCompositionModel>;
-};
-
 export type PerformActionRequest = {
     requestId: string;
     action: string;
@@ -329,21 +69,6 @@ export type PerformActionResponse = {
     inBackground: boolean;
     operationId?: string | null;
     message?: string | null;
-};
-
-export type PropertyTypeAppearanceModel = {
-    labelOnTop: boolean;
-};
-
-export type PropertyTypeValidationModel = {
-    mandatory: boolean;
-    mandatoryMessage?: string | null;
-    regEx?: string | null;
-    regExMessage?: string | null;
-};
-
-export type ReferenceByIdModel = {
-    id: string;
 };
 
 export type SyncActionButton = {
@@ -363,19 +88,6 @@ export type SyncActionGroup = {
     groupName: string;
     buttons: Array<SyncActionButton>;
     lastSync?: string | null;
-};
-
-export type SyncContentPreviewCulture = {
-    culture: string;
-    published: boolean;
-};
-
-export type SyncContentPreviewInfo = {
-    parent?: string | null;
-    sortOrder: number;
-    trashed: boolean;
-    template?: string | null;
-    published: Array<SyncContentPreviewCulture>;
 };
 
 export type SyncFileVersionCheckResult = {
@@ -406,26 +118,7 @@ export type SyncItemPreviewResponse = {
     isDelete: boolean;
     success: boolean;
     message?: string | null;
-    currentDataType?: DataTypeResponseModel | null;
-    incomingDataType?: DataTypeResponseModel | null;
-    currentDocumentType?: DocumentTypeResponseModel | null;
-    incomingDocumentType?: DocumentTypeResponseModel | null;
-    currentMediaType?: MediaTypeResponseModel | null;
-    incomingMediaType?: MediaTypeResponseModel | null;
-    currentMemberType?: MemberTypeResponseModel | null;
-    incomingMemberType?: MemberTypeResponseModel | null;
-    currentDocument?: DocumentResponseModel | null;
-    incomingDocument?: DocumentResponseModel | null;
-    currentMedia?: MediaResponseModel | null;
-    incomingMedia?: MediaResponseModel | null;
-    currentInfo?: SyncContentPreviewInfo | null;
-    incomingInfo?: SyncContentPreviewInfo | null;
-    compositionDocumentTypes: Array<DocumentTypeResponseModel>;
-    compositionMediaTypes: Array<MediaTypeResponseModel>;
-    compositionMemberTypes: Array<MemberTypeResponseModel>;
-    dataTypes: Array<DataTypeResponseModel>;
-    newDataTypes: Array<string>;
-    newCompositions: Array<string>;
+    preview?: unknown;
     details: Array<USyncChange>;
 };
 
@@ -559,60 +252,6 @@ export type USyncSettings = {
     productionFolder: string;
     additionalBadNames: Array<string>;
     includeWindowsReservedNames: boolean;
-};
-
-export type DocumentResponseModelWritable = {
-    values: Array<DocumentValueResponseModel>;
-    variants: Array<DocumentVariantResponseModelWritable>;
-    id: string;
-    flags: Array<FlagModel>;
-    documentType: DocumentTypeReferenceResponseModel;
-    template?: ReferenceByIdModel | null;
-    isTrashed: boolean;
-};
-
-export type DocumentVariantResponseModelWritable = {
-    culture?: string | null;
-    segment?: string | null;
-    name: string;
-    createDate: string;
-    updateDate: string;
-    state: DocumentVariantStateModel;
-    publishDate?: string | null;
-    scheduledPublishDate?: string | null;
-    scheduledUnpublishDate?: string | null;
-    flags: Array<FlagModel>;
-};
-
-export type SyncItemPreviewResponseWritable = {
-    key: string;
-    handler: string;
-    itemType: string;
-    entityType: string;
-    isDelete: boolean;
-    success: boolean;
-    message?: string | null;
-    currentDataType?: DataTypeResponseModel | null;
-    incomingDataType?: DataTypeResponseModel | null;
-    currentDocumentType?: DocumentTypeResponseModel | null;
-    incomingDocumentType?: DocumentTypeResponseModel | null;
-    currentMediaType?: MediaTypeResponseModel | null;
-    incomingMediaType?: MediaTypeResponseModel | null;
-    currentMemberType?: MemberTypeResponseModel | null;
-    incomingMemberType?: MemberTypeResponseModel | null;
-    currentDocument?: DocumentResponseModelWritable | null;
-    incomingDocument?: DocumentResponseModelWritable | null;
-    currentMedia?: MediaResponseModel | null;
-    incomingMedia?: MediaResponseModel | null;
-    currentInfo?: SyncContentPreviewInfo | null;
-    incomingInfo?: SyncContentPreviewInfo | null;
-    compositionDocumentTypes: Array<DocumentTypeResponseModel>;
-    compositionMediaTypes: Array<MediaTypeResponseModel>;
-    compositionMemberTypes: Array<MemberTypeResponseModel>;
-    dataTypes: Array<DataTypeResponseModel>;
-    newDataTypes: Array<string>;
-    newCompositions: Array<string>;
-    details: Array<USyncChange>;
 };
 
 export type GetActionsData = {

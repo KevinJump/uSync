@@ -2,7 +2,7 @@ import type {
 	DocumentTypeResponseModel,
 	MediaTypeResponseModel,
 	MemberTypeResponseModel,
-} from '../../api';
+} from '@umbraco-cms/backoffice/external/backend-api';
 
 /**
  * the shape document, media and member types share - enough to lay out

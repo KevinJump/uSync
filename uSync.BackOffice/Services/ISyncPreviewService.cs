@@ -11,12 +11,13 @@ namespace uSync.BackOffice.Services;
 public interface ISyncPreviewService
 {
     /// <summary>
-    ///  get the current and incoming versions of an item from the uSync folders.
+    ///  get the current and incoming versions of an item from the uSync folders, 
+    ///  mapped by the first preview mapper that can map them.
     /// </summary>
     /// <remarks>
     ///  the mapper is called inside the preview scope, so it can read the database, 
     ///  and nothing it (or the dry run) writes is kept.
     /// </remarks>
     /// <returns>null if the handler or item can't be found, or the handler doesn't support previews</returns>
-    Task<TResult?> GetPreviewAsync<TResult>(string handlerAlias, Guid key, Func<SyncItemPreview, Task<TResult>> mapper);
+    Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, Guid key);
 }

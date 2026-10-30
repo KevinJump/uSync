@@ -14,13 +14,12 @@ import {
 	uSyncActionRepository,
 	uSyncDetailsModalData,
 	uSyncDetailsModalValue,
+	type ManifestuSyncItemPreview,
 	type SyncItemPreviewResponse,
 	type USyncActionView,
 } from '@jumoo/uSync';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
-import '../components/usync-data-type-preview.js';
-import '../components/usync-content-type-preview.js';
-import '../components/usync-content-preview.js';
+import { umbExtensionsRegistry } from '@umbraco-cms/backoffice/extension-registry';
 
 type DetailsTab = 'changes' | 'diff';
 
@@ -47,10 +46,23 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 	@state()
 	private _index = -1;
 
+	/** the entity types there is a 'usync-item-preview' element for */
+	@state()
+	private _previewTypes = new Set<string>();
+
 	#repository = new uSyncActionRepository(this);
+
+	// kept between renders, so the extension slot doesn't rebuild the preview each time.
+	#previewFilter = (_manifest: ManifestuSyncItemPreview) => false;
+	#previewProps: { preview?: SyncItemPreviewResponse } = {};
 
 	constructor() {
 		super();
+
+		this.observe(umbExtensionsRegistry.byType('usync-item-preview'), (manifests) => {
+			this._previewTypes = new Set(manifests.flatMap((m) => m.forEntityTypes));
+		});
+
 		// this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
 		// 	if (!_instance) return;
 		// 	this.#actionContext = _instance;
@@ -90,8 +102,16 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 		this._loading = false;
 		if (data?.entityType) {
+			const entityType = data.entityType;
+			this.#previewFilter = (manifest) => manifest.forEntityTypes.includes(entityType);
+			this.#previewProps = { preview: data };
 			this._preview = data;
 		}
+	}
+
+	/** there is a preview, and an element registered to show it */
+	#hasPreview() {
+		return !!this._preview && this._previewTypes.has(this._preview.entityType);
 	}
 
 	#showActions() {
@@ -200,7 +220,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 	}
 
 	renderTabs() {
-		if (!this._preview) return nothing;
+		if (!this.#hasPreview()) return nothing;
 
 		return html`<uui-tab-group>
 			${this.renderTab('changes', 'uSync_changesTab', 'Changes', 'icon-eye')}
@@ -225,7 +245,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		// for anything that doesn't have a preview (or if you ask for it).
 		if (this._tab === 'changes') {
 			if (this._loading) return html`<uui-loader-bar></uui-loader-bar>`;
-			if (this._preview) return this.renderPreview(this._preview);
+			if (this.#hasPreview()) return this.renderPreview();
 		}
 
 		return html`<uui-box style="--uui-box-default-padding: 0;">
@@ -233,23 +253,14 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		</uui-box>`;
 	}
 
-	renderPreview(preview: SyncItemPreviewResponse) {
-		switch (preview.entityType) {
-			case 'data-type':
-				return html`<usync-data-type-preview
-					.preview=${preview}></usync-data-type-preview>`;
-			case 'document-type':
-			case 'media-type':
-			case 'member-type':
-				return html`<usync-content-type-preview
-					.preview=${preview}></usync-content-type-preview>`;
-			case 'document':
-			case 'media':
-				return html`<usync-content-preview
-					.preview=${preview}></usync-content-preview>`;
-			default:
-				return nothing;
-		}
+	renderPreview() {
+		// packages can show previews for their own items by registering a
+		// 'usync-item-preview' element for the entity type their preview mapper returns.
+		return html`<umb-extension-slot
+			type="usync-item-preview"
+			single
+			.filter=${this.#previewFilter}
+			.props=${this.#previewProps}></umb-extension-slot>`;
 	}
 
 	renderActions() {

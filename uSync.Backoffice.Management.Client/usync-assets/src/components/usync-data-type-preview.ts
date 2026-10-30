@@ -8,7 +8,9 @@ import {
 	property,
 } from '@umbraco-cms/backoffice/external/lit';
 import '@umbraco-cms/backoffice/components';
-import type { DataTypeResponseModel, SyncItemPreviewResponse } from '../api';
+import type { DataTypeResponseModel } from '@umbraco-cms/backoffice/external/backend-api';
+import type { SyncItemPreviewResponse } from '../api';
+import { getPreviewModel, type SyncDataTypePreview } from '../preview/types.js';
 import { deepEqual, prettyJson } from '../utils/diff/index.js';
 
 type PreviewSide = 'current' | 'incoming';
@@ -28,8 +30,9 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 	render() {
 		if (!this.preview) return nothing;
 
-		const current = this.preview.currentDataType ?? undefined;
-		const incoming = this.preview.incomingDataType ?? undefined;
+		const model = getPreviewModel<SyncDataTypePreview>(this.preview);
+		const current = model?.current ?? undefined;
+		const incoming = model?.incoming ?? undefined;
 
 		return html`
 			<div class="sides">

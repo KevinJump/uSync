@@ -1,10 +1,3 @@
-using Umbraco.Cms.Api.Management.ViewModels.DataType;
-using Umbraco.Cms.Api.Management.ViewModels.Document;
-using Umbraco.Cms.Api.Management.ViewModels.DocumentType;
-using Umbraco.Cms.Api.Management.ViewModels.Media;
-using Umbraco.Cms.Api.Management.ViewModels.MediaType;
-using Umbraco.Cms.Api.Management.ViewModels.MemberType;
-
 using uSync.Core.Models;
 
 namespace uSync.Backoffice.Management.Api.Models;
@@ -23,6 +16,9 @@ public class SyncItemPreviewResponse
     /// <summary>
     ///  the backoffice entity type for the item (e.g. data-type), empty when there is no typed preview.
     /// </summary>
+    /// <remarks>
+    ///  the backoffice shows the 'usync-item-preview' element registered for this entity type.
+    /// </remarks>
     public string EntityType { get; set; } = string.Empty;
 
     public bool IsDelete { get; set; }
@@ -31,67 +27,10 @@ public class SyncItemPreviewResponse
 
     public string? Message { get; set; }
 
-    public DataTypeResponseModel? CurrentDataType { get; set; }
-
-    public DataTypeResponseModel? IncomingDataType { get; set; }
-
-    /// <remarks>
-    ///  for a document, this is the document type of the item (as it is in the site).
-    /// </remarks>
-    public DocumentTypeResponseModel? CurrentDocumentType { get; set; }
-
-    public DocumentTypeResponseModel? IncomingDocumentType { get; set; }
-
-    /// <remarks>
-    ///  for a media item, this is the media type of the item (as it is in the site).
-    /// </remarks>
-    public MediaTypeResponseModel? CurrentMediaType { get; set; }
-
-    public MediaTypeResponseModel? IncomingMediaType { get; set; }
-
-    public MemberTypeResponseModel? CurrentMemberType { get; set; }
-
-    public MemberTypeResponseModel? IncomingMemberType { get; set; }
-
-    public DocumentResponseModel? CurrentDocument { get; set; }
-
-    public DocumentResponseModel? IncomingDocument { get; set; }
-
-    public MediaResponseModel? CurrentMedia { get; set; }
-
-    public MediaResponseModel? IncomingMedia { get; set; }
-
     /// <summary>
-    ///  parent, sort order, template and published state of a content or media item.
+    ///  the model the preview mapper for the entity type built (e.g. <see cref="SyncDataTypePreview"/>).
     /// </summary>
-    public SyncContentPreviewInfo? CurrentInfo { get; set; }
-
-    public SyncContentPreviewInfo? IncomingInfo { get; set; }
-
-    /// <summary>
-    ///  the content types either side is composed of (as they are in the site), 
-    ///  so the preview can show inherited tabs, groups and properties.
-    /// </summary>
-    public List<DocumentTypeResponseModel> CompositionDocumentTypes { get; set; } = [];
-
-    public List<MediaTypeResponseModel> CompositionMediaTypes { get; set; } = [];
-
-    public List<MemberTypeResponseModel> CompositionMemberTypes { get; set; } = [];
-
-    /// <summary>
-    ///  the data types used by the properties on either side (as they are in the site).
-    /// </summary>
-    public List<DataTypeResponseModel> DataTypes { get; set; } = [];
-
-    /// <summary>
-    ///  keys of the data types in <see cref="DataTypes"/> that aren't in the site yet (built from the uSync files).
-    /// </summary>
-    public List<Guid> NewDataTypes { get; set; } = [];
-
-    /// <summary>
-    ///  keys of the compositions that aren't in the site yet (built from the uSync files).
-    /// </summary>
-    public List<Guid> NewCompositions { get; set; } = [];
+    public object? Preview { get; set; }
 
     public List<uSyncChange> Details { get; set; } = [];
 }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Umbraco.Cms.Core.Scoping;
 
 using uSync.BackOffice.Models;
+using uSync.BackOffice.Preview;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Models;
 
@@ -18,20 +19,23 @@ internal class SyncPreviewService : ISyncPreviewService
 {
     private readonly ISyncHandlerFactory _handlerFactory;
     private readonly ICoreScopeProvider _scopeProvider;
+    private readonly SyncPreviewMapperCollection _mappers;
     private readonly ILogger<SyncPreviewService> _logger;
 
     public SyncPreviewService(
         ISyncHandlerFactory handlerFactory,
         ICoreScopeProvider scopeProvider,
+        SyncPreviewMapperCollection mappers,
         ILogger<SyncPreviewService> logger)
     {
         _handlerFactory = handlerFactory;
         _scopeProvider = scopeProvider;
+        _mappers = mappers;
         _logger = logger;
     }
 
     /// <inheritdoc/>
-    public async Task<TResult?> GetPreviewAsync<TResult>(string handlerAlias, Guid key, Func<SyncItemPreview, Task<TResult>> mapper)
+    public async Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, Guid key)
     {
         var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias);
         if (handlerConfig is null) return default;
@@ -56,7 +60,21 @@ internal class SyncPreviewService : ISyncPreviewService
         }
 
         preview.PendingItems = resolver.Items;
-        return await mapper(preview);
+
+        var result = new SyncPreviewResult { Preview = preview };
+
+        var mapper = _mappers.GetMapper(preview);
+        if (mapper is null)
+        {
+            // the backoffice shows just the changes list for items it can't preview.
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("No preview mapper for {handler} {itemType}", handlerAlias, preview.ItemType);
+            return result;
+        }
+
+        result.EntityType = mapper.EntityType;
+        result.Model = await mapper.MapAsync(preview);
+        return result;
     }
 
     private static async Task<object?> BuildIncomingItemAsync(HandlerConfigPair handlerConfig, Guid key, SyncPreviewOptions? options)

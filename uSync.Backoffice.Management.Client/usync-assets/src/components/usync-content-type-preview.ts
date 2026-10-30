@@ -11,7 +11,9 @@ import {
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
 import '@umbraco-cms/backoffice/components';
-import type { DataTypeResponseModel, SyncItemPreviewResponse } from '../api';
+import type { DataTypeResponseModel } from '@umbraco-cms/backoffice/external/backend-api';
+import type { SyncItemPreviewResponse } from '../api';
+import { getPreviewModel, type SyncContentTypePreview } from '../preview/types.js';
 import {
 	buildContentTypeLayout,
 	compositionIds,
@@ -64,11 +66,16 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 	protected willUpdate(changed: PropertyValues<this>) {
 		if (!changed.has('preview') || !this.preview) return;
 
-		this.#sides = getSides(this.preview);
+		const model = getPreviewModel<SyncContentTypePreview>(this.preview);
+		this.#sides = {
+			current: model?.current ?? undefined,
+			incoming: model?.incoming ?? undefined,
+			compositions: model?.compositions ?? [],
+		};
 		this.#compositions = new Map(this.#sides.compositions.map((c) => [c.id, c]));
-		this.#dataTypes = new Map(this.preview.dataTypes.map((d) => [d.id, d]));
-		this.#newDataTypes = new Set(this.preview.newDataTypes);
-		this.#newCompositions = new Set(this.preview.newCompositions);
+		this.#dataTypes = new Map((model?.dataTypes ?? []).map((d) => [d.id, d]));
+		this.#newDataTypes = new Set(model?.newDataTypes);
+		this.#newCompositions = new Set(model?.newCompositions);
 		this.#diff = diffContentTypes(this.#sides.current, this.#sides.incoming);
 		this._activeTab = undefined;
 	}
@@ -601,31 +608,6 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 			color: var(--uui-color-text-alt);
 		}
 	`;
-}
-
-function getSides(preview: SyncItemPreviewResponse): PreviewSides {
-	switch (preview.entityType) {
-		case 'document-type':
-			return {
-				current: preview.currentDocumentType ?? undefined,
-				incoming: preview.incomingDocumentType ?? undefined,
-				compositions: preview.compositionDocumentTypes,
-			};
-		case 'media-type':
-			return {
-				current: preview.currentMediaType ?? undefined,
-				incoming: preview.incomingMediaType ?? undefined,
-				compositions: preview.compositionMediaTypes,
-			};
-		case 'member-type':
-			return {
-				current: preview.currentMemberType ?? undefined,
-				incoming: preview.incomingMemberType ?? undefined,
-				compositions: preview.compositionMemberTypes,
-			};
-		default:
-			return { compositions: [] };
-	}
 }
 
 export default uSyncContentTypePreviewElement;

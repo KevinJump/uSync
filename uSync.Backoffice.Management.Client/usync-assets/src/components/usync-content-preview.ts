@@ -15,9 +15,13 @@ import type {
 	DataTypeResponseModel,
 	DocumentResponseModel,
 	MediaResponseModel,
-	SyncContentPreviewInfo,
-	SyncItemPreviewResponse,
-} from '../api';
+} from '@umbraco-cms/backoffice/external/backend-api';
+import type { SyncItemPreviewResponse } from '../api';
+import {
+	getPreviewModel,
+	type SyncContentPreview,
+	type SyncContentPreviewInfo,
+} from '../preview/types.js';
 import {
 	buildContentTypeLayout,
 	type USyncLayoutProperty,
@@ -68,25 +72,15 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 
 	protected willUpdate(changed: PropertyValues<this>) {
 		if (!changed.has('preview') || !this.preview) return;
-		const preview = this.preview;
+		const model = getPreviewModel<SyncContentPreview>(this.preview);
 
-		const isMedia = preview.entityType === 'media';
-		this.#current = {
-			item: (isMedia ? preview.currentMedia : preview.currentDocument) ?? undefined,
-			info: preview.currentInfo,
-		};
-		this.#incoming = {
-			item: (isMedia ? preview.incomingMedia : preview.incomingDocument) ?? undefined,
-			info: preview.incomingInfo,
-		};
+		this.#current = { item: model?.current ?? undefined, info: model?.currentInfo };
+		this.#incoming = { item: model?.incoming ?? undefined, info: model?.incomingInfo };
 
-		this.#type =
-			(isMedia ? preview.currentMediaType : preview.currentDocumentType) ?? undefined;
-		const compositions: USyncPreviewContentType[] = isMedia
-			? preview.compositionMediaTypes
-			: preview.compositionDocumentTypes;
+		this.#type = model?.contentType ?? undefined;
+		const compositions: USyncPreviewContentType[] = model?.compositions ?? [];
 		this.#compositions = new Map(compositions.map((c) => [c.id, c]));
-		this.#dataTypes = new Map(preview.dataTypes.map((d) => [d.id, d]));
+		this.#dataTypes = new Map((model?.dataTypes ?? []).map((d) => [d.id, d]));
 
 		this.#cultures = [
 			...new Set(
