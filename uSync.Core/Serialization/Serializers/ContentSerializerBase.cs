@@ -78,13 +78,19 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // are we including the default (not variant) values in the serialized result? 
         // we only worry about this when we are passing partial cultures or segments 
         // to the file, when we sync complete content items, this is redundant. 
-        if (options.GetSetting(uSyncConstants.DefaultsKey, true) && ContentSerializerBase<TObject>.IsPartialElement(item, cultures, segments))
+        if (IncludeDefaultValues(options) && ContentSerializerBase<TObject>.IsPartialElement(item, cultures, segments))
         {
             node.Add(new XAttribute(uSyncConstants.DefaultsKey, true));
         }
 
         return node;
     }
+
+    /// <summary>
+    ///  are the default (not variant) values written for partial culture/segment exports?
+    /// </summary>
+    private static bool IncludeDefaultValues(SyncSerializerOptions options)
+        => options.GetSetting(uSyncConstants.DefaultsKey, false);
 
     private static bool IsPartialCultureElement(TObject item, string cultures)
         => !string.IsNullOrWhiteSpace(cultures) && item.ContentType.VariesByCulture();
@@ -215,7 +221,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         var cultures = options.GetCultures();
         var segments = options.GetSegments();
         var includeDefaults = (cultures.Count == 0 && segments.Count == 0)
-            || options.GetSetting(uSyncConstants.DefaultsKey, false);
+            || IncludeDefaultValues(options);
 
         var excludedProperties = GetExcludedProperties(options);
         var excludedPropertiesPattern = GetExcludedPropertiesPattern(options);
