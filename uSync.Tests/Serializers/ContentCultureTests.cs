@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -61,7 +62,14 @@ public class ContentCultureTests : UmbracoIntegrationTest
     private ISyncSerializer<IContent> Serializer
         => GetRequiredService<SyncSerializerCollection>().GetSerializer<IContent>("ContentSerializer");
 
-    private async Task<IContent> CreateVariantContent()
+    private Task<IContent> CreateVariantContent(bool withSharedProperty = false)
+        => CreateContent(ContentVariation.Culture, withSharedProperty, content =>
+        {
+            content.SetValue("title", "title en", "en-US");
+            content.SetValue("title", "title da", "da-DK");
+        });
+
+    private async Task<IContent> CreateContent(ContentVariation variation, bool withSharedProperty, Action<IContent> setValues)
     {
         await GetRequiredService<ILanguageService>().CreateAsync(new Language("da-DK", "Danish"), UmbConstants.Security.SuperUserKey);
 
@@ -70,28 +78,178 @@ public class ContentCultureTests : UmbracoIntegrationTest
         {
             Alias = "variantPage",
             Name = "Variant Page",
-            Variations = ContentVariation.Culture
+            Variations = variation
         };
         contentType.AddPropertyType(new PropertyType(shortStringHelper, "Umbraco.TextBox", ValueStorageType.Nvarchar, "title")
         {
             Name = "Title",
-            Variations = ContentVariation.Culture,
+            Variations = variation,
             DataTypeId = UmbConstants.DataTypes.Textbox
         });
+        if (withSharedProperty)
+        {
+            contentType.AddPropertyType(new PropertyType(shortStringHelper, "Umbraco.TextBox", ValueStorageType.Nvarchar, "shared")
+            {
+                Name = "Shared",
+                Variations = ContentVariation.Nothing,
+                DataTypeId = UmbConstants.DataTypes.Textbox
+            });
+        }
         await GetRequiredService<IContentTypeService>().CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         var contentService = GetRequiredService<IContentService>();
         var content = contentService.Create("page", -1, contentType);
-        content.SetCultureName("page en", "en-US");
-        content.SetCultureName("page da", "da-DK");
-        content.SetValue("title", "title en", "en-US");
-        content.SetValue("title", "title da", "da-DK");
+        if (variation != ContentVariation.Nothing)
+        {
+            content.SetCultureName("page en", "en-US");
+            content.SetCultureName("page da", "da-DK");
+        }
+        setValues(content);
+        if (withSharedProperty)
+            content.SetValue("shared", "shared value");
         contentService.Save(content);
         return content;
     }
 
     private static string[] Cultures(XElement node)
         => [.. node.Descendants().Attributes("Culture").Select(x => x.Value).Distinct().Order()];
+
+    private async Task<XElement> ExportEnglishOnly(Dictionary<string, object?> settings)
+    {
+        var content = await CreateVariantContent(withSharedProperty: true);
+        settings[Core.uSyncConstants.CultureKey] = "en-US";
+        return (await Serializer.SerializeAsync(content, new SyncSerializerOptions(settings))).Item;
+    }
+
+    private static string[] SharedValues(XElement node)
+        => [.. node.Element("Properties")?.Element("shared")?.Elements("Value")
+            .Where(x => x.Attribute("Culture") is null)
+            .Select(x => x.Value) ?? []];
+
+    [Test]
+    public async Task Export_PartialCultureWithoutDefaultValuesSetting_OmitsDefaultValues()
+    {
+        var node = await ExportEnglishOnly([]);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(node.Attribute(Core.uSyncConstants.DefaultsKey), Is.Null);
+            Assert.That(SharedValues(node), Is.Empty);
+        });
+    }
+
+    [Test]
+    public async Task Export_PartialCultureWithDefaultValuesSetting_WritesDefaultValues()
+    {
+        var node = await ExportEnglishOnly(new() { [Core.uSyncConstants.DefaultsKey] = "true" });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(node.Attribute(Core.uSyncConstants.DefaultsKey)?.Value, Is.EqualTo("true"));
+            Assert.That(SharedValues(node), Is.EqualTo(new[] { "shared value" }));
+        });
+    }
+
+    private async Task<XElement> ExportWith(IContent content, string key, string value)
+    {
+        var options = new SyncSerializerOptions(new Dictionary<string, object?> { [key] = value });
+        return (await Serializer.SerializeAsync(content, options)).Item;
+    }
+
+    private Task Import(XElement node)
+        => Serializer.DeserializeAsync(node, new SyncSerializerOptions(SerializerFlags.Force));
+
+    private static IEnumerable<string> Values(XElement node)
+        => node.Descendants("Value").Select(x => x.Value);
+
+    [Test]
+    public async Task Export_InvariantItemWithCulturesSetting_KeepsValues()
+    {
+        var content = await CreateContent(ContentVariation.Nothing, false, x => x.SetValue("title", "source"));
+        var node = await ExportWith(content, Core.uSyncConstants.CultureKey, "en-US");
+
+        content.SetValue("title", "target");
+        GetRequiredService<IContentService>().Save(content);
+        await Import(node);
+
+        var reloaded = GetRequiredService<IContentService>().GetById(content.Key);
+        Assert.Multiple(() =>
+        {
+            Assert.That(Values(node), Is.EqualTo(new[] { "source" }));
+            Assert.That(reloaded.GetValue<string>("title"), Is.EqualTo("source"));
+        });
+    }
+
+    [Test]
+    public async Task Export_PartialCultureWithMissingValue_BlanksValueOnImport()
+    {
+        var content = await CreateContent(ContentVariation.Culture, false, x => x.SetValue("title", "title da", "da-DK"));
+        var node = await ExportWith(content, Core.uSyncConstants.CultureKey, "en-US");
+
+        content.SetValue("title", "stale", "en-US");
+        GetRequiredService<IContentService>().Save(content);
+        await Import(node);
+
+        var reloaded = GetRequiredService<IContentService>().GetById(content.Key);
+        Assert.Multiple(() =>
+        {
+            Assert.That(Cultures(node), Is.EqualTo(new[] { "en-US" }));
+            Assert.That(reloaded.GetValue<string>("title", "en-US"), Is.Null.Or.Empty);
+            Assert.That(reloaded.GetValue<string>("title", "da-DK"), Is.EqualTo("title da"));
+        });
+    }
+
+    [Test]
+    public async Task Export_PartialCulture_LeavesOutSegmentValuesOfOtherCultures()
+    {
+        var content = await CreateContent(ContentVariation.CultureAndSegment, false,
+            x => x.SetValue("title", "title da", "da-DK", "seg1"));
+        var node = await ExportWith(content, Core.uSyncConstants.CultureKey, "en-US");
+
+        await Import(node);
+
+        var reloaded = GetRequiredService<IContentService>().GetById(content.Key);
+        Assert.Multiple(() =>
+        {
+            Assert.That(Values(node), Has.None.EqualTo("title da"));
+            Assert.That(reloaded.GetValue<string>("title", "en-US", "seg1"), Is.Null);
+        });
+    }
+
+    [Test]
+    public async Task Export_PartialSegment_LeavesOutOtherSegments()
+    {
+        var content = await CreateContent(ContentVariation.CultureAndSegment, false, x =>
+        {
+            x.SetValue("title", "default", "en-US");
+            x.SetValue("title", "one", "en-US", "seg1");
+            x.SetValue("title", "two", "en-US", "seg2");
+        });
+        var node = await ExportWith(content, Core.uSyncConstants.SegmentKey, "seg1");
+
+        await Import(node);
+
+        var reloaded = GetRequiredService<IContentService>().GetById(content.Key);
+        Assert.Multiple(() =>
+        {
+            Assert.That(Values(node), Has.None.EqualTo("two"));
+            Assert.That(reloaded.GetValue<string>("title", "en-US"), Is.EqualTo("default"));
+        });
+    }
+
+    [Test]
+    public async Task Export_WildcardCultures_IsNotPartial()
+    {
+        var content = await CreateVariantContent(withSharedProperty: true);
+        var node = await ExportWith(content, Core.uSyncConstants.CultureKey, "*");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(SharedValues(node), Is.EqualTo(new[] { "shared value" }));
+            Assert.That(Cultures(node), Is.EqualTo(new[] { "da-DK", "en-US" }));
+            Assert.That(node.Attribute(Core.uSyncConstants.CultureKey), Is.Null);
+        });
+    }
 
     [Test]
     public async Task Export_LanguageStoredInLowerCase_WritesStandardCasing()
