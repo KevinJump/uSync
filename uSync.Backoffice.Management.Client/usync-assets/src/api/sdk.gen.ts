@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CheckLegacyData, CheckLegacyErrors, CheckLegacyResponses, CopyLegacyData, CopyLegacyErrors, CopyLegacyResponses, DownloadData, DownloadErrors, DownloadResponses, GetActionsBySetData, GetActionsBySetErrors, GetActionsBySetResponses, GetActionsData, GetActionsErrors, GetActionsResponses, GetAddOnsData, GetAddOnsErrors, GetAddonSplashData, GetAddonSplashErrors, GetAddonSplashResponses, GetAddOnsResponses, GetHandlerSetSettingsData, GetHandlerSetSettingsErrors, GetHandlerSetSettingsResponses, GetSetsData, GetSetsErrors, GetSetsResponses, GetSettingsData, GetSettingsErrors, GetSettingsResponses, GetSyncFileInfoData, GetSyncFileInfoErrors, GetSyncFileInfoResponses, IgnoreLegacyData, IgnoreLegacyErrors, IgnoreLegacyResponses, ImportSingleData, ImportSingleErrors, ImportSingleResponses, MergeExportFolderData, MergeExportFolderErrors, MergeExportFolderResponses, PerformActionData, PerformActionErrors, PerformActionResponses, ProcessUploadData, ProcessUploadErrors, ProcessUploadResponses, RunningData, RunningErrors, RunningResponses, StatusData, StatusErrors, StatusResponses } from './types.gen';
+import type { CheckLegacyData, CheckLegacyErrors, CheckLegacyResponses, CopyLegacyData, CopyLegacyErrors, CopyLegacyResponses, DownloadData, DownloadErrors, DownloadResponses, GetActionsBySetData, GetActionsBySetErrors, GetActionsBySetResponses, GetActionsData, GetActionsErrors, GetActionsResponses, GetAddOnsData, GetAddOnsErrors, GetAddonSplashData, GetAddonSplashErrors, GetAddonSplashResponses, GetAddOnsResponses, GetHandlerSetSettingsData, GetHandlerSetSettingsErrors, GetHandlerSetSettingsResponses, GetPreviewData, GetPreviewErrors, GetPreviewResponses, GetSetsData, GetSetsErrors, GetSetsResponses, GetSettingsData, GetSettingsErrors, GetSettingsResponses, GetSyncFileInfoData, GetSyncFileInfoErrors, GetSyncFileInfoResponses, IgnoreLegacyData, IgnoreLegacyErrors, IgnoreLegacyResponses, ImportSingleData, ImportSingleErrors, ImportSingleResponses, MergeExportFolderData, MergeExportFolderErrors, MergeExportFolderResponses, PerformActionData, PerformActionErrors, PerformActionResponses, ProcessUploadData, ProcessUploadErrors, ProcessUploadResponses, RunningData, RunningErrors, RunningResponses, StatusData, StatusErrors, StatusResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -75,6 +75,14 @@ export class ActionsService {
                 'Content-Type': 'application/json',
                 ...options?.headers
             }
+        });
+    }
+    
+    public static getPreview<ThrowOnError extends boolean = true>(options?: Options<GetPreviewData, ThrowOnError>): RequestResult<GetPreviewResponses, GetPreviewErrors, ThrowOnError> {
+        return (options?.client ?? client).get<GetPreviewResponses, GetPreviewErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/umbraco/usync/api/v1/Preview',
+            ...options
         });
     }
     

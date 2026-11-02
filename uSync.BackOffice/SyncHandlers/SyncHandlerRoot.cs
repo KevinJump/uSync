@@ -2282,4 +2282,52 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         return null;
     }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    ///  previews are opt-in, handlers whose serializers honour <see cref="SerializerFlags.DoNotSave"/>
+    ///  can override this and call <see cref="BuildPreviewAsync"/>.
+    /// </remarks>
+    public virtual Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings, SyncPreviewOptions? options = null)
+        => Task.FromResult<SyncItemPreview?>(null);
+
+    /// <summary>
+    ///  build a preview by running the serializer with the DoNotSave flag. 
+    /// </summary>
+    /// <remarks>
+    ///  the serializer still loads (and changes) the item in memory, so this should be 
+    ///  called inside a scope that is never completed.
+    /// </remarks>
+    protected async Task<SyncItemPreview?> BuildPreviewAsync(XElement node, HandlerSettings settings, SerializerFlags flags, SyncPreviewOptions? previewOptions = null)
+    {
+        var preview = new SyncItemPreview
+        {
+            Key = node.GetKey(),
+            Handler = Alias,
+            ItemType = ItemType,
+            Node = node,
+            Current = await serializer.FindItemAsync(node),
+        };
+
+        if (node.IsEmptyItem())
+        {
+            // deletes and renames are never run in a preview.
+            preview.IsDelete = true;
+            preview.Success = true;
+            return preview;
+        }
+
+        var options = new SyncSerializerOptions(flags | SerializerFlags.Force | SerializerFlags.DoNotSave, settings.Settings)
+        {
+            PendingItemResolver = previewOptions?.PendingItemResolver,
+        };
+        var attempt = await serializer.DeserializeAsync(node, options);
+
+        preview.Options = options;
+        preview.Incoming = attempt.Item;
+        preview.Success = attempt.Success;
+        preview.Message = attempt.Message;
+        preview.Details = attempt.Details ?? [];
+        return preview;
+    }
 }

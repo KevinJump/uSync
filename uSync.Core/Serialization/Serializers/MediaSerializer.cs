@@ -80,6 +80,10 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
                 new Exception("Import failed because of warnings, and fail on warnings is true"));
         }
 
+        // a dry run (preview) stops here, the item is changed in memory but not saved.
+        if (options.DoNotSave)
+            return SyncAttempt<IMedia>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, string.Empty, false, [.. details, .. propertyAttempt.Result]);
+
         var saveAttempt = _mediaService.Save(item);
         if (!saveAttempt.Success)
         {

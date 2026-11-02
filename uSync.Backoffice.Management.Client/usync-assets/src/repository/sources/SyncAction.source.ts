@@ -97,4 +97,14 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 			}),
 		);
 	}
+
+	async getPreview(handler: string, key: string) {
+		return await tryExecute(
+			this.#host,
+			ActionsService.getPreview({
+				query: { handler, key },
+			}),
+			{ disableNotifications: true },
+		);
+	}
 }

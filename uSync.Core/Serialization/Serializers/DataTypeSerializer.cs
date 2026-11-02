@@ -92,7 +92,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         var name = info?.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty) ?? string.Empty;
         var key = node.GetKey();
 
-        var attempt = await FindOrCreateAsync(node);
+        var attempt = await FindOrCreateAsync(node, options);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception("Unknown serialization error");
 
@@ -119,7 +119,8 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             // use the configuration serializers to track the rename.
             // uSync.migrations can use this to hook into the rename here, so we don't 
             // have to track it in the core. 
-            await _configurationSerializers.TrackRenamedEditorAsync(editorAlias, item.EditorAlias);
+            if (options.DoNotSave is false)
+                await _configurationSerializers.TrackRenamedEditorAsync(editorAlias, item.EditorAlias);
 
             if (editor is not null)
             {
@@ -168,7 +169,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             details.AddRange(await DeserializeConfiguration(item, node, editorAlias));
         }
 
-        details.AddNotNull(await SetFolderFromElementAsync(item, info?.Element("Folder")));
+        details.AddNotNull(await SetFolderFromElementAsync(item, info?.Element("Folder"), options.DoNotSave is false));
 
         return SyncAttempt<IDataType>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, details);
     }
@@ -176,14 +177,14 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     private static ValueStorageType GetEditorValueStorageType(IDataEditor? editor)
         => editor is null ? ValueStorageType.Ntext : ValueTypes.ToStorageType(editor.GetValueEditor().ValueType);
 
-    private async Task<uSyncChange?> SetFolderFromElementAsync(IDataType item, XElement? folderNode)
+    private async Task<uSyncChange?> SetFolderFromElementAsync(IDataType item, XElement? folderNode, bool createIfMissing)
     {
         if (folderNode == null) return null;
 
         var folder = folderNode.ValueOrDefault(string.Empty);
         if (string.IsNullOrWhiteSpace(folder)) return null;
 
-        var container = await FindFolderAsync(folderNode.GetKey(), folder);
+        var container = await FindFolderAsync(folderNode.GetKey(), folder, createIfMissing);
         if (container != null && container.Id != item.ParentId)
         {
             var change = uSyncChange.Update("", "Folder", container.Id, item.ParentId);

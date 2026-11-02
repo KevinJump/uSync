@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
@@ -12,10 +13,12 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
+using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -82,4 +85,8 @@ public class MediaHandler : ContentHandlerBase<IMedia>, ISyncHandler, ISyncClean
             return await Task.FromResult(_mediaService.GetRootMedia());
         }
     }
+
+    /// <inheritdoc/>
+    public override Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings, SyncPreviewOptions? options = null)
+        => BuildPreviewAsync(node, settings, SerializerFlags.None, options);
 }
