@@ -56,7 +56,7 @@
 	"devDependencies": {
 		"@hey-api/openapi-ts": "^0.99.0",
 		"@microsoft/signalr": "^10.0.11",
-		"@umbraco-cms/backoffice": "^17.3.0",
+		"@umbraco-cms/backoffice": "^17.6.2",
 		"eslint": "^10.13.0",
 		"lit": "^3.3.3",
 		"prettier": "^3.9.10",
