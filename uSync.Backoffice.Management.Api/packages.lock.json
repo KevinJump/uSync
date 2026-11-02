@@ -1213,18 +1213,18 @@
       "usync.core": {
         "type": "Project",
         "dependencies": {
-          "Jumoo.Json": "[18.0.3, )",
+          "Jumoo.Json": "[19.0.0-beta1, )",
           "Umbraco.Cms.Api.Management": "[19.0.0-beta1, )",
           "Umbraco.Cms.Web.Website": "[19.0.0-beta1, )"
         }
       },
       "Jumoo.Json": {
         "type": "CentralTransitive",
-        "requested": "[18.0.3, )",
-        "resolved": "18.0.3",
-        "contentHash": "Z0KYeQ1+VJWgZQitCQBgTzeofVMxqD/TEECYyaZQPJ5fOV5Mod/NmC1ZXEzME2Upg46nanbuLwUpo5TE1W5AHA==",
+        "requested": "[19.0.0-beta1, )",
+        "resolved": "19.0.0-beta1",
+        "contentHash": "TVBIrPvAs0hkQDxy+U6cG4vztLpy14p16xhZsCPR2SNv4XrNeBPby8HbWTigrz7toB5tMzd16IjtnwN9UCyWGQ==",
         "dependencies": {
-          "Umbraco.Cms.Web.Common": "18.0.0"
+          "Umbraco.Cms.Web.Common": "19.0.0-beta1"
         }
       },
       "Umbraco.Cms.Core": {
