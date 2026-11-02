@@ -21,7 +21,7 @@
     "@jumoo/translate": "^17.2.3",
     "@jumoo/usync": "^17.0.4",
     "@rollup/plugin-node-resolve": "^16.0.3",
-    "@umbraco-cms/backoffice": "^17.5.0-rc",
+    "@umbraco-cms/backoffice": "^17.6.2",
     "chalk": "^6.0.1",
     "lit": "^3.3.3",
     "node-fetch": "^3.3.2",
