@@ -64,6 +64,8 @@ namespace uSync.Core.Mapping
                     var value = item[property.Alias];
                     if (value != null)
                     {
+                        if (IsUnmappedPrimitive(value, property.PropertyEditorAlias)) continue;
+
                         var mappedVal = mapperCollection.Value.GetImportValue(GetStringValue(value), property.PropertyEditorAlias);
                         item[property.Alias] = GetImportProperty(mappedVal);
                     }
@@ -88,6 +90,8 @@ namespace uSync.Core.Mapping
                     var value = item[property.Alias];
                     if (value != null)
                     {
+                        if (IsUnmappedPrimitive(value, property.PropertyEditorAlias)) continue;
+
                         var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias);
                         item[property.Alias] = GetExportProperty(mappedVal);
                     }
@@ -214,6 +218,27 @@ namespace uSync.Core.Mapping
             if (string.IsNullOrWhiteSpace(alias)) return default;
             return mapperCollection.Value?.EntityCache.GetContentType(alias)
                 ?? contentTypeService.Get(alias);
+        }
+
+        /// <summary>
+        ///  is this a JSON boolean or number that no mapper wants to change?
+        /// </summary>
+        /// <remarks>
+        ///  these values are left as they are, if we round trip them through
+        ///  a string, a boolean false comes back as "False", which Umbraco can't
+        ///  convert to the int a TrueFalse property stores.
+        /// </remarks>
+        private bool IsUnmappedPrimitive(JToken value, string editorAlias)
+        {
+            switch (value.Type)
+            {
+                case JTokenType.Boolean:
+                case JTokenType.Integer:
+                case JTokenType.Float:
+                    return mapperCollection.Value.GetSyncMappers(editorAlias).Any() is false;
+                default:
+                    return false;
+            }
         }
 
         protected string GetStringValue(JToken value)
