@@ -47,6 +47,9 @@ namespace uSync.Tests.Serialization
         [TestCase("M126680-0001", "M126680-0002")]
         [TestCase("Home", "")]
         [TestCase("", "")]
+        [TestCase("1", "4")]
+        [TestCase("2024", "2025")]
+        [TestCase("一", "二")]
         public void DifferentNames_DoNotMatch(string name, string alias)
         {
             Assert.That(name.IsNameMatch(alias, _shortStringHelper), Is.False);
