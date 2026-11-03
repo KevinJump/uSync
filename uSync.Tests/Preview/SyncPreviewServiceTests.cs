@@ -36,6 +36,7 @@ public class SyncPreviewServiceTests
     private Mock<ISyncHandler> _contentTypeHandler = null!;
     private Mock<ISyncHandler> _dataTypeHandler = null!;
     private Mock<ICoreScope> _scope = null!;
+    private Mock<ISyncHandlerFactory> _factory = null!;
     private SyncPreviewService _service = null!;
 
     private readonly XElement _folderDataType = new("DataType", new XAttribute("Key", _dataTypeKey));
@@ -58,7 +59,7 @@ public class SyncPreviewServiceTests
                 return Preview(node, new object());
             });
 
-        var factory = new Mock<ISyncHandlerFactory>();
+        var factory = _factory = new Mock<ISyncHandlerFactory>();
         factory.Setup(x => x.GetValidHandler("ContentTypeHandler", It.IsAny<SyncHandlerOptions?>())).Returns(Pair(_contentTypeHandler));
         factory.Setup(x => x.GetValidHandlers(It.IsAny<SyncHandlerOptions?>())).Returns([Pair(_contentTypeHandler), Pair(_dataTypeHandler)]);
 
@@ -115,6 +116,18 @@ public class SyncPreviewServiceTests
         await _service.GetPreviewAsync("ContentTypeHandler", new XElement("ContentType"), (_, _) => Task.FromResult<XElement?>(null));
 
         _scope.Verify(x => x.Complete(), Times.Never);
+    }
+
+    [Test]
+    public async Task Uses_The_Handler_Set_It_Is_Given()
+    {
+        var options = new SyncHandlerOptions("Exporter");
+
+        await _service.GetPreviewAsync("ContentTypeHandler", new XElement("ContentType"), (_, _) => Task.FromResult<XElement?>(null), options);
+
+        // the handler and the ones its pending items use both come from the set.
+        _factory.Verify(x => x.GetValidHandler("ContentTypeHandler", options));
+        _factory.Verify(x => x.GetValidHandlers(options));
     }
 
     [Test]
