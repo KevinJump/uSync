@@ -11,13 +11,16 @@ import '@umbraco-cms/backoffice/components';
 import type { DataTypeResponseModel } from '@umbraco-cms/backoffice/external/backend-api';
 import type { SyncItemPreviewResponse } from '../api';
 import {
+	type PreviewSide,
+	previewSideStyles,
+	renderPreviewHeadline,
+} from './preview-side.js';
+import {
 	getPreviewModel,
 	type SyncDataTypePreview,
 	type uSyncPreviewLabels,
 } from '../preview/types.js';
 import { deepEqual, prettyJson } from '../utils/diff/index.js';
-
-type PreviewSide = 'current' | 'incoming';
 
 type ConfigStatus = 'added' | 'removed' | 'changed' | 'unchanged';
 
@@ -43,8 +46,8 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 
 		return html`
 			<div class="sides">
-				${this.#renderSide('current', current, incoming)}
 				${this.#renderSide('incoming', incoming, current)}
+				${this.#renderSide('current', current, incoming)}
 			</div>
 		`;
 	}
@@ -54,16 +57,9 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 		dataType: DataTypeResponseModel | undefined,
 		other: DataTypeResponseModel | undefined,
 	) {
-		const headline =
-			side === 'current'
-				? (this.labels?.current ??
-					this.localize.termOrDefault('uSync_previewCurrent', 'Current (this site)'))
-				: (this.labels?.incoming ??
-					this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)'));
-
 		return html`
-			<div class="side">
-				<h4 class="side-headline">${headline}</h4>
+			<div class="side ${side}">
+				${renderPreviewHeadline(this, side, this.labels)}
 				${
 					dataType
 						? html`
@@ -180,148 +176,143 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 		`;
 	}
 
-	static styles = css`
-		:host {
-			display: block;
-			container-type: inline-size;
-		}
+	static styles = [
+		previewSideStyles,
+		css`
+			:host {
+				display: block;
+				container-type: inline-size;
+			}
 
-		/* the two sides share rows (headline, info, editor, config), so the
-		   boxes line up across the sides. */
-		.sides {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			grid-template-rows: auto auto auto 1fr;
-			gap: var(--uui-size-space-4) var(--uui-size-space-5);
-		}
-
-		.side {
-			display: grid;
-			grid-row: span 4;
-			grid-template-rows: subgrid;
-			min-width: 0;
-		}
-
-		.side > :last-child {
-			align-self: start;
-		}
-
-		@container (max-width: 760px) {
+			/* the two sides share rows (headline, info, editor, config), so the
+			   boxes line up across the sides. */
 			.sides {
-				grid-template-columns: 1fr;
-				grid-template-rows: none;
-				row-gap: var(--uui-size-layout-1);
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				grid-template-rows: auto auto auto 1fr;
+				gap: var(--uui-size-space-4) var(--uui-size-space-5);
 			}
 
 			.side {
-				display: flex;
-				flex-direction: column;
-				gap: var(--uui-size-space-4);
-				grid-row: auto;
+				display: grid;
+				grid-row: span 4;
+				grid-template-rows: subgrid;
+				min-width: 0;
 			}
-		}
 
-		.side-headline {
-			margin: 0;
-			font-size: var(--uui-type-small-size);
-			text-transform: uppercase;
-			letter-spacing: 0.04em;
-			color: var(--uui-color-text-alt);
-		}
+			.side > :last-child {
+				align-self: start;
+			}
 
-		.headline {
-			display: flex;
-			align-items: center;
-			gap: var(--uui-size-space-3);
-		}
+			@container (max-width: 760px) {
+				.sides {
+					grid-template-columns: 1fr;
+					grid-template-rows: none;
+					row-gap: var(--uui-size-layout-1);
+				}
 
-		.meta {
-			display: grid;
-			grid-template-columns: max-content 1fr;
-			align-items: baseline;
-			gap: var(--uui-size-space-3) var(--uui-size-space-5);
-			margin: 0;
-		}
+				.side {
+					display: flex;
+					flex-direction: column;
+					gap: var(--uui-size-space-4);
+					grid-row: auto;
+				}
+			}
 
-		.meta dt {
-			font-weight: 700;
-		}
+			.headline {
+				display: flex;
+				align-items: center;
+				gap: var(--uui-size-space-3);
+			}
 
-		.meta dd {
-			margin: 0;
-			overflow-wrap: anywhere;
-		}
+			.meta {
+				display: grid;
+				grid-template-columns: max-content 1fr;
+				align-items: baseline;
+				gap: var(--uui-size-space-3) var(--uui-size-space-5);
+				margin: 0;
+			}
 
-		/* a changed field gets a soft highlight, spread with a shadow so the text doesn't move. */
-		.changed {
-			background: color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
-			border-radius: var(--uui-border-radius);
-			box-shadow: 0 0 0 var(--uui-size-space-1)
-				color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
-		}
+			.meta dt {
+				font-weight: 700;
+			}
 
-		/* umb-property pads itself for a full workspace, tighten it up here. */
-		umb-property {
-			--uui-size-layout-1: var(--uui-size-space-2);
-		}
+			.meta dd {
+				margin: 0;
+				overflow-wrap: anywhere;
+			}
 
-		table {
-			width: 100%;
-			border-collapse: collapse;
-			margin: calc(-1 * var(--uui-size-space-2)) 0;
-		}
+			/* a changed field gets a soft highlight, spread with a shadow so the text doesn't move. */
+			.changed {
+				background: color-mix(in srgb, var(--usync-preview-change) 35%, transparent);
+				border-radius: var(--uui-border-radius);
+				box-shadow: 0 0 0 var(--uui-size-space-1)
+					color-mix(in srgb, var(--usync-preview-change) 35%, transparent);
+			}
 
-		tr + tr {
-			border-top: 1px solid var(--uui-color-divider);
-		}
+			/* umb-property pads itself for a full workspace, tighten it up here. */
+			umb-property {
+				--uui-size-layout-1: var(--uui-size-space-2);
+			}
 
-		th,
-		td {
-			text-align: left;
-			vertical-align: baseline;
-			padding: var(--uui-size-space-3) var(--uui-size-space-3);
-		}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin: calc(-1 * var(--uui-size-space-2)) 0;
+			}
 
-		/* the alias column is as wide as the longest alias (up to 40%), so values sit beside their names. */
-		th {
-			width: 1%;
-			max-width: 40%;
-			white-space: nowrap;
-			font-weight: 700;
-		}
+			tr + tr {
+				border-top: 1px solid var(--uui-color-divider);
+			}
 
-		th code,
-		td pre {
-			font-size: var(--uui-type-small-size);
-		}
+			th,
+			td {
+				text-align: left;
+				vertical-align: baseline;
+				padding: var(--uui-size-space-3) var(--uui-size-space-3);
+			}
 
-		td pre {
-			margin: 0;
-			white-space: pre-wrap;
-			word-break: break-word;
-		}
+			/* the alias column is as wide as the longest alias (up to 40%), so values sit beside their names. */
+			th {
+				width: 1%;
+				max-width: 40%;
+				white-space: nowrap;
+				font-weight: 700;
+			}
 
-		/* marked with an inset bar rather than a border, so the content doesn't shift. */
-		tr.row-changed {
-			box-shadow: inset 3px 0 0 var(--uui-color-warning);
-			background: color-mix(in srgb, var(--uui-color-warning) 10%, transparent);
-		}
+			th code,
+			td pre {
+				font-size: var(--uui-type-small-size);
+			}
 
-		tr.row-added {
-			box-shadow: inset 3px 0 0 var(--uui-color-positive);
-			background: color-mix(in srgb, var(--uui-color-positive) 6%, transparent);
-		}
+			td pre {
+				margin: 0;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
 
-		tr.row-removed {
-			box-shadow: inset 3px 0 0 var(--uui-color-danger);
-			background: color-mix(in srgb, var(--uui-color-danger) 6%, transparent);
-		}
+			/* marked with an inset bar rather than a border, so the content doesn't shift. */
+			tr.row-changed {
+				box-shadow: inset 3px 0 0 var(--usync-preview-change);
+				background: color-mix(in srgb, var(--usync-preview-change) 10%, transparent);
+			}
 
-		.empty {
-			margin: 0;
-			color: var(--uui-color-text-alt);
-		}
-	`;
+			tr.row-added {
+				box-shadow: inset 3px 0 0 var(--uui-color-positive);
+				background: color-mix(in srgb, var(--uui-color-positive) 6%, transparent);
+			}
+
+			tr.row-removed {
+				box-shadow: inset 3px 0 0 var(--uui-color-danger);
+				background: color-mix(in srgb, var(--uui-color-danger) 6%, transparent);
+			}
+
+			.empty {
+				margin: 0;
+				color: var(--uui-color-text-alt);
+			}
+		`,
+	];
 }
 
 /**
