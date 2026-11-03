@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 namespace uSync.Core
@@ -172,6 +173,21 @@ namespace uSync.Core
         /// </summary>
         public static bool IsObjectNullOrEmptyString(this object value)
             => value == null || (value is string valueString && string.IsNullOrWhiteSpace(valueString));
+
+        /// <summary>
+        ///  does the name of an item match the alias we have in a uSync file?
+        /// </summary>
+        /// <remarks>
+        ///  content and media files hold the name as it is ("Home Page"), so
+        ///  we have to make both sides safe aliases to compare them.
+        /// </remarks>
+        public static bool IsNameMatch(this string name, string alias, IShortStringHelper shortStringHelper)
+        {
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(alias)) return false;
+            if (name.InvariantEquals(alias)) return true;
+
+            return name.ToSafeAlias(shortStringHelper).InvariantEquals(alias.ToSafeAlias(shortStringHelper));
+        }
 
     }
 }

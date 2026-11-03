@@ -688,7 +688,7 @@ namespace uSync.Core.Serialization.Serializers
             var rootNodes = contentService.GetRootContent();
             if (rootNodes.Any())
             {
-                return rootNodes.FirstOrDefault(x => x.Name.ToSafeAlias(shortStringHelper).InvariantEquals(alias));
+                return FindByName(rootNodes, alias);
             }
 
             return null;

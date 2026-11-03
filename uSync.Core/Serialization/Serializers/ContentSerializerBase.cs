@@ -845,7 +845,7 @@ namespace uSync.Core.Serialization.Serializers
             }
             else if (parentKey == Guid.Empty)
             {
-                FindAtRoot(alias);
+                return FindAtRoot(alias);
             }
 
             return default;
@@ -856,7 +856,7 @@ namespace uSync.Core.Serialization.Serializers
             if (parent != null)
             {
                 var children = entityService.GetChildren(parent.Id, this.umbracoObjectType);
-                var child = children.FirstOrDefault(x => x.Name.ToSafeAlias(shortStringHelper).InvariantEquals(alias));
+                var child = FindByName(children, alias);
                 if (child != null)
                     return FindItem(child.Id);
             }
@@ -869,6 +869,17 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         protected abstract TObject FindAtRoot(string alias);
+
+        /// <summary>
+        ///  find an item by name, an exact name match wins over a safe alias one.
+        /// </summary>
+        protected TEntity FindByName<TEntity>(IEnumerable<TEntity> items, string alias)
+            where TEntity : IUmbracoEntity
+        {
+            var list = items.ToList();
+            return list.FirstOrDefault(x => x.Name.InvariantEquals(alias))
+                ?? list.FirstOrDefault(x => x.Name.IsNameMatch(alias, shortStringHelper));
+        }
 
         public override string ItemAlias(TObject item)
             => item.Name;
