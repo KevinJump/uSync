@@ -45,19 +45,19 @@ internal class SyncPreviewService : ISyncPreviewService
         var node = await handlerConfig.Handler.TryFindItemNodeAsync(key);
         if (node is null) return default;
 
-        return await GetPreviewAsync(handlerConfig, node, null);
+        return await GetPreviewAsync(handlerConfig, node, null, null);
     }
 
     /// <inheritdoc/>
-    public async Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, XElement node, Func<ISyncHandler, Guid, Task<XElement?>>? findNode = null)
+    public async Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, XElement node, Func<ISyncHandler, Guid, Task<XElement?>>? findNode = null, SyncHandlerOptions? handlerOptions = null)
     {
-        var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias);
+        var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias, handlerOptions);
         if (handlerConfig is null) return default;
 
-        return await GetPreviewAsync(handlerConfig, node, findNode);
+        return await GetPreviewAsync(handlerConfig, node, findNode, handlerOptions);
     }
 
-    private async Task<SyncPreviewResult?> GetPreviewAsync(HandlerConfigPair handlerConfig, XElement node, Func<ISyncHandler, Guid, Task<XElement?>>? findNode)
+    private async Task<SyncPreviewResult?> GetPreviewAsync(HandlerConfigPair handlerConfig, XElement node, Func<ISyncHandler, Guid, Task<XElement?>>? findNode, SyncHandlerOptions? handlerOptions)
     {
         var handlerAlias = handlerConfig.Handler.Alias;
 
@@ -66,7 +66,7 @@ internal class SyncPreviewService : ISyncPreviewService
         using var scope = _scopeProvider.CreateCoreScope(autoComplete: false);
         using var _ = scope.Notifications.Suppress();
 
-        var resolver = new PendingItemResolver(this, findNode);
+        var resolver = new PendingItemResolver(this, findNode, handlerOptions);
         var options = new SyncPreviewOptions { PendingItemResolver = resolver.ResolveAsync };
 
         var preview = await handlerConfig.Handler.GetPreviewAsync(node, handlerConfig.Settings, options);
@@ -114,12 +114,14 @@ internal class SyncPreviewService : ISyncPreviewService
     {
         private readonly SyncPreviewService _service;
         private readonly Func<ISyncHandler, Guid, Task<XElement?>>? _findNode;
+        private readonly SyncHandlerOptions? _handlerOptions;
         private readonly Dictionary<(Type, Guid), object?> _items = [];
 
-        public PendingItemResolver(SyncPreviewService service, Func<ISyncHandler, Guid, Task<XElement?>>? findNode)
+        public PendingItemResolver(SyncPreviewService service, Func<ISyncHandler, Guid, Task<XElement?>>? findNode, SyncHandlerOptions? handlerOptions)
         {
             _service = service;
             _findNode = findNode;
+            _handlerOptions = handlerOptions;
         }
 
         /// <summary>
@@ -134,7 +136,7 @@ internal class SyncPreviewService : ISyncPreviewService
             // mark it first, so an item that (somehow) depends on itself doesn't loop.
             _items[(itemType, key)] = null;
 
-            var handlerConfig = _service._handlerFactory.GetValidHandlers()
+            var handlerConfig = _service._handlerFactory.GetValidHandlers(_handlerOptions)
                 .FirstOrDefault(x => x.Handler.ItemType == itemType.Name);
             if (handlerConfig is null) return null;
 

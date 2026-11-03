@@ -98,11 +98,13 @@ own file instead:
 
 ```csharp
 var result = await previewService.GetPreviewAsync(handlerAlias, node,
-    (handler, key) => FindInMyPackAsync(handler, key));
+    (handler, key) => FindInMyPackAsync(handler, key),
+    new SyncHandlerOptions("MyHandlerSet"));
 ```
 
 The finder is called for items the incoming item uses that aren't in Umbraco yet, so they come
-from the same place as the node.
+from the same place as the node. Pass the handler set your import uses, so the dry run uses the
+same handler settings.
 
 On the client, pass a `previewSource` to `usync-results` (or in the details dialog data). Use a
 function to load the preview, or `false` to show just the diff:
