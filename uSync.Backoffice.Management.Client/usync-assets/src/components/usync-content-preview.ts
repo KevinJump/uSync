@@ -18,6 +18,11 @@ import type {
 } from '@umbraco-cms/backoffice/external/backend-api';
 import type { SyncItemPreviewResponse } from '../api';
 import {
+	type PreviewSide,
+	previewSideStyles,
+	renderPreviewHeadline,
+} from './preview-side.js';
+import {
 	getPreviewModel,
 	type SyncContentPreview,
 	type SyncContentPreviewInfo,
@@ -30,8 +35,6 @@ import {
 	type USyncPreviewContentType,
 } from '../utils/preview/content-type-layout.js';
 import { deepEqual } from '../utils/diff/deep-equal.js';
-
-type PreviewSide = 'current' | 'incoming';
 
 type PreviewItem = DocumentResponseModel | MediaResponseModel;
 
@@ -116,8 +119,8 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 		return html`
 			<div class="sides">
 				${this.#renderToolbar()}
-				${this.#renderSide('current', this.#current, tabs, active)}
 				${this.#renderSide('incoming', this.#incoming, tabs, active)}
+				${this.#renderSide('current', this.#current, tabs, active)}
 			</div>
 		`;
 	}
@@ -163,23 +166,16 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 		tabs: USyncLayoutTab[],
 		active: USyncLayoutTab | undefined,
 	) {
-		const headline =
-			side === 'current'
-				? (this.labels?.current ??
-					this.localize.termOrDefault('uSync_previewCurrent', 'Current (this site)'))
-				: (this.labels?.incoming ??
-					this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)'));
-
 		if (!data.item) {
 			return html`<div class="side ${side}">
-				<h4 class="side-headline">${headline}</h4>
+				${renderPreviewHeadline(this, side, this.labels)}
 				<uui-box class="info"><p class="empty">${this.#missingMessage(side)}</p></uui-box>
 			</div>`;
 		}
 
 		return html`
 			<div class="side ${side}">
-				<h4 class="side-headline">${headline}</h4>
+				${renderPreviewHeadline(this, side, this.labels)}
 				${this.#renderInfo(data)}
 				${
 					tabs.length > 1 || (tabs.length === 1 && tabs[0].name)
@@ -423,205 +419,192 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 		return 'changed';
 	}
 
-	static styles = css`
-		:host {
-			display: block;
-			container-type: inline-size;
-		}
-
-		/* the toolbar shares the headline row with the incoming side, on the right. */
-		.toolbar {
-			grid-column: 2;
-			grid-row: 1;
-			justify-self: end;
-			align-self: center;
-			z-index: 1;
-			display: flex;
-			flex-wrap: wrap;
-			align-items: center;
-			gap: var(--uui-size-space-4);
-		}
-
-		/* the two sides share rows (headline, info, tabs, content), so the
-		   tab bars and properties line up even when the info boxes differ. */
-		.sides {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			grid-template-rows: auto auto auto 1fr;
-			gap: var(--uui-size-space-4) var(--uui-size-space-5);
-		}
-
-		.side {
-			display: grid;
-			grid-row: span 4;
-			grid-template-rows: subgrid;
-			align-items: start;
-			min-width: 0;
-		}
-
-		.side.current {
-			grid-column: 1;
-			grid-row: 1 / span 4;
-		}
-
-		.side.incoming {
-			grid-column: 2;
-			grid-row: 1 / span 4;
-		}
-
-		.side > .info:not(:last-child) {
-			align-self: stretch;
-		}
-
-		@container (max-width: 760px) {
-			.sides {
-				grid-template-columns: 1fr;
-				grid-template-rows: none;
-				row-gap: var(--uui-size-layout-1);
+	static styles = [
+		previewSideStyles,
+		css`
+			:host {
+				display: block;
+				container-type: inline-size;
 			}
 
-			.side,
-			.side.current,
-			.side.incoming,
+			/* the toolbar shares the headline row with the current side, on the right. */
 			.toolbar {
-				grid-column: 1;
-				grid-row: auto;
-			}
-
-			.side {
+				grid-column: 2;
+				grid-row: 1;
+				justify-self: end;
+				align-self: center;
+				z-index: 1;
 				display: flex;
-				flex-direction: column;
-				align-items: stretch;
+				flex-wrap: wrap;
+				align-items: center;
 				gap: var(--uui-size-space-4);
 			}
 
-			.side > .side-headline {
-				align-self: auto;
+			/* the two sides share rows (headline, info, tabs, content), so the
+			   tab bars and properties line up even when the info boxes differ. */
+			.sides {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				grid-template-rows: auto auto auto 1fr;
+				gap: var(--uui-size-space-4) var(--uui-size-space-5);
 			}
-		}
 
-		umb-property-dataset {
-			display: flex;
-			flex-direction: column;
-			gap: var(--uui-size-space-4);
-			min-width: 0;
-		}
+			.side {
+				display: grid;
+				grid-row: span 4;
+				grid-template-rows: subgrid;
+				align-items: start;
+				min-width: 0;
+			}
 
-		.side-headline {
-			align-self: center;
-			margin: 0;
-			font-size: var(--uui-type-small-size);
-			text-transform: uppercase;
-			letter-spacing: 0.04em;
-			color: var(--uui-color-text-alt);
-		}
+			.side.current {
+				grid-column: 2;
+				grid-row: 1 / span 4;
+			}
 
-		.headline {
-			display: flex;
-			align-items: center;
-			gap: var(--uui-size-space-3);
-		}
+			.side.incoming {
+				grid-column: 1;
+				grid-row: 1 / span 4;
+			}
 
-		.meta {
-			display: grid;
-			grid-template-columns: max-content 1fr;
-			align-items: center;
-			gap: var(--uui-size-space-2) var(--uui-size-space-5);
-			margin: 0 0 var(--uui-size-space-2);
-		}
+			.side > .info:not(:last-child) {
+				align-self: stretch;
+			}
 
-		.meta dt {
-			font-weight: 700;
-		}
+			@container (max-width: 760px) {
+				.sides {
+					grid-template-columns: 1fr;
+					grid-template-rows: none;
+					row-gap: var(--uui-size-layout-1);
+				}
 
-		.tags {
-			display: inline-flex;
-			flex-wrap: wrap;
-			gap: var(--uui-size-space-2);
-		}
+				.side,
+				.side.current,
+				.side.incoming,
+				.toolbar {
+					grid-column: 1;
+					grid-row: auto;
+				}
 
-		.meta dd {
-			display: flex;
-			flex-wrap: wrap;
-			gap: var(--uui-size-space-2);
-			margin: 0;
-		}
+				.side {
+					display: flex;
+					flex-direction: column;
+					align-items: stretch;
+					gap: var(--uui-size-space-4);
+				}
 
-		/* a changed field gets a soft highlight, spread with a shadow so the text doesn't move. */
-		.changed:not(.property):not(.dot) {
-			background: color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
-			border-radius: var(--uui-border-radius);
-			box-shadow: 0 0 0 var(--uui-size-space-1)
-				color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
-		}
+				.side > .side-headline {
+					align-self: auto;
+				}
+			}
 
-		uui-tab-group {
-			--uui-tab-divider: var(--uui-color-border);
-			border-bottom: 1px solid var(--uui-color-border);
-		}
+			umb-property-dataset {
+				display: flex;
+				flex-direction: column;
+				gap: var(--uui-size-space-4);
+				min-width: 0;
+			}
 
-		.tab-label {
-			display: inline-flex;
-			align-items: center;
-			gap: var(--uui-size-space-2);
-			white-space: nowrap;
-		}
+			.headline {
+				display: flex;
+				align-items: center;
+				gap: var(--uui-size-space-3);
+			}
 
-		.dot {
-			display: inline-block;
-			width: 8px;
-			height: 8px;
-			border-radius: 50%;
-		}
+			.meta {
+				display: grid;
+				grid-template-columns: max-content 1fr;
+				align-items: center;
+				gap: var(--uui-size-space-2) var(--uui-size-space-5);
+				margin: 0 0 var(--uui-size-space-2);
+			}
 
-		.dot.changed {
-			background: var(--uui-color-warning);
-		}
+			.meta dt {
+				font-weight: 700;
+			}
 
-		/* marked with an inset bar rather than a border, so the content doesn't shift. */
-		.property.added {
-			box-shadow: inset 3px 0 0 var(--uui-color-positive);
-			background: color-mix(in srgb, var(--uui-color-positive) 6%, transparent);
-		}
+			.tags {
+				display: inline-flex;
+				flex-wrap: wrap;
+				gap: var(--uui-size-space-2);
+			}
 
-		.property.removed {
-			box-shadow: inset 3px 0 0 var(--uui-color-danger);
-			background: color-mix(in srgb, var(--uui-color-danger) 6%, transparent);
-		}
+			.meta dd {
+				display: flex;
+				flex-wrap: wrap;
+				gap: var(--uui-size-space-2);
+				margin: 0;
+			}
 
-		.property.changed {
-			box-shadow: inset 3px 0 0 var(--uui-color-warning);
-			background: color-mix(in srgb, var(--uui-color-warning) 10%, transparent);
-		}
+			/* a changed field gets a soft highlight, spread with a shadow so the text doesn't move. */
+			.changed:not(.property):not(.dot) {
+				background: color-mix(in srgb, var(--usync-preview-change) 35%, transparent);
+				border-radius: var(--uui-border-radius);
+				box-shadow: 0 0 0 var(--uui-size-space-1)
+					color-mix(in srgb, var(--usync-preview-change) 35%, transparent);
+			}
 
-		/* properties run edge to edge in their box, like the backoffice editor. */
-		.property {
-			padding: 0 var(--uui-size-space-5);
-			margin: 0 calc(-1 * var(--uui-size-space-5));
-		}
+			uui-tab-group {
+				--uui-tab-divider: var(--uui-color-border);
+				border-bottom: 1px solid var(--uui-color-border);
+			}
 
-		.property:first-child {
-			margin-top: calc(-1 * var(--uui-size-space-5));
-		}
+			.tab-label {
+				display: inline-flex;
+				align-items: center;
+				gap: var(--uui-size-space-2);
+				white-space: nowrap;
+			}
 
-		.property:last-child {
-			margin-bottom: calc(-1 * var(--uui-size-space-5));
-		}
+			.dot {
+				display: inline-block;
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+			}
 
-		.property + .property {
-			border-top: 1px solid var(--uui-color-divider);
-		}
+			.dot.changed {
+				background: var(--uui-color-warning);
+			}
 
-		/* umb-property pads itself for a full workspace, tighten it up here. */
-		umb-property {
-			--uui-size-layout-1: var(--uui-size-space-4);
-		}
+			/* marked with an inset bar rather than a border, so the content doesn't shift.
+			   the colour is the side's (red going, green coming in), whatever the change. */
+			.property.added,
+			.property.removed,
+			.property.changed {
+				box-shadow: inset 3px 0 0 var(--usync-preview-change);
+				background: color-mix(in srgb, var(--usync-preview-change) 10%, transparent);
+			}
 
-		.empty {
-			margin: 0;
-			color: var(--uui-color-text-alt);
-		}
-	`;
+			/* properties run edge to edge in their box, like the backoffice editor. */
+			.property {
+				padding: 0 var(--uui-size-space-5);
+				margin: 0 calc(-1 * var(--uui-size-space-5));
+			}
+
+			.property:first-child {
+				margin-top: calc(-1 * var(--uui-size-space-5));
+			}
+
+			.property:last-child {
+				margin-bottom: calc(-1 * var(--uui-size-space-5));
+			}
+
+			.property + .property {
+				border-top: 1px solid var(--uui-color-divider);
+			}
+
+			/* umb-property pads itself for a full workspace, tighten it up here. */
+			umb-property {
+				--uui-size-layout-1: var(--uui-size-space-4);
+			}
+
+			.empty {
+				margin: 0;
+				color: var(--uui-color-text-alt);
+			}
+		`,
+	];
 }
 
 /** values that mean "nothing set" compare as equal */
