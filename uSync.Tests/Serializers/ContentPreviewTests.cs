@@ -169,6 +169,27 @@ public class ContentPreviewTests : UmbracoIntegrationTest
     }
 
     [Test]
+    public async Task ContentHandler_Preview_MissingContentType_FailsWithoutThrowing()
+    {
+        var content = CreatePage("Missing Type", "Title");
+        var node = (await ContentSerializer.SerializeAsync(content, new SyncSerializerOptions())).Item!;
+
+        node.SetAttributeValue("Key", Guid.NewGuid());
+        node.Element("Info")!.Element("ContentType")!.Value = "notOnThisSite";
+
+        var handler = GetRequiredService<ISyncHandlerFactory>().GetValidHandler(uSync.BackOffice.uSyncConstants.Handlers.ContentHandler);
+        Assert.That(handler, Is.Not.Null);
+
+        var preview = await handler!.Handler.GetPreviewAsync(node, handler.Settings);
+
+        Assert.That(preview, Is.Not.Null);
+        Assert.That(preview!.Success, Is.False);
+        Assert.That(preview.Message, Does.Contain("notOnThisSite"));
+        Assert.That(preview.Current, Is.Null);
+        Assert.That(preview.Incoming, Is.Null);
+    }
+
+    [Test]
     public async Task DoNotSave_ExistingMedia_ChangesInMemoryOnly()
     {
         var media = CreateFolder("Preview Folder");
