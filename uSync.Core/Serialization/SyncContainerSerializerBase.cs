@@ -49,7 +49,19 @@ public abstract class SyncContainerSerializerBase<TObject>
         return SyncAttempt<TObject>.Succeed(alias, ChangeType.Hidden);
     }
 
-    protected override async Task<Attempt<TObject?>> FindOrCreateAsync(XElement node)
+    protected override Task<Attempt<TObject?>> FindOrCreateAsync(XElement node)
+        => FindOrCreateItemAsync(node, false);
+
+    /// <inheritdoc/>
+    /// <remarks>
+    ///  when DoNotSave is set, missing folders are not created and folder keys are not updated.
+    /// </remarks>
+    protected override Task<Attempt<TObject?>> FindOrCreateAsync(XElement node, SyncSerializerOptions options)
+        => options.DoNotSave
+            ? FindOrCreateItemAsync(node, true)
+            : FindOrCreateAsync(node);
+
+    private async Task<Attempt<TObject?>> FindOrCreateItemAsync(XElement node, bool dryRun)
     {
         TObject? item = await FindItemAsync(node);
         if (item is not null) return Attempt.Succeed(item);
@@ -86,7 +98,7 @@ public abstract class SyncContainerSerializerBase<TObject>
                 if (logger.IsEnabled(LogLevel.Debug))
                     logger.LogDebug("Searching for Parent by folder {folderKey} {folderValue}", folderKey, folder.Value);
 
-                var container = await FindFolderAsync(folderKey, folder.Value);
+                var container = await FindFolderAsync(folderKey, folder.Value, dryRun is false);
                 if (container != null)
                 {
                     treeItem = container;
@@ -95,7 +107,7 @@ public abstract class SyncContainerSerializerBase<TObject>
                         logger.LogDebug("Parent is Folder {TreeItemId}", treeItem.Key);
 
                     // update the container key if its different (because we don't serialize folders on their own)
-                    if (container.Key != folderKey)
+                    if (container.Key != folderKey && dryRun is false)
                     {
                         if (container.Key != folderKey)
                         {
@@ -250,6 +262,33 @@ public abstract class SyncContainerSerializerBase<TObject>
             ? await entityTypeContainerTypeService.CreateAsync(Guid.NewGuid(), name, parentKeyValue, Constants.Security.SuperUserKey)
             : await entityTypeContainerTypeService.UpdateAsync(existing.Key, existing.Name, Constants.Security.SuperUserKey);
         return result;
+    }
+
+    /// <summary>
+    ///  find a folder by key or path, optionally creating any missing folders on the way. 
+    /// </summary>
+    protected virtual async Task<EntityContainer?> FindFolderAsync(Guid key, string path, bool createIfMissing)
+    {
+        if (createIfMissing) return await FindFolderAsync(key, path);
+
+        var container = await FindContainerAsync(key);
+        if (container is not null) return container;
+
+        var bits = path.Split('/');
+
+        var current = (await FindContainersAsync(HttpUtility.UrlDecode(bits[0]), 1))
+            .FirstOrDefault();
+
+        for (int i = 1; i < bits.Length && current is not null; i++)
+        {
+            var name = HttpUtility.UrlDecode(bits[i]);
+            var child = entityService.GetChildren(current.Id, containerType)?
+                .FirstOrDefault(x => x.Name.InvariantEquals(name));
+
+            current = child is null ? null : await FindContainerAsync(child.Key);
+        }
+
+        return current;
     }
 
     protected virtual async Task<EntityContainer?> FindFolderAsync(Guid key, string path)

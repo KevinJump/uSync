@@ -448,7 +448,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (logger.IsEnabled(LogLevel.Trace))
                 logger.LogTrace("{Id} Setting Key {Key}", item.Id, key);
 
-            if (item.HasIdentity)
+            if (item.HasIdentity && options.DoNotSave is false)
                 await OnKeyChange(item, item.Key, key);
 
             item.Key = key;

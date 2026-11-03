@@ -171,7 +171,11 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
                 new Exception("Import failed because of warnings, and fail on warnings is true"));
         }
 
-        // read user ids from the xml, 
+        // a dry run (preview) stops here, the item is changed in memory but not saved or published.
+        if (options.DoNotSave)
+            return SyncAttempt<TObject>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, string.Empty, false, details);
+
+        // read user ids from the xml,
         var userId = DeserializeWriterInfo(item, node);
 
         // if the userId hasn't been set in the options , we use the one from the xml.
