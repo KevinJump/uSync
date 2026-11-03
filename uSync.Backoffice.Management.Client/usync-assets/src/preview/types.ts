@@ -10,10 +10,22 @@ import type {
 import type { SyncItemPreviewResponse } from '../api';
 
 /**
+ * the headlines over the two sides of a preview, for callers whose items don't
+ * come from this site's uSync folders (e.g. 'Target site' and 'This site').
+ */
+export interface uSyncPreviewLabels {
+	current?: string;
+	incoming?: string;
+}
+
+/**
  * An element that shows the preview of an import for one or more entity types.
  */
 export interface uSyncItemPreviewElement extends HTMLElement {
 	preview?: SyncItemPreviewResponse;
+
+	/** headlines for the two sides, when not set the element uses its own. */
+	labels?: uSyncPreviewLabels;
 }
 
 /**

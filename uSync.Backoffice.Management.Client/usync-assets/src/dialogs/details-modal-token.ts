@@ -1,5 +1,5 @@
 import { UmbModalToken } from '@umbraco-cms/backoffice/modal';
-import { SyncItemPreviewResponse, USyncActionView } from '@jumoo/uSync';
+import { SyncItemPreviewResponse, USyncActionView, uSyncPreviewLabels } from '@jumoo/uSync';
 
 /**
  * where the details dialog gets the preview of an item from.
@@ -32,6 +32,12 @@ export interface uSyncDetailsModalData {
 	 * the item from this site's uSync folders.
 	 */
 	previewSource?: uSyncPreviewSource;
+
+	/**
+	 * the headlines over the two sides of the preview, for a previewSource whose
+	 * items don't come from this site's uSync folders.
+	 */
+	previewLabels?: uSyncPreviewLabels;
 }
 
 export interface uSyncDetailsModalValue {

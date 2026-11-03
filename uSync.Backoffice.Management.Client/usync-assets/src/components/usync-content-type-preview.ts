@@ -13,7 +13,11 @@ import {
 import '@umbraco-cms/backoffice/components';
 import type { DataTypeResponseModel } from '@umbraco-cms/backoffice/external/backend-api';
 import type { SyncItemPreviewResponse } from '../api';
-import { getPreviewModel, type SyncContentTypePreview } from '../preview/types.js';
+import {
+	getPreviewModel,
+	type SyncContentTypePreview,
+	type uSyncPreviewLabels,
+} from '../preview/types.js';
 import {
 	buildContentTypeLayout,
 	compositionIds,
@@ -51,6 +55,9 @@ const KIND_LABELS: Record<string, [string, string]> = {
 export class uSyncContentTypePreviewElement extends UmbLitElement {
 	@property({ type: Object })
 	preview?: SyncItemPreviewResponse;
+
+	@property({ type: Object })
+	labels?: uSyncPreviewLabels;
 
 	/** the tab shown on both sides (by name, so it lines up when ids differ) */
 	@state()
@@ -94,8 +101,10 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 	#renderSide(side: PreviewSide, type: USyncPreviewContentType | undefined) {
 		const headline =
 			side === 'current'
-				? this.localize.termOrDefault('uSync_previewCurrent', 'Current (this site)')
-				: this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)');
+				? (this.labels?.current ??
+					this.localize.termOrDefault('uSync_previewCurrent', 'Current (this site)'))
+				: (this.labels?.incoming ??
+					this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)'));
 
 		if (!type) {
 			return html`<div class="side">

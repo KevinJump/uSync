@@ -16,6 +16,7 @@ import {
 	uSyncDetailsModalValue,
 	type ManifestuSyncItemPreview,
 	type SyncItemPreviewResponse,
+	type uSyncPreviewLabels,
 	type USyncActionView,
 } from '@jumoo/uSync';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
@@ -54,7 +55,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 	// kept between renders, so the extension slot doesn't rebuild the preview each time.
 	#previewFilter = (_manifest: ManifestuSyncItemPreview) => false;
-	#previewProps: { preview?: SyncItemPreviewResponse } = {};
+	#previewProps: { preview?: SyncItemPreviewResponse; labels?: uSyncPreviewLabels } = {};
 
 	constructor() {
 		super();
@@ -109,7 +110,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		if (data?.entityType) {
 			const entityType = data.entityType;
 			this.#previewFilter = (manifest) => manifest.forEntityTypes.includes(entityType);
-			this.#previewProps = { preview: data };
+			this.#previewProps = { preview: data, labels: this.data?.previewLabels };
 			this._preview = data;
 		}
 	}

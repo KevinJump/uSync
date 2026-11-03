@@ -10,7 +10,11 @@ import {
 import '@umbraco-cms/backoffice/components';
 import type { DataTypeResponseModel } from '@umbraco-cms/backoffice/external/backend-api';
 import type { SyncItemPreviewResponse } from '../api';
-import { getPreviewModel, type SyncDataTypePreview } from '../preview/types.js';
+import {
+	getPreviewModel,
+	type SyncDataTypePreview,
+	type uSyncPreviewLabels,
+} from '../preview/types.js';
 import { deepEqual, prettyJson } from '../utils/diff/index.js';
 
 type PreviewSide = 'current' | 'incoming';
@@ -26,6 +30,9 @@ type ConfigStatus = 'added' | 'removed' | 'changed' | 'unchanged';
 export class uSyncDataTypePreviewElement extends UmbLitElement {
 	@property({ type: Object })
 	preview?: SyncItemPreviewResponse;
+
+	@property({ type: Object })
+	labels?: uSyncPreviewLabels;
 
 	render() {
 		if (!this.preview) return nothing;
@@ -49,8 +56,10 @@ export class uSyncDataTypePreviewElement extends UmbLitElement {
 	) {
 		const headline =
 			side === 'current'
-				? this.localize.termOrDefault('uSync_previewCurrent', 'Current (this site)')
-				: this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)');
+				? (this.labels?.current ??
+					this.localize.termOrDefault('uSync_previewCurrent', 'Current (this site)'))
+				: (this.labels?.incoming ??
+					this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)'));
 
 		return html`
 			<div class="side">
