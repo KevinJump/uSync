@@ -3,6 +3,7 @@ import { UmbDataSourceResponse } from '@umbraco-cms/backoffice/repository';
 import { tryExecute } from '@umbraco-cms/backoffice/resources';
 import {
 	getActionsBySet,
+	getPreview,
 	getRunning,
 	getStatus,
 	getSyncFileInfo,
@@ -102,6 +103,16 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 			postImport({
 				body: view,
 			}),
+		);
+	}
+
+	async getPreview(handler: string, key: string) {
+		return await tryExecute(
+			this.#host,
+			getPreview({
+				query: { handler, key },
+			}),
+			{ disableNotifications: true },
 		);
 	}
 }
