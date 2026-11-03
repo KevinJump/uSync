@@ -2321,9 +2321,23 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             PendingItemResolver = previewOptions?.PendingItemResolver,
         };
-        var attempt = await serializer.DeserializeAsync(node, options);
-
         preview.Options = options;
+
+        SyncAttempt<TObject> attempt;
+        try
+        {
+            attempt = await serializer.DeserializeAsync(node, options);
+        }
+        catch (Exception ex)
+        {
+            // serializers throw when something the item needs isn't on the site yet
+            // (e.g. content whose doctype hasn't been imported), the preview shouldn't.
+            logger.LogWarning("[{alias}] Preview of {name} failed : {message}", this.Alias, node.GetAlias(), ex.Message);
+            preview.Success = false;
+            preview.Message = ex.Message;
+            return preview;
+        }
+
         preview.Incoming = attempt.Item;
         preview.Success = attempt.Success;
         preview.Message = attempt.Message;
