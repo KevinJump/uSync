@@ -90,11 +90,16 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		const item = this._item;
 		if (!item?.handler || !item.key) return;
 
+		const source = this.data?.previewSource;
+		if (source === false) return;
+
 		// only some handlers support previews, the rest return a 404
 		// and the modal shows the diff on its own. we leave _tab alone
 		// so a user who picked the diff stays on it as they move through.
 		this._loading = true;
-		const { data } = await this.#repository.getPreview(item.handler, item.key);
+		const data = source
+			? await source(item).catch(() => undefined)
+			: (await this.#repository.getPreview(item.handler, item.key)).data;
 
 		// moving through the list quickly can return previews out of order,
 		// so drop anything that isn't for the item we are now showing.

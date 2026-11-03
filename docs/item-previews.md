@@ -89,3 +89,24 @@ matches, the one with the highest manifest `weight` wins.
 
 The uSync previews are registered the same way (`src/preview/manifest.ts`). Their models are typed
 in `@jumoo/uSync`: `SyncDataTypePreview`, `SyncContentTypePreview` and `SyncContentPreview`.
+
+## Previewing items that aren't in the uSync folders
+
+By default the details dialog previews an item from this site's uSync folders. A package that
+shows results for files somewhere else (a sync pack, a snapshot) can build the preview from its
+own file instead:
+
+```csharp
+var result = await previewService.GetPreviewAsync(handlerAlias, node,
+    (handler, key) => FindInMyPackAsync(handler, key));
+```
+
+The finder is called for items the incoming item uses that aren't in Umbraco yet, so they come
+from the same place as the node.
+
+On the client, pass a `previewSource` to `usync-results` (or in the details dialog data). Use a
+function to load the preview, or `false` to show just the diff:
+
+```ts
+html`<usync-results .results=${results} .previewSource=${(item) => this.#loadPreview(item)}></usync-results>`;
+```

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
@@ -10,6 +11,7 @@ using Umbraco.Cms.Core.Scoping;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.Preview;
 using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.Services;
@@ -43,12 +45,28 @@ internal class SyncPreviewService : ISyncPreviewService
         var node = await handlerConfig.Handler.TryFindItemNodeAsync(key);
         if (node is null) return default;
 
+        return await GetPreviewAsync(handlerConfig, node, null);
+    }
+
+    /// <inheritdoc/>
+    public async Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, XElement node, Func<ISyncHandler, Guid, Task<XElement?>>? findNode = null)
+    {
+        var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias);
+        if (handlerConfig is null) return default;
+
+        return await GetPreviewAsync(handlerConfig, node, findNode);
+    }
+
+    private async Task<SyncPreviewResult?> GetPreviewAsync(HandlerConfigPair handlerConfig, XElement node, Func<ISyncHandler, Guid, Task<XElement?>>? findNode)
+    {
+        var handlerAlias = handlerConfig.Handler.Alias;
+
         // the scope is never completed, so anything the dry run writes is rolled back
         // and no notifications (or cache refreshes) are published.
         using var scope = _scopeProvider.CreateCoreScope(autoComplete: false);
         using var _ = scope.Notifications.Suppress();
 
-        var resolver = new PendingItemResolver(this);
+        var resolver = new PendingItemResolver(this, findNode);
         var options = new SyncPreviewOptions { PendingItemResolver = resolver.ResolveAsync };
 
         var preview = await handlerConfig.Handler.GetPreviewAsync(node, handlerConfig.Settings, options);
@@ -77,9 +95,11 @@ internal class SyncPreviewService : ISyncPreviewService
         return result;
     }
 
-    private static async Task<object?> BuildIncomingItemAsync(HandlerConfigPair handlerConfig, Guid key, SyncPreviewOptions? options)
+    private static async Task<object?> BuildIncomingItemAsync(HandlerConfigPair handlerConfig, Guid key, Func<ISyncHandler, Guid, Task<XElement?>>? findNode, SyncPreviewOptions? options)
     {
-        var node = await handlerConfig.Handler.TryFindItemNodeAsync(key);
+        var node = findNode is null
+            ? await handlerConfig.Handler.TryFindItemNodeAsync(key)
+            : await findNode(handlerConfig.Handler, key);
         if (node is null) return null;
 
         var preview = await handlerConfig.Handler.GetPreviewAsync(node, handlerConfig.Settings, options);
@@ -87,15 +107,20 @@ internal class SyncPreviewService : ISyncPreviewService
     }
 
     /// <summary>
-    ///  finds items (by type and key) in the uSync folders for a single preview, building
+    ///  finds items (by type and key) in the uSync folders (or with the caller's finder) for a single preview, building
     ///  each one with a dry run of its handler, and remembering what it has already built.
     /// </summary>
     private class PendingItemResolver
     {
         private readonly SyncPreviewService _service;
+        private readonly Func<ISyncHandler, Guid, Task<XElement?>>? _findNode;
         private readonly Dictionary<(Type, Guid), object?> _items = [];
 
-        public PendingItemResolver(SyncPreviewService service) => _service = service;
+        public PendingItemResolver(SyncPreviewService service, Func<ISyncHandler, Guid, Task<XElement?>>? findNode)
+        {
+            _service = service;
+            _findNode = findNode;
+        }
 
         /// <summary>
         ///  the items found and built so far.
@@ -113,7 +138,7 @@ internal class SyncPreviewService : ISyncPreviewService
                 .FirstOrDefault(x => x.Handler.ItemType == itemType.Name);
             if (handlerConfig is null) return null;
 
-            item = await BuildIncomingItemAsync(handlerConfig, key, new SyncPreviewOptions { PendingItemResolver = ResolveAsync });
+            item = await BuildIncomingItemAsync(handlerConfig, key, _findNode, new SyncPreviewOptions { PendingItemResolver = ResolveAsync });
 
             if (item is not null && _service._logger.IsEnabled(LogLevel.Debug))
                 _service._logger.LogDebug("Preview using {type} {key} from the uSync files", itemType.Name, key);

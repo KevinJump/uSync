@@ -13,7 +13,7 @@ import {
 	UMB_MODAL_MANAGER_CONTEXT,
 	UmbModalManagerContext,
 } from '@umbraco-cms/backoffice/modal';
-import { USYNC_DETAILS_MODAL } from '@jumoo/uSync';
+import { USYNC_DETAILS_MODAL, uSyncPreviewSource } from '@jumoo/uSync';
 import { uSyncShowDetailEvent } from './events';
 
 @customElement('usync-results')
@@ -37,6 +37,13 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 	@property({ type: Boolean })
 	hideActions: boolean = false;
 
+	/**
+	 * where the details dialog gets previews from, leave it unset to preview
+	 * items from this site's uSync folders (see uSyncDetailsModalData).
+	 */
+	@property({ attribute: false })
+	previewSource?: uSyncPreviewSource;
+
 	@state()
 	showAll: boolean = false;
 
@@ -55,6 +62,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 			data: {
 				item: e.action,
 				items: this.#visibleItems(),
+				previewSource: this.previewSource,
 				showActions: (item) =>
 					!this.hideActions &&
 					(item.change == ChangeType.CREATE ||
