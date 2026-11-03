@@ -235,7 +235,7 @@ namespace uSync.Core.Serialization.Serializers
             var rootNodes = _mediaService.GetRootMedia();
             if (rootNodes.Any())
             {
-                return rootNodes.FirstOrDefault(x => x.Name.ToSafeAlias(shortStringHelper).InvariantEquals(alias));
+                return FindByName(rootNodes, alias);
             }
 
             return null;
