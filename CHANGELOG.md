@@ -9,6 +9,68 @@ re-export), see [`changes/format.md`](changes/format.md).
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 History is backfilled from the v18 release history starting at `v18.0.0`.
 
+## [18.3.0] - 2026-11-03
+
+### Added
+
+- **The change details dialog previews items with the real backoffice
+  editors.** A new Changes tab shows the site's current version of an item
+  next to the incoming one from the uSync files, with what differs
+  highlighted. It covers data types, document, media and member types, and
+  content and media. The incoming item is built by a dry run of the normal
+  serializer, so nothing is saved, published or created while you look. The
+  existing diff moves to its own Diff tab, and you can step through the
+  changes from the dialog. (#1166, #1168)
+
+### Fixed
+
+- **Previewing an item whose dependencies aren't on the site no longer
+  returns a 500.** Opening the details of, say, content whose doctype hadn't
+  been imported yet made the preview endpoint throw. It now returns a failed
+  preview with the reason, and the dialog falls back to the changes list.
+  (#1189)
+
+## [18.2.1] - 2026-11-01
+
+### Security
+
+- **The uSync Management API requires the uSync policy again.** The API
+  controllers checked for Content section access, so any user with the
+  Content section could call import and export, and a user with only the
+  uSync section got 403s. They now use the uSync policy (Settings section or
+  the uSync section), as on v17. (#1157)
+
+### Fixed
+
+- **Member type compositions are imported.** They were exported but never
+  read back, so importing member types onto a clean site dropped their
+  compositions without an error. (#1149, #1151)
+
+- **Blueprint folders keep their spaces when created on import.** A missing
+  blueprint folder took its name from the item's path, which has the spaces
+  removed, so `My Blueprints` came back as `MyBlueprints`. (#1153)
+
+- **The SignalR client respects Umbraco's skip-negotiation setting.** When
+  negotiation is skipped, the dashboard connects over WebSockets directly.
+  (#1169, #1170)
+
+- **Export all skips content outside the `Include` paths.** With
+  `RulesOnExport` on, an export all serialized every content and media item
+  before discarding the ones the `Include` and `Exclude` paths ruled out. It
+  now skips them, and whole branches beneath them, up front. (#1176, #563)
+
+- **Partial culture and segment exports keep their values.** Culture or
+  segment limited exports could lose values, keep stale ones, or put a value
+  in the wrong place on import. `DefaultValues` is also only stamped on a
+  partial export when the shared values are actually written. (#1181, #1184)
+
+- **Items with a clean marker stay in the import order.** A clean marker
+  shares its item's key and sorted ahead of it, so it replaced the item in
+  report and import lists. (#1182)
+
+- **The dashboard shows `18.x` while its version loads.** It showed `17.x`
+  until the add-ons call returned. (#1148)
+
 ## [18.2.0] - 2026-10-26
 
 ### Added
