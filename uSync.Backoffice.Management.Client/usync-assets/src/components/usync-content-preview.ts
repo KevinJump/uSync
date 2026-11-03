@@ -21,6 +21,7 @@ import {
 	getPreviewModel,
 	type SyncContentPreview,
 	type SyncContentPreviewInfo,
+	type uSyncPreviewLabels,
 } from '../preview/types.js';
 import {
 	buildContentTypeLayout,
@@ -51,6 +52,9 @@ type ValueStatus = 'added' | 'removed' | 'changed';
 export class uSyncContentPreviewElement extends UmbLitElement {
 	@property({ type: Object })
 	preview?: SyncItemPreviewResponse;
+
+	@property({ type: Object })
+	labels?: uSyncPreviewLabels;
 
 	/** the tab shown on both sides (by name) */
 	@state()
@@ -161,8 +165,10 @@ export class uSyncContentPreviewElement extends UmbLitElement {
 	) {
 		const headline =
 			side === 'current'
-				? this.localize.termOrDefault('uSync_previewCurrent', 'Current (this site)')
-				: this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)');
+				? (this.labels?.current ??
+					this.localize.termOrDefault('uSync_previewCurrent', 'Current (this site)'))
+				: (this.labels?.incoming ??
+					this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)'));
 
 		if (!data.item) {
 			return html`<div class="side ${side}">

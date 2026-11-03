@@ -112,3 +112,16 @@ function to load the preview, or `false` to show just the diff:
 ```ts
 html`<usync-results .results=${results} .previewSource=${(item) => this.#loadPreview(item)}></usync-results>`;
 ```
+
+The preview's two sides are headed "Current (this site)" and "Incoming (uSync files)". When those
+aren't right for your items, pass `previewLabels` alongside the `previewSource` (both are on
+`usync-results` and the details dialog data):
+
+```ts
+html`<usync-results
+	.results=${results}
+	.previewSource=${this.#loadPreview}
+	.previewLabels=${{ current: 'Target site', incoming: 'This site' }}></usync-results>`;
+```
+
+Elements you register get the same `labels` alongside `preview`.
