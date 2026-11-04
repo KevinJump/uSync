@@ -186,7 +186,12 @@ namespace uSync.Core
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(alias)) return false;
             if (name.InvariantEquals(alias)) return true;
 
-            return name.ToSafeAlias(shortStringHelper).InvariantEquals(alias.ToSafeAlias(shortStringHelper));
+            // names that are all digits or non-latin can have an empty safe alias,
+            // and two empty aliases are not a match ("1" is not "4").
+            var safeName = name.ToSafeAlias(shortStringHelper);
+            if (string.IsNullOrWhiteSpace(safeName)) return false;
+
+            return safeName.InvariantEquals(alias.ToSafeAlias(shortStringHelper));
         }
 
     }
