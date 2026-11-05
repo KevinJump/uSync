@@ -523,7 +523,17 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             var fileWithoutPath = Path.GetFileName(filename);
             logger.LogWarning("[{alias}] ({filename}) ImportElement Failed : {exception}", this.Alias, fileWithoutPath, ex.ToString());
-            return [uSyncAction.Fail(fileWithoutPath, this.Alias, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message))];
+
+            // name the failure after the item (like the success path), not its file.
+            var alias = node.GetAlias();
+            var name = string.IsNullOrWhiteSpace(alias) ? fileWithoutPath : alias;
+
+            return [new uSyncAction(false, name, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message),
+                GetNameFromFileOrNode(filename, node), this.Alias)
+            {
+                Key = node.GetKey(),
+                Path = node.GetPath()
+            }];
         }
 
     }
