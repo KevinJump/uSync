@@ -1921,7 +1921,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             var item = await this.GetFromServiceAsync(key);
             if (item == null)
             {
-                var container = await this.GetContainerAsync(key);
+                var container = await GetContainerSafeAsync(key);
                 if (container != null)
                 {
                     return await GetContainerDependenciesAsync(container, flags);
@@ -1930,6 +1930,29 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             }
 
             return await GetDependenciesAsync(item, flags);
+        }
+    }
+
+    /// <summary>
+    ///  Get a container by key, returning null when the key belongs to something that isn't a container.
+    /// </summary>
+    /// <remarks>
+    ///  In Umbraco 17 EntityContainerRepository.Get(Guid) looks the node up by key alone, without
+    ///  filtering on the container's object type. A key that belongs to any other node (e.g. a doctype
+    ///  or content item) makes it throw "Not a container object type" instead of returning null.
+    ///  (Umbraco 18 adds the object type filter, so there it is a plain null.)
+    /// </remarks>
+    private async Task<TContainer?> GetContainerSafeAsync(Guid key)
+    {
+        try
+        {
+            return await GetContainerAsync(key);
+        }
+        catch (ArgumentException ex)
+        {
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug(ex, "Key {key} is not a container for {handler}", key, Alias);
+            return default;
         }
     }
 
