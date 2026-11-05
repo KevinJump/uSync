@@ -125,8 +125,7 @@ internal class SyncPreviewMappingHelper : ISyncPreviewMappingHelper
 
         if (item is IContent content)
         {
-            if (content.TemplateId is int templateId)
-                info.Template = (await _templateService.GetAsync(templateId))?.Alias;
+            info.Template = await GetTemplateAliasAsync(content, nodeInfo);
 
             // only the cultures uSync is set to sync are compared, the import leaves the others alone.
             var cultures = options?.GetCultures() ?? [];
@@ -135,6 +134,25 @@ internal class SyncPreviewMappingHelper : ISyncPreviewMappingHelper
         }
 
         return info;
+    }
+
+    /// <summary>
+    ///  the template alias, from the uSync file for the incoming item.
+    /// </summary>
+    /// <remarks>
+    ///  the deserialized item only gets a template the site already has, so a template that
+    ///  is coming in the same sync (or is missing) would show as none, and the preview would
+    ///  hide a change the details report. The file says what the item is set to.
+    /// </remarks>
+    private async Task<string?> GetTemplateAliasAsync(IContent content, XElement? nodeInfo)
+    {
+        var templateNode = nodeInfo?.Element(uSyncConstants.Xml.Template);
+        if (templateNode is not null)
+            return string.IsNullOrWhiteSpace(templateNode.Value) ? null : templateNode.Value;
+
+        return content.TemplateId is int templateId
+            ? (await _templateService.GetAsync(templateId))?.Alias
+            : null;
     }
 
     /// <summary>
