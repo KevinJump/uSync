@@ -126,6 +126,9 @@ export default {
 		noChangesImport: 'No changes were made to this item',
 		noChangesReport: 'No changes detected',
 		noChangesDelete: 'This item has been deleted from Umbraco',
+		// a change with no property details (files report this way), so not "no changes".
+		noChangesUpdate: 'This item will be updated',
+		noChangesWillChange: 'This item will change',
 
 		importHeader: 'Import from file',
 
@@ -205,6 +208,10 @@ export default {
 		IWebhook: 'Webhooks',
 		IRelationType: 'Relation Types',
 		MediaFile: 'Media Files',
+		IFile: 'Files',
+		IScript: 'Scripts',
+		IStylesheet: 'Stylesheets',
+		IPartialView: 'Partial Views',
 		XElement: 'Other',
 		LanguageHandler: 'Languages',
 		DictionaryHandler: 'Dictionary Items',
