@@ -516,7 +516,17 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             var fileWithoutPath = Path.GetFileName(filename);
             logger.LogWarning("[{alias}] ({filename}) ImportElement Failed : {exception}", this.Alias, fileWithoutPath, ex.ToString());
-            return [uSyncAction.Fail(fileWithoutPath, this.Alias, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message))];
+
+            // name the failure after the item (like the success path), not its file.
+            var alias = node.GetAlias();
+            var name = string.IsNullOrWhiteSpace(alias) ? fileWithoutPath : alias;
+
+            return [new uSyncAction(false, name, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message),
+                GetNameFromFileOrNode(filename, node), this.Alias)
+            {
+                Key = node.GetKey(),
+                Path = node.GetPath()
+            }];
         }
 
     }
@@ -1944,7 +1954,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             var item = await this.GetFromServiceAsync(key);
             if (item == null)
             {
-                var container = await this.GetContainerAsync(key);
+                var container = await GetContainerSafeAsync(key);
                 if (container != null)
                 {
                     return await GetContainerDependenciesAsync(container, flags);
@@ -1953,6 +1963,29 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             }
 
             return await GetDependenciesAsync(item, flags);
+        }
+    }
+
+    /// <summary>
+    ///  Get a container by key, returning null when the key belongs to something that isn't a container.
+    /// </summary>
+    /// <remarks>
+    ///  In Umbraco 17 EntityContainerRepository.Get(Guid) looks the node up by key alone, without
+    ///  filtering on the container's object type. A key that belongs to any other node (e.g. a doctype
+    ///  or content item) makes it throw "Not a container object type" instead of returning null.
+    ///  (Umbraco 18 adds the object type filter, so there it is a plain null.)
+    /// </remarks>
+    private async Task<TContainer?> GetContainerSafeAsync(Guid key)
+    {
+        try
+        {
+            return await GetContainerAsync(key);
+        }
+        catch (ArgumentException ex)
+        {
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug(ex, "Key {key} is not a container for {handler}", key, Alias);
+            return default;
         }
     }
 
@@ -2320,5 +2353,67 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
 
         return null;
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    ///  previews are opt-in, handlers whose serializers honour <see cref="SerializerFlags.DoNotSave"/>
+    ///  can override this and call <see cref="BuildPreviewAsync"/>.
+    /// </remarks>
+    public virtual Task<SyncItemPreview?> GetPreviewAsync(XElement node, HandlerSettings settings, SyncPreviewOptions? options = null)
+        => Task.FromResult<SyncItemPreview?>(null);
+
+    /// <summary>
+    ///  build a preview by running the serializer with the DoNotSave flag. 
+    /// </summary>
+    /// <remarks>
+    ///  the serializer still loads (and changes) the item in memory, so this should be 
+    ///  called inside a scope that is never completed.
+    /// </remarks>
+    protected async Task<SyncItemPreview?> BuildPreviewAsync(XElement node, HandlerSettings settings, SerializerFlags flags, SyncPreviewOptions? previewOptions = null)
+    {
+        var preview = new SyncItemPreview
+        {
+            Key = node.GetKey(),
+            Handler = Alias,
+            ItemType = ItemType,
+            Node = node,
+            Current = await serializer.FindItemAsync(node),
+        };
+
+        if (node.IsEmptyItem())
+        {
+            // deletes and renames are never run in a preview.
+            preview.IsDelete = true;
+            preview.Success = true;
+            return preview;
+        }
+
+        var options = new SyncSerializerOptions(flags | SerializerFlags.Force | SerializerFlags.DoNotSave, settings.Settings)
+        {
+            PendingItemResolver = previewOptions?.PendingItemResolver,
+        };
+        preview.Options = options;
+
+        SyncAttempt<TObject> attempt;
+        try
+        {
+            attempt = await serializer.DeserializeAsync(node, options);
+        }
+        catch (Exception ex)
+        {
+            // serializers throw when something the item needs isn't on the site yet
+            // (e.g. content whose doctype hasn't been imported), the preview shouldn't.
+            logger.LogWarning("[{alias}] Preview of {name} failed : {message}", this.Alias, node.GetAlias(), ex.Message);
+            preview.Success = false;
+            preview.Message = ex.Message;
+            return preview;
+        }
+
+        preview.Incoming = attempt.Item;
+        preview.Success = attempt.Success;
+        preview.Message = attempt.Message;
+        preview.Details = attempt.Details ?? [];
+        return preview;
     }
 }

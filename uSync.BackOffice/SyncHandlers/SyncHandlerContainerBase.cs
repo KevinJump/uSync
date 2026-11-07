@@ -275,7 +275,10 @@ public abstract class SyncHandlerContainerBase<TObject>
 
         options.UpdateCallback?.Invoke("Order: Sorting items", 3, 5);
 
-        var nodes = items.DistinctBy(x => x.Key).ToDictionary(k => k.Key);
+        // a clean marker has the same key as the item it cleans and sorts ahead of it,
+        // so it is kept out of the distinct or it would replace the item.
+        var cleans = items.Where(IsCleanMarker).DistinctBy(x => x.Key).ToList();
+        var nodes = items.Where(x => !IsCleanMarker(x)).DistinctBy(x => x.Key).ToDictionary(k => k.Key);
         var renames = nodes.Where(x => x.Value.Node.IsEmptyItem()).Select(x => x.Value);
         var graph = new List<GraphEdge<Guid>>();
 
@@ -309,8 +312,13 @@ public abstract class SyncHandlerContainerBase<TObject>
             results.AddRange(renames);
         }
 
+        results.AddRange(cleans);
+
         return results;
     }
+
+    private static bool IsCleanMarker(OrderedNodeInfo item)
+        => item.Node.GetEmptyAction() == SyncActionType.Clean;
 
     private void CheckForDuplicates(IReadOnlyList<OrderedNodeInfo> items)
     {
