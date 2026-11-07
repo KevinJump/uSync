@@ -22,6 +22,7 @@ using uSync.BackOffice.Hubs;
 using uSync.BackOffice.Legacy;
 using uSync.BackOffice.Legacy.Migrators;
 using uSync.BackOffice.Notifications;
+using uSync.BackOffice.Preview;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Handlers;
@@ -83,6 +84,11 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.Services.AddSingleton<ISyncHandlerFactory, SyncHandlerFactory>();
         builder.Services.AddSingleton<ISyncUserService, SyncUserService>();
         builder.Services.AddSingleton<ISyncService, SyncService>();
+        builder.Services.AddSingleton<ISyncPreviewService, SyncPreviewService>();
+
+        // preview mappers, turn previews into the models the backoffice shows for each type of item.
+        builder.WithCollectionBuilder<SyncPreviewMapperCollectionBuilder>()
+            .Add(builder.TypeLoader.GetTypes<ISyncPreviewMapper>());
         builder.Services.AddSingleton<CacheLifecycleManager>();
 
         // remembers which files we have already confirmed match Umbraco, so repeat runs can

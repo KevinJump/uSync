@@ -13,7 +13,7 @@ import {
 	UMB_MODAL_MANAGER_CONTEXT,
 	UmbModalManagerContext,
 } from '@umbraco-cms/backoffice/modal';
-import { USYNC_DETAILS_MODAL } from '@jumoo/uSync';
+import { USYNC_DETAILS_MODAL, uSyncPreviewLabels, uSyncPreviewSource } from '@jumoo/uSync';
 import { uSyncShowDetailEvent } from './events';
 
 @customElement('usync-results')
@@ -37,6 +37,19 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 	@property({ type: Boolean })
 	hideActions: boolean = false;
 
+	/**
+	 * where the details dialog gets previews from, leave it unset to preview
+	 * items from this site's uSync folders (see uSyncDetailsModalData).
+	 */
+	@property({ attribute: false })
+	previewSource?: uSyncPreviewSource;
+
+	/**
+	 * the headlines over the two sides of the preview (see uSyncDetailsModalData).
+	 */
+	@property({ attribute: false })
+	previewLabels?: uSyncPreviewLabels;
+
 	@state()
 	showAll: boolean = false;
 
@@ -54,11 +67,14 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {
 			data: {
 				item: e.action,
-				showActions:
+				items: this.#visibleItems(),
+				previewSource: this.previewSource,
+				previewLabels: this.previewLabels,
+				showActions: (item) =>
 					!this.hideActions &&
-					(e.action.change == ChangeType.CREATE ||
-						e.action.change == ChangeType.UPDATE ||
-						e.action.change == ChangeType.IMPORT),
+					(item.change == ChangeType.CREATE ||
+						item.change == ChangeType.UPDATE ||
+						item.change == ChangeType.IMPORT),
 			},
 		});
 
@@ -66,6 +82,22 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 			return;
 		});
 		if (!data) return;
+	}
+
+	/**
+	 * the items in the order they are shown in the list (grouped by type,
+	 * no-change items only when 'show all' is on), so the details dialog
+	 * can step through them. exports have no details, so are left out.
+	 */
+	#visibleItems() {
+		const groups = this.groupBy(this.results || [], (result) => result.itemType);
+		return Object.values(groups)
+			.flat()
+			.filter(
+				(r) =>
+					r.change !== ChangeType.EXPORT &&
+					(this.showAll || r.change !== ChangeType.NO_CHANGE),
+			);
 	}
 
 	groupBy<T>(arr: T[], fn: (item: T) => any) {

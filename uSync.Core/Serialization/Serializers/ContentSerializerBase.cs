@@ -81,7 +81,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // are we including the default (not variant) values in the serialized result? 
         // we only worry about this when we are passing partial cultures or segments 
         // to the file, when we sync complete content items, this is redundant. 
-        if (options.GetSetting(uSyncConstants.DefaultsKey, true) && ContentSerializerBase<TObject>.IsPartialElement(item, cultures, segments))
+        if (IncludeDefaultValues(options) && ContentSerializerBase<TObject>.IsPartialElement(item, cultures, segments))
         {
             node.Add(new XAttribute(uSyncConstants.DefaultsKey, true));
         }
@@ -89,11 +89,26 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return node;
     }
 
+    /// <summary>
+    ///  are the default (not variant) values written for partial culture/segment exports?
+    /// </summary>
+    private static bool IncludeDefaultValues(SyncSerializerOptions options)
+        => options.GetSetting(uSyncConstants.DefaultsKey, false);
+
     private static bool IsPartialCultureElement(TObject item, string cultures)
-        => !string.IsNullOrWhiteSpace(cultures) && item.ContentType.VariesByCulture();
+        => IsLimitedList(cultures) && item.ContentType.VariesByCulture();
 
     private static bool IsPartialSegmentElement(TObject item, string segments)
-        => !string.IsNullOrWhiteSpace(segments) && item.ContentType.VariesBySegment();
+        => IsLimitedList(segments) && item.ContentType.VariesBySegment();
+
+    /// <summary>
+    ///  does the setting limit what we serialize? (blank or a wildcard means everything)
+    /// </summary>
+    private static bool IsLimitedList(string values)
+    {
+        var list = values.ToDelimitedList();
+        return list.Count > 0 && !list.InvariantContains("*");
+    }
 
     private static bool IsPartialElement(TObject item, string cultures, string segments)
         => IsPartialCultureElement(item, cultures) || IsPartialSegmentElement(item, segments);
@@ -217,8 +232,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     {
         var cultures = options.GetCultures();
         var segments = options.GetSegments();
-        var includeDefaults = (cultures.Count == 0 && segments.Count == 0)
-            || options.GetSetting(uSyncConstants.DefaultsKey, false);
+        var isPartial = ContentSerializerBase<TObject>.IsPartialElement(item,
+            options.GetSetting(uSyncConstants.CultureKey, string.Empty),
+            options.GetSetting(uSyncConstants.SegmentKey, string.Empty));
+        var includeDefaults = !isPartial || IncludeDefaultValues(options);
 
         var excludedProperties = GetExcludedProperties(options);
         var excludedPropertiesPattern = GetExcludedPropertiesPattern(options);
@@ -255,12 +272,14 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 //    segments are overrides of a culture value, so they go with their culture.
                 var validNode = !hasCulture && !hasSegment
                     ? includeDefaults
-                    : (!hasCulture || cultures.IsValid(value.Culture!)) && (!hasSegment || segments.IsValid(value.Segment!));
+                    : cultures.IsValidOrBlank(value.Culture!) && segments.IsValidOrBlank(value.Segment!);
 
-                if (validNode && hasCulture)
+                // always label the value, even when it isn't valid for this export,
+                // so it can't be read back as the invariant/default value (#1184).
+                if (hasCulture)
                     valueNode.Add(new XAttribute("Culture", value.Culture.EnsureCultureCode() ?? string.Empty));
 
-                if (validNode && hasSegment)
+                if (hasSegment)
                     valueNode.Add(new XAttribute("Segment", value.Segment!));
 
                 if (validNode)
@@ -270,31 +289,29 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 }
             }
 
-            if (includeDefaults)
-            {
-                if (property.PropertyType.VariesByCulture())
-                {
-                    foreach (var culture in availableCultures)
-                    {
-                        if (!cultures.IsValid(culture)) continue;
 
-                        // add a blank value for any missing culture values.
-                        if (!property.Values.Any(x => (x.Culture ?? "").Equals(culture, StringComparison.OrdinalIgnoreCase)))
-                        {
-                            elements.Add(new XElement("Value",
-                                new XAttribute("Culture", culture.EnsureCultureCode()!),
-                                new XCData(string.Empty)));
-                        }
+            if (property.PropertyType.VariesByCulture())
+            {
+                foreach (var culture in availableCultures)
+                {
+                    if (!cultures.IsValid(culture)) continue;
+
+                    // add a blank value for any missing culture values.
+                    if (!property.Values.Any(x => (x.Culture ?? "").Equals(culture, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        elements.Add(new XElement("Value",
+                            new XAttribute("Culture", culture.EnsureCultureCode()!),
+                            new XCData(string.Empty)));
                     }
                 }
-                else if (property.Values == null || property.Values.Count == 0)
-                {
-                    // add a blank one, for change clarity
-                    // we do it like this because then it doesn't get collapsed in the XML serialization
-                    elements.Add(new XElement("Value",
-                        new XCData(string.Empty)));
+            }
+            else if (includeDefaults && (property.Values == null || property.Values.Count == 0))
+            {
+                // add a blank one, for change clarity
+                // we do it like this because then it doesn't get collapsed in the XML serialization
+                elements.Add(new XElement("Value",
+                    new XCData(string.Empty)));
 
-                }
             }
 
             if (elements.Count > 0)
@@ -432,7 +449,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (logger.IsEnabled(LogLevel.Trace))
                 logger.LogTrace("{Id} Setting Key {Key}", item.Id, key);
 
-            if (item.HasIdentity)
+            if (item.HasIdentity && options.DoNotSave is false)
                 await OnKeyChange(item, item.Key, key);
 
             item.Key = key;
