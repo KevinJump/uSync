@@ -13,7 +13,16 @@ import {
 import '@umbraco-cms/backoffice/components';
 import type { DataTypeResponseModel } from '@umbraco-cms/backoffice/external/backend-api';
 import type { SyncItemPreviewResponse } from '../api';
-import { getPreviewModel, type SyncContentTypePreview } from '../preview/types.js';
+import {
+	type PreviewSide,
+	previewSideStyles,
+	renderPreviewHeadline,
+} from './preview-side.js';
+import {
+	getPreviewModel,
+	type SyncContentTypePreview,
+	type uSyncPreviewLabels,
+} from '../preview/types.js';
 import {
 	buildContentTypeLayout,
 	compositionIds,
@@ -26,8 +35,6 @@ import {
 	type USyncContentTypeDiff,
 	type USyncPreviewItemChange,
 } from '../utils/preview/content-type-diff.js';
-
-type PreviewSide = 'current' | 'incoming';
 
 interface PreviewSides {
 	current?: USyncPreviewContentType;
@@ -51,6 +58,9 @@ const KIND_LABELS: Record<string, [string, string]> = {
 export class uSyncContentTypePreviewElement extends UmbLitElement {
 	@property({ type: Object })
 	preview?: SyncItemPreviewResponse;
+
+	@property({ type: Object })
+	labels?: uSyncPreviewLabels;
 
 	/** the tab shown on both sides (by name, so it lines up when ids differ) */
 	@state()
@@ -85,21 +95,16 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 
 		return html`
 			<div class="sides">
-				${this.#renderSide('current', this.#sides.current)}
 				${this.#renderSide('incoming', this.#sides.incoming)}
+				${this.#renderSide('current', this.#sides.current)}
 			</div>
 		`;
 	}
 
 	#renderSide(side: PreviewSide, type: USyncPreviewContentType | undefined) {
-		const headline =
-			side === 'current'
-				? this.localize.termOrDefault('uSync_previewCurrent', 'Current (this site)')
-				: this.localize.termOrDefault('uSync_previewIncoming', 'Incoming (uSync files)');
-
 		if (!type) {
-			return html`<div class="side">
-				<h4 class="side-headline">${headline}</h4>
+			return html`<div class="side ${side}">
+				${renderPreviewHeadline(this, side, this.labels)}
 				<uui-box class="info"><p class="empty">${this.#missingMessage(side)}</p></uui-box>
 			</div>`;
 		}
@@ -108,8 +113,8 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		const active = tabs.find((t) => t.name === this._activeTab) ?? tabs[0];
 
 		return html`
-			<div class="side">
-				<h4 class="side-headline">${headline}</h4>
+			<div class="side ${side}">
+				${renderPreviewHeadline(this, side, this.labels)}
 				${this.#renderInfo(type)}
 				${
 					tabs.length > 1 || (tabs.length === 1 && tabs[0].name)
@@ -388,226 +393,221 @@ export class uSyncContentTypePreviewElement extends UmbLitElement {
 		>`;
 	}
 
-	static styles = css`
-		:host {
-			display: block;
-			container-type: inline-size;
-		}
+	static styles = [
+		previewSideStyles,
+		css`
+			:host {
+				display: block;
+				container-type: inline-size;
+			}
 
-		/* the two sides share rows (headline, info, tabs, content), so the
-		   tab bars and groups line up even when the info boxes differ. */
-		.sides {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			grid-template-rows: auto auto auto 1fr;
-			gap: var(--uui-size-space-4) var(--uui-size-space-5);
-		}
-
-		.side {
-			display: grid;
-			grid-row: span 4;
-			grid-template-rows: subgrid;
-			align-items: start;
-			min-width: 0;
-		}
-
-		/* info boxes match heights across the sides (but a lone "not here" box doesn't stretch). */
-		.side > .info:not(:last-child) {
-			align-self: stretch;
-		}
-
-		@container (max-width: 760px) {
+			/* the two sides share rows (headline, info, tabs, content), so the
+			   tab bars and groups line up even when the info boxes differ. */
 			.sides {
-				grid-template-columns: 1fr;
-				grid-template-rows: none;
-				row-gap: var(--uui-size-layout-1);
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				grid-template-rows: auto auto auto 1fr;
+				gap: var(--uui-size-space-4) var(--uui-size-space-5);
 			}
 
 			.side {
+				display: grid;
+				grid-row: span 4;
+				grid-template-rows: subgrid;
+				align-items: start;
+				min-width: 0;
+			}
+
+			/* info boxes match heights across the sides (but a lone "not here" box doesn't stretch). */
+			.side > .info:not(:last-child) {
+				align-self: stretch;
+			}
+
+			@container (max-width: 760px) {
+				.sides {
+					grid-template-columns: 1fr;
+					grid-template-rows: none;
+					row-gap: var(--uui-size-layout-1);
+				}
+
+				.side {
+					display: flex;
+					flex-direction: column;
+					align-items: stretch;
+					gap: var(--uui-size-space-4);
+					grid-row: auto;
+				}
+			}
+
+			umb-property-dataset {
 				display: flex;
 				flex-direction: column;
-				align-items: stretch;
 				gap: var(--uui-size-space-4);
-				grid-row: auto;
+				min-width: 0;
 			}
-		}
 
-		umb-property-dataset {
-			display: flex;
-			flex-direction: column;
-			gap: var(--uui-size-space-4);
-			min-width: 0;
-		}
+			.headline {
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				gap: var(--uui-size-space-2) var(--uui-size-space-3);
+			}
 
-		.side-headline {
-			margin: 0;
-			font-size: var(--uui-type-small-size);
-			text-transform: uppercase;
-			letter-spacing: 0.04em;
-			color: var(--uui-color-text-alt);
-		}
+			.headline code {
+				font-size: var(--uui-type-small-size);
+				color: var(--uui-color-text-alt);
+			}
 
-		.headline {
-			display: flex;
-			align-items: center;
-			flex-wrap: wrap;
-			gap: var(--uui-size-space-2) var(--uui-size-space-3);
-		}
+			.info-body {
+				display: flex;
+				flex-direction: column;
+				gap: var(--uui-size-space-4);
+			}
 
-		.headline code {
-			font-size: var(--uui-type-small-size);
-			color: var(--uui-color-text-alt);
-		}
+			.tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: var(--uui-size-space-2);
+			}
 
-		.info-body {
-			display: flex;
-			flex-direction: column;
-			gap: var(--uui-size-space-4);
-		}
+			.description {
+				margin: 0;
+			}
 
-		.tags {
-			display: flex;
-			flex-wrap: wrap;
-			gap: var(--uui-size-space-2);
-		}
+			.meta {
+				display: grid;
+				grid-template-columns: max-content 1fr;
+				align-items: center;
+				gap: var(--uui-size-space-2) var(--uui-size-space-5);
+				margin: 0;
+			}
 
-		.description {
-			margin: 0;
-		}
+			.meta dt {
+				font-weight: 700;
+			}
 
-		.meta {
-			display: grid;
-			grid-template-columns: max-content 1fr;
-			align-items: center;
-			gap: var(--uui-size-space-2) var(--uui-size-space-5);
-			margin: 0;
-		}
+			.meta dd {
+				display: flex;
+				flex-wrap: wrap;
+				gap: var(--uui-size-space-2);
+				margin: 0;
+			}
 
-		.meta dt {
-			font-weight: 700;
-		}
+			/* a changed field gets a soft highlight, spread with a shadow so the text doesn't move. */
+			.changed:not(.property):not(uui-box) {
+				background: color-mix(in srgb, var(--usync-preview-change) 35%, transparent);
+				border-radius: var(--uui-border-radius);
+				box-shadow: 0 0 0 var(--uui-size-space-1)
+					color-mix(in srgb, var(--usync-preview-change) 35%, transparent);
+			}
 
-		.meta dd {
-			display: flex;
-			flex-wrap: wrap;
-			gap: var(--uui-size-space-2);
-			margin: 0;
-		}
+			uui-tab-group {
+				--uui-tab-divider: var(--uui-color-border);
+				border-bottom: 1px solid var(--uui-color-border);
+			}
 
-		/* a changed field gets a soft highlight, spread with a shadow so the text doesn't move. */
-		.changed:not(.property):not(uui-box) {
-			background: color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
-			border-radius: var(--uui-border-radius);
-			box-shadow: 0 0 0 var(--uui-size-space-1)
-				color-mix(in srgb, var(--uui-color-warning) 35%, transparent);
-		}
+			.tab-label {
+				display: inline-flex;
+				align-items: center;
+				gap: var(--uui-size-space-2);
+				white-space: nowrap;
+			}
 
-		uui-tab-group {
-			--uui-tab-divider: var(--uui-color-border);
-			border-bottom: 1px solid var(--uui-color-border);
-		}
+			.dot {
+				display: inline-block;
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+			}
 
-		.tab-label {
-			display: inline-flex;
-			align-items: center;
-			gap: var(--uui-size-space-2);
-			white-space: nowrap;
-		}
+			.dot.added {
+				background: var(--uui-color-positive);
+			}
 
-		.dot {
-			display: inline-block;
-			width: 8px;
-			height: 8px;
-			border-radius: 50%;
-		}
+			.dot.removed {
+				background: var(--uui-color-danger);
+			}
 
-		.dot.added {
-			background: var(--uui-color-positive);
-		}
+			.dot.changed {
+				background: var(--uui-color-warning);
+			}
 
-		.dot.removed {
-			background: var(--uui-color-danger);
-		}
+			uui-box.added {
+				border-left: 3px solid var(--uui-color-positive);
+			}
 
-		.dot.changed {
-			background: var(--uui-color-warning);
-		}
+			uui-box.removed {
+				border-left: 3px solid var(--uui-color-danger);
+			}
 
-		uui-box.added {
-			border-left: 3px solid var(--uui-color-positive);
-		}
+			uui-box.changed {
+				border-left: 3px solid var(--usync-preview-change);
+			}
 
-		uui-box.removed {
-			border-left: 3px solid var(--uui-color-danger);
-		}
+			/* marked with an inset bar rather than a border, so the content doesn't shift. */
+			.property.added {
+				box-shadow: inset 3px 0 0 var(--uui-color-positive);
+				background: color-mix(in srgb, var(--uui-color-positive) 6%, transparent);
+			}
 
-		uui-box.changed {
-			border-left: 3px solid var(--uui-color-warning);
-		}
+			.property.removed {
+				box-shadow: inset 3px 0 0 var(--uui-color-danger);
+				background: color-mix(in srgb, var(--uui-color-danger) 6%, transparent);
+			}
 
-		/* marked with an inset bar rather than a border, so the content doesn't shift. */
-		.property.added {
-			box-shadow: inset 3px 0 0 var(--uui-color-positive);
-			background: color-mix(in srgb, var(--uui-color-positive) 6%, transparent);
-		}
+			.property.changed {
+				box-shadow: inset 3px 0 0 var(--usync-preview-change);
+				background: color-mix(in srgb, var(--usync-preview-change) 10%, transparent);
+			}
 
-		.property.removed {
-			box-shadow: inset 3px 0 0 var(--uui-color-danger);
-			background: color-mix(in srgb, var(--uui-color-danger) 6%, transparent);
-		}
+			/* properties run edge to edge in their box, like the backoffice editor. */
+			.property {
+				padding: var(--uui-size-space-4) var(--uui-size-space-5) 0;
+				margin: 0 calc(-1 * var(--uui-size-space-5));
+			}
 
-		.property.changed {
-			box-shadow: inset 3px 0 0 var(--uui-color-warning);
-			background: color-mix(in srgb, var(--uui-color-warning) 10%, transparent);
-		}
+			.property:first-child,
+			.headline + .property {
+				margin-top: calc(-1 * var(--uui-size-space-5));
+			}
 
-		/* properties run edge to edge in their box, like the backoffice editor. */
-		.property {
-			padding: var(--uui-size-space-4) var(--uui-size-space-5) 0;
-			margin: 0 calc(-1 * var(--uui-size-space-5));
-		}
+			.property:last-child {
+				margin-bottom: calc(-1 * var(--uui-size-space-5));
+			}
 
-		.property:first-child,
-		.headline + .property {
-			margin-top: calc(-1 * var(--uui-size-space-5));
-		}
+			.property + .property {
+				border-top: 1px solid var(--uui-color-divider);
+			}
 
-		.property:last-child {
-			margin-bottom: calc(-1 * var(--uui-size-space-5));
-		}
+			/* umb-property pads itself for a full workspace, tighten it up here. */
+			umb-property {
+				--uui-size-layout-1: var(--uui-size-space-4);
+			}
 
-		.property + .property {
-			border-top: 1px solid var(--uui-color-divider);
-		}
+			.property-meta {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: var(--uui-size-space-2) var(--uui-size-space-3);
+				font-size: var(--uui-type-small-size);
+				color: var(--uui-color-text-alt);
+			}
 
-		/* umb-property pads itself for a full workspace, tighten it up here. */
-		umb-property {
-			--uui-size-layout-1: var(--uui-size-space-4);
-		}
+			.property-meta code {
+				color: var(--uui-color-text);
+			}
 
-		.property-meta {
-			display: flex;
-			flex-wrap: wrap;
-			align-items: center;
-			gap: var(--uui-size-space-2) var(--uui-size-space-3);
-			font-size: var(--uui-type-small-size);
-			color: var(--uui-color-text-alt);
-		}
+			.inherited {
+				font-style: italic;
+				color: var(--uui-color-text-alt);
+			}
 
-		.property-meta code {
-			color: var(--uui-color-text);
-		}
-
-		.inherited {
-			font-style: italic;
-			color: var(--uui-color-text-alt);
-		}
-
-		.empty {
-			margin: 0;
-			color: var(--uui-color-text-alt);
-		}
-	`;
+			.empty {
+				margin: 0;
+				color: var(--uui-color-text-alt);
+			}
+		`,
+	];
 }
 
 export default uSyncContentTypePreviewElement;

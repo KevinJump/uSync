@@ -525,7 +525,17 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             var fileWithoutPath = Path.GetFileName(filename);
             logger.LogWarning("[{alias}] ({filename}) ImportElement Failed : {exception}", this.Alias, fileWithoutPath, ex.ToString());
-            return [uSyncAction.Fail(fileWithoutPath, this.Alias, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message))];
+
+            // name the failure after the item (like the success path), not its file.
+            var alias = node.GetAlias();
+            var name = string.IsNullOrWhiteSpace(alias) ? fileWithoutPath : alias;
+
+            return [new uSyncAction(false, name, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message),
+                GetNameFromFileOrNode(filename, node), this.Alias)
+            {
+                Key = node.GetKey(),
+                Path = node.GetPath()
+            }];
         }
 
     }
@@ -1965,7 +1975,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             var item = await this.GetFromServiceAsync(key);
             if (item == null)
             {
-                var container = await this.GetContainerAsync(key);
+                var container = await GetContainerSafeAsync(key);
                 if (container != null)
                 {
                     return await GetContainerDependenciesAsync(container, flags);
@@ -1974,6 +1984,29 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             }
 
             return await GetDependenciesAsync(item, flags);
+        }
+    }
+
+    /// <summary>
+    ///  Get a container by key, returning null when the key belongs to something that isn't a container.
+    /// </summary>
+    /// <remarks>
+    ///  In Umbraco 17 EntityContainerRepository.Get(Guid) looks the node up by key alone, without
+    ///  filtering on the container's object type. A key that belongs to any other node (e.g. a doctype
+    ///  or content item) makes it throw "Not a container object type" instead of returning null.
+    ///  (Umbraco 18 adds the object type filter, so there it is a plain null.)
+    /// </remarks>
+    private async Task<TContainer?> GetContainerSafeAsync(Guid key)
+    {
+        try
+        {
+            return await GetContainerAsync(key);
+        }
+        catch (ArgumentException ex)
+        {
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug(ex, "Key {key} is not a container for {handler}", key, Alias);
+            return default;
         }
     }
 

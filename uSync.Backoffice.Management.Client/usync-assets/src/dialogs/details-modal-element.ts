@@ -16,6 +16,7 @@ import {
 	uSyncDetailsModalValue,
 	type ManifestuSyncItemPreview,
 	type SyncItemPreviewResponse,
+	type uSyncPreviewLabels,
 	type USyncActionView,
 } from '@jumoo/uSync';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
@@ -54,7 +55,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 	// kept between renders, so the extension slot doesn't rebuild the preview each time.
 	#previewFilter = (_manifest: ManifestuSyncItemPreview) => false;
-	#previewProps: { preview?: SyncItemPreviewResponse } = {};
+	#previewProps: { preview?: SyncItemPreviewResponse; labels?: uSyncPreviewLabels } = {};
 
 	constructor() {
 		super();
@@ -90,11 +91,16 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		const item = this._item;
 		if (!item?.handler || !item.key) return;
 
+		const source = this.data?.previewSource;
+		if (source === false) return;
+
 		// only some handlers support previews, the rest return a 404
 		// and the modal shows the diff on its own. we leave _tab alone
 		// so a user who picked the diff stays on it as they move through.
 		this._loading = true;
-		const { data } = await this.#repository.getPreview(item.handler, item.key);
+		const data = source
+			? await source(item).catch(() => undefined)
+			: (await this.#repository.getPreview(item.handler, item.key)).data;
 
 		// moving through the list quickly can return previews out of order,
 		// so drop anything that isn't for the item we are now showing.
@@ -104,7 +110,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		if (data?.entityType) {
 			const entityType = data.entityType;
 			this.#previewFilter = (manifest) => manifest.forEntityTypes.includes(entityType);
-			this.#previewProps = { preview: data };
+			this.#previewProps = { preview: data, labels: this.data?.previewLabels };
 			this._preview = data;
 		}
 	}

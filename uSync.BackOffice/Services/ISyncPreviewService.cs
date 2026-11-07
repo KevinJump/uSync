@@ -1,7 +1,10 @@
 using System;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 using uSync.BackOffice.Models;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.Services;
 
@@ -20,4 +23,19 @@ public interface ISyncPreviewService
     /// </remarks>
     /// <returns>null if the handler or item can't be found, or the handler doesn't support previews</returns>
     Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, Guid key);
+
+    /// <summary>
+    ///  get the current and incoming versions of an item from a uSync file that isn't 
+    ///  (necessarily) in the uSync folders, e.g. one in a sync pack.
+    /// </summary>
+    /// <remarks>
+    ///  <paramref name="findNode"/> finds the other items (by handler and key) the incoming item 
+    ///  uses that aren't in Umbraco yet, so they come from the same place as the node. When it's 
+    ///  null they come from the uSync folders.
+    ///
+    ///  <paramref name="handlerOptions"/> picks the handler set (and so the handler settings) 
+    ///  the dry run uses, it should be the set the import would use. 
+    /// </remarks>
+    /// <returns>null if the handler can't be found, or doesn't support previews</returns>
+    Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, XElement node, Func<ISyncHandler, Guid, Task<XElement?>>? findNode = null, SyncHandlerOptions? handlerOptions = null);
 }
