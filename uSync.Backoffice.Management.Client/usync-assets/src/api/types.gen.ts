@@ -199,6 +199,7 @@ export type USyncHandlerSetSettings = {
         [key: string]: HandlerSettings;
     };
     isSelectable: boolean;
+    folders: Array<string>;
 };
 
 export type USyncOptions = {
