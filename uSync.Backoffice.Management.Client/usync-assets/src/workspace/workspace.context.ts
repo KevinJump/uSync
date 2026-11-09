@@ -287,6 +287,9 @@ export class uSyncWorkspaceContext
 	async performAction(options: SyncPerformActionOptions) {
 		var clientId = this.#signalRContext?.getClientId() ?? '';
 
+		// single item imports and previews from these results look in this set's folders.
+		this.#lastSet = options.setName;
+
 		this.#working.setValue(true);
 		this.#completed.setValue(false);
 		this.#results.setValue([]);
@@ -557,10 +560,19 @@ export class uSyncWorkspaceContext
 		return `usync_export_${timestamp}.zip`;
 	}
 
+	#lastSet?: string;
+
+	/**
+	 * the handler set the last action ran for (the results on screen come from its folders)
+	 */
+	get lastSet() {
+		return this.#lastSet;
+	}
+
 	async importSingle(item: USyncActionView) {
 		if (!item) return;
 
-		const data = await this.#repository.importSingle(item);
+		const data = await this.#repository.importSingle(item, this.#lastSet);
 		return data;
 	}
 }

@@ -25,6 +25,12 @@ public interface ISyncPreviewService
     Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, Guid key);
 
     /// <summary>
+    ///  get the preview for an item, finding it (and the items it uses) in the folders of the given handler set.
+    /// </summary>
+    Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, Guid key, string? set)
+        => GetPreviewAsync(handlerAlias, key);
+
+    /// <summary>
     ///  get the current and incoming versions of an item from a uSync file that isn't 
     ///  (necessarily) in the uSync folders, e.g. one in a sync pack.
     /// </summary>

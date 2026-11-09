@@ -1195,7 +1195,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             callback?.Invoke("Validating Report", 2, 3);
             var validationActions = await ReportMissingParentsAsync([.. actions]);
-            actions.AddRange(ReportDeleteCheck(uSyncConfig.GetWorkingFolder(), validationActions));
+            actions.AddRange(ReportDeleteCheck(folders.LastOrDefault() ?? uSyncConfig.GetWorkingFolder(), validationActions));
 
             callback?.Invoke($"Done ({this.ItemType})", 3, 3);
             return actions;
@@ -1210,6 +1210,20 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  Check to returned report to see if there is a delete and an update for the same item
     ///  because if there is then we have issues.
     /// </summary>
+    /// <summary>
+    ///  the part of a file name after the given folder, or just the file name if it isn't in that folder.
+    /// </summary>
+    private static string GetRelativeFileName(string? fileName, string folder)
+    {
+        if (string.IsNullOrEmpty(fileName)) return string.Empty;
+
+        var root = folder.Replace('\\', '/').Trim('/');
+        var path = fileName.Replace('\\', '/');
+        var index = root.Length == 0 ? -1 : path.IndexOf(root, StringComparison.OrdinalIgnoreCase);
+
+        return index < 0 ? Path.GetFileName(fileName) : path[(index + root.Length)..];
+    }
+
     protected virtual IEnumerable<uSyncAction> ReportDeleteCheck(string folder, IEnumerable<uSyncAction> actions)
     {
         var duplicates = new List<uSyncAction>();
@@ -1230,7 +1244,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
                 // add the delete message to the list of changes
                 var filename = Path.GetFileName(deleteAction.FileName) ?? string.Empty;
-                var relativePath = deleteAction.FileName?.Substring(folder.Length) ?? string.Empty;
+                var relativePath = GetRelativeFileName(deleteAction.FileName, folder);
 
                 details.Add(uSyncChange.Delete(filename, $"Delete: {deleteAction.Name} ({filename}", relativePath));
 
@@ -1238,7 +1252,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 foreach (var dup in actions.Where(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
                 {
                     var dupFilename = Path.GetFileName(dup.FileName) ?? string.Empty;
-                    var dupRelativePath = dup.FileName?.Substring(folder.Length) ?? string.Empty;
+                    var dupRelativePath = GetRelativeFileName(dup.FileName, folder);
 
                     details.Add(
                         uSyncChange.Update(
@@ -2302,9 +2316,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     #endregion
 
     /// <inheritdoc/>
-    public async Task<XElement?> TryFindItemNodeAsync(Guid key)
+    public Task<XElement?> TryFindItemNodeAsync(Guid key)
+        => TryFindItemNodeAsync(key, RootFolders);
+
+    /// <inheritdoc/>
+    public async Task<XElement?> TryFindItemNodeAsync(Guid key, string[] rootFolders)
     {
-        var folders = GetDefaultHandlerFolders();
+        var folders = rootFolders.Select(f => Path.Combine(f, DefaultFolder)).ToArray();
         var items = await GetMergedItemsAsync(folders, new SyncMergeOptions());
 
         foreach (var item in items)

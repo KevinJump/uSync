@@ -407,6 +407,10 @@ internal class uSyncManagementService : ISyncManagementService
 
         Guid requestId = GetRequestId(actionRequest);
 
+        var set = string.IsNullOrWhiteSpace(actionRequest.Options?.Set)
+            ? _configService.Settings.DefaultSet
+            : actionRequest.Options.Set;
+
         if (isFirstRequest)
         {
             await _syncActionService.StartProcessAsync(new SyncStartActionRequest
@@ -415,13 +419,11 @@ internal class uSyncManagementService : ISyncManagementService
                 Username = user?.Username,
                 HandlerAction = action,
                 Clean = actionRequest.Options?.Clean ?? false,
-                Set = actionRequest.Options?.Set
+                Set = set
             });
         }
 
         uSyncCallbacks callbacks = GetCallbacksFromRequest(actionRequest);
-
-        var set = actionRequest.Options?.Set ?? _configService.Settings.DefaultSet;
 
         var handlerOptions = new SyncActionOptions()
         {

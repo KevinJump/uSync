@@ -36,8 +36,14 @@ internal class SyncConfigService : ISyncConfigService
     }
 
     private string[] FetchFolders()
+        => FetchFolders(Settings.Folders);
+
+    /// <summary>
+    ///  merge the given base folders with the folders registered in code (SyncFolderCollection), ordered by weight.
+    /// </summary>
+    private string[] FetchFolders(IEnumerable<string> baseFolders)
     {
-        var folders = Settings.Folders
+        var folders = baseFolders
             .Select((x, index) => new SyncFolderItem
             {
                 Path = x.TrimStart('/').EnsureEndsWith('/'),
@@ -94,10 +100,14 @@ internal class SyncConfigService : ISyncConfigService
 
         var setFolders = GetSetSettings(setName).Folders?
             .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x.Trim().TrimStart('/').EnsureEndsWith('/'))
+            .Select(x => x.Trim())
             .ToArray() ?? [];
 
-        return setFolders.Length > 0 ? setFolders : GetFolders();
+        // the set's folders replace the global ones from settings, but folders
+        // registered in code (SyncFolderCollection) are still merged in by weight.
+        return setFolders.Length > 0
+            ? [.. FetchFolders(setFolders).Select(x => x.TrimStart('/'))]
+            : GetFolders();
     }
 
     /// <inheritdoc/>

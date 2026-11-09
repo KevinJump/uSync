@@ -71,7 +71,8 @@ public class SyncPreviewServiceTests
             .Returns(_scope.Object);
 
         _service = new SyncPreviewService(factory.Object, scopeProvider.Object,
-            new SyncPreviewMapperCollection(() => []), NullLogger<SyncPreviewService>.Instance);
+            new SyncPreviewMapperCollection(() => []), NullLogger<SyncPreviewService>.Instance,
+            Mock.Of<uSync.BackOffice.Configuration.ISyncConfigService>());
     }
 
     [Test]

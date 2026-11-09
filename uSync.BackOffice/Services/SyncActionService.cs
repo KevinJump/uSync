@@ -81,11 +81,12 @@ internal class SyncActionService : ISyncActionService
     {
         if (options.Handler is null) return new();
 
+        var (set, folders) = GetSetAndFolders(options);
         var importOptions = new uSyncImportOptions
         {
             Callbacks = callbacks,
-            HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = [.. options.GetFoldersOrDefault(_uSyncConfig.GetFolders(options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet)))]
+            HandlerSet = set,
+            Folders = folders
         };
 
         var actions = (await _uSyncService.ReportHandlerAsync(options.Handler, importOptions)).ToList();
@@ -100,11 +101,12 @@ internal class SyncActionService : ISyncActionService
     {
         if (options.Handler is null) return new();
 
+        var (set, folders) = GetSetAndFolders(options);
         var importOptions = new uSyncImportOptions
         {
             Callbacks = callbacks,
-            HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders(options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet))),
+            HandlerSet = set,
+            Folders = folders,
             PauseDuringImport = true,
             Flags = options.GetImportFlags()
         };
@@ -119,10 +121,8 @@ internal class SyncActionService : ISyncActionService
 
     public async Task<SyncActionResult> ImportPostAsync(SyncFinalActionRequest request)
     {
-        var actions = await _uSyncService.PerformPostImportAsync(
-            request.ActionOptions.GetFoldersOrDefault(_uSyncConfig.GetFolders(request.ActionOptions.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet))),
-            request.ActionOptions.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            request.Actions);
+        var (set, folders) = GetSetAndFolders(request.ActionOptions);
+        var actions = await _uSyncService.PerformPostImportAsync(folders, set, request.Actions);
 
         if (request.Callbacks is not null)
             await request.Callbacks.RaiseUpdateAsync("Post Import Complete", 1, 1);
@@ -133,11 +133,12 @@ internal class SyncActionService : ISyncActionService
     {
         if (options.Handler is null) return new();
 
+        var (set, folders) = GetSetAndFolders(options);
         var importOptions = new uSyncImportOptions
         {
             Callbacks = callbacks,
-            HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders(options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet)))
+            HandlerSet = set,
+            Folders = folders
         };
 
         var actions = (await _uSyncService.ExportHandlerAsync(options.Handler, importOptions)).ToList();
@@ -148,6 +149,15 @@ internal class SyncActionService : ISyncActionService
         return new SyncActionResult(actions);
     }
 
+    /// <summary>
+    ///  the handler set for these options, and the folders that set reads and writes.
+    /// </summary>
+    private (string Set, string[] Folders) GetSetAndFolders(SyncActionOptions options)
+    {
+        var set = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet);
+        return (set, options.GetFoldersOrDefault(_uSyncConfig.GetFolders(set)));
+    }
+
     public void CleanExportFolder()
         => CleanExportFolder(null);
 
@@ -155,17 +165,40 @@ internal class SyncActionService : ISyncActionService
     {
         try
         {
-            var folder = string.IsNullOrWhiteSpace(set)
-                ? _uSyncConfig.GetWorkingFolder()
-                : _uSyncConfig.GetFolders(set).Last();
+            var workingFolder = _uSyncConfig.GetWorkingFolder();
+            var folder = _uSyncConfig.GetFolders(
+                string.IsNullOrWhiteSpace(set) ? _uSyncConfig.Settings.DefaultSet : set).Last();
+
+            if (IsSharedFolder(folder, workingFolder))
+            {
+                _logger.LogWarning("[uSync] Not cleaning {folder} for set {set}: the folder is, or contains, one of the global uSync folders. Give the set its own export folder (the last folder in its list).", folder, set);
+                return;
+            }
 
             _uSyncService.CleanExportFolder(folder);
         }
-        catch
+        catch (Exception ex)
         {
-            // 
+            _logger.LogWarning(ex, "[uSync] Failed to clean the export folder");
         }
     }
+
+    /// <summary>
+    ///  a set's export folder is shared if it is (or contains) one of the global folders,
+    ///  other than the working folder, which is what a normal clean export empties.
+    /// </summary>
+    private bool IsSharedFolder(string folder, string workingFolder)
+    {
+        var target = NormalisePath(folder);
+        if (target == NormalisePath(workingFolder)) return false;
+
+        return _uSyncConfig.GetFolders()
+            .Select(NormalisePath)
+            .Any(x => x.StartsWith(target, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string NormalisePath(string folder)
+        => _syncFileService.GetAbsPath(folder).TrimEnd('/', '\\') + Path.DirectorySeparatorChar;
 
     private string MakeValidImportFolder(string folder)
     {
@@ -220,7 +253,8 @@ internal class SyncActionService : ISyncActionService
     /// <inheritdoc/>
     public async Task<SyncActionResult> FinishProcessAsync(SyncFinalActionRequest request)
     {
-        await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.ActionOptions.Group, request.Actions);
+        var (_, folders) = GetSetAndFolders(request.ActionOptions);
+        await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.ActionOptions.Group, folders.Last(), request.Actions);
 
         long elapsed = 0;
         if (_timers.TryRemove(request.RequestId, out var timer))

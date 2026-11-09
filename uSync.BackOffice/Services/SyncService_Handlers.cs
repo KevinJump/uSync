@@ -165,11 +165,15 @@ public partial class SyncService
 
     /// <inheritdoc/>>
     public async Task FinishBulkProcessAsync(HandlerActions action, string? group, IEnumerable<uSyncAction> actions)
+        => await FinishBulkProcessAsync(action, group, _uSyncConfig.GetWorkingFolder(), actions);
+
+    /// <inheritdoc/>>
+    public async Task FinishBulkProcessAsync(HandlerActions action, string? group, string exportFolder, IEnumerable<uSyncAction> actions)
     {
         switch (action)
         {
             case HandlerActions.Export:
-                await _syncVersionFileService.WriteVersionFileAsync(_uSyncConfig.GetWorkingFolder());
+                await _syncVersionFileService.WriteVersionFileAsync(exportFolder);
                 await _mutexService.FireBulkCompleteAsync(new uSyncExportCompletedNotification(actions, group));
                 break;
             case HandlerActions.Import:

@@ -89,20 +89,21 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 		);
 	}
 
-	async importSingle(view: USyncActionView) {
+	async importSingle(view: USyncActionView, set?: string) {
 		return await tryExecute(
 			this.#host,
 			ActionsService.importSingle({
 				body: view,
+				query: set ? { set } : undefined,
 			}),
 		);
 	}
 
-	async getPreview(handler: string, key: string) {
+	async getPreview(handler: string, key: string, set?: string) {
 		return await tryExecute(
 			this.#host,
 			ActionsService.getPreview({
-				query: { handler, key },
+				query: set ? { handler, key, set } : { handler, key },
 			}),
 			{ disableNotifications: true },
 		);

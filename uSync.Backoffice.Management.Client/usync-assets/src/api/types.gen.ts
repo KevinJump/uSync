@@ -351,7 +351,9 @@ export type GetSyncFileInfoResponse = GetSyncFileInfoResponses[keyof GetSyncFile
 export type ImportSingleData = {
     body?: USyncActionView;
     path?: never;
-    query?: never;
+    query?: {
+        set?: string;
+    };
     url: '/umbraco/usync/api/v1/Import';
 };
 
@@ -400,6 +402,7 @@ export type GetPreviewData = {
     query?: {
         handler?: string;
         key?: string;
+        set?: string;
     };
     url: '/umbraco/usync/api/v1/Preview';
 };
