@@ -50,21 +50,42 @@ jobs:
       # Not GitVersion: on any branch other than vN/main it treats *every* vN/main as a
       # source branch, so a v17 feature branch could pick up a v18 tag and publish v17 code
       # under an 18.x version. `git tag --merged HEAD` only sees this branch's own tags.
-      # Release candidates (-rc1) are skipped, so an rc is never the base.
+      # Release candidates and betas (-rc1, -beta01) are skipped, so one is never the base.
+      #
+      # Only tags in the branch's own major count. Forward merges bring the older line's
+      # tags into this branch's history, so before v19's first full release the highest
+      # tag on v19/main is v18.x, and v19 code went out as 18.x.y-prerelease. The major
+      # comes from the branch name (v19/main, v19/feature/x); on any other branch it is
+      # the highest major among the tags, betas included. With no full release in that
+      # major yet, the next release is {major}.0.0: 19.0.0-prerelease.42, which sorts
+      # after 19.0.0-beta01 and before 19.0.0.
       #
       # github.run_number is scoped to this workflow and only goes up, so "latest" on the
       # feed always resolves to the newest run.
       - name: Determine nightly version
         id: version
+        env:
+          BRANCH: ${{ github.ref_name }}
         run: |
-          latest=$(git tag --merged HEAD --list 'v*' | sed -E 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
-          if [ -z "$latest" ]; then
-            echo "::error::No release tag found in this branch's history."
+          tags=$(git tag --merged HEAD --list 'v*' | sed -E 's/^v//')
+          if [[ "$BRANCH" =~ ^v([0-9]+)/ ]]; then
+            major="${BASH_REMATCH[1]}"
+          else
+            major=$(echo "$tags" | grep -E '^[0-9]+\.' | cut -d. -f1 | sort -n | tail -1)
+          fi
+          if [ -z "$major" ]; then
+            echo "::error::Can't work out the major version from the branch name or the tags."
             exit 1
           fi
-          IFS='.' read -r major minor patch <<< "$latest"
-          version="${major}.${minor}.$((patch + 1))-prerelease.${GITHUB_RUN_NUMBER}"
-          echo "Last release: $latest -> nightly $version"
+          latest=$(echo "$tags" | grep -E "^${major}\.[0-9]+\.[0-9]+$" | sort -V | tail -1 || true)
+          if [ -z "$latest" ]; then
+            version="${major}.0.0-prerelease.${GITHUB_RUN_NUMBER}"
+            echo "No ${major}.x release yet -> nightly $version"
+          else
+            IFS='.' read -r maj minor patch <<< "$latest"
+            version="${maj}.${minor}.$((patch + 1))-prerelease.${GITHUB_RUN_NUMBER}"
+            echo "Last release: $latest -> nightly $version"
+          fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-dotnet@v6
