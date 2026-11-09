@@ -40,6 +40,16 @@ public class uSyncHandlerSetSettings
     ///  for handlers to appear in the drop down on the dashboard they have to be selectable
     /// </summary>
     public bool IsSelectable { get; set; } = false;
+
+    /// <summary>
+    ///  Folders this set reads and writes, in place of the global uSync folders.
+    /// </summary>
+    /// <remarks>
+    ///  Leave empty to use the global folders. When set, imports, reports and exports
+    ///  for this set only look in these folders, merged in order like the global ones
+    ///  (the last folder is the one exports are written to). Only used when FolderMode is Normal.
+    /// </remarks>
+    public string[] Folders { get; set; } = [];
 }
 
 /// <summary>

@@ -16,6 +16,14 @@ public interface ISyncConfigService
     string[] GetFolders();
 
     /// <summary>
+    ///  get the list of folders uSync looks at for a named set
+    /// </summary>
+    /// <remarks>
+    ///  returns the set's own folders if it has any configured, otherwise the global folders.
+    /// </remarks>
+    string[] GetFolders(string? setName) => GetFolders();
+
+    /// <summary>
     ///  get the settings for the default set
     /// </summary>
     uSyncHandlerSetSettings GetDefaultSetSettings();

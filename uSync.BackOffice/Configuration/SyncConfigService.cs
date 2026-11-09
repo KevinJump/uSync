@@ -87,6 +87,20 @@ internal class SyncConfigService : ISyncConfigService
     }
 
     /// <inheritdoc/>
+    public string[] GetFolders(string? setName)
+    {
+        if (string.IsNullOrWhiteSpace(setName) || Settings.FolderMode != SyncFolderMode.Normal)
+            return GetFolders();
+
+        var setFolders = GetSetSettings(setName).Folders?
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim().TrimStart('/').EnsureEndsWith('/'))
+            .ToArray() ?? [];
+
+        return setFolders.Length > 0 ? setFolders : GetFolders();
+    }
+
+    /// <inheritdoc/>
     public uSyncHandlerSetSettings GetSetSettings(string setName)
         => _setOptionsMonitor.Get(setName) ?? new uSyncHandlerSetSettings();
 

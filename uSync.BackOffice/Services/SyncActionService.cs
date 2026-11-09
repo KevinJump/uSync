@@ -85,7 +85,7 @@ internal class SyncActionService : ISyncActionService
         {
             Callbacks = callbacks,
             HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = [.. options.GetFoldersOrDefault(_uSyncConfig.GetFolders())]
+            Folders = [.. options.GetFoldersOrDefault(_uSyncConfig.GetFolders(options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet)))]
         };
 
         var actions = (await _uSyncService.ReportHandlerAsync(options.Handler, importOptions)).ToList();
@@ -104,7 +104,7 @@ internal class SyncActionService : ISyncActionService
         {
             Callbacks = callbacks,
             HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders()),
+            Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders(options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet))),
             PauseDuringImport = true,
             Flags = options.GetImportFlags()
         };
@@ -120,7 +120,7 @@ internal class SyncActionService : ISyncActionService
     public async Task<SyncActionResult> ImportPostAsync(SyncFinalActionRequest request)
     {
         var actions = await _uSyncService.PerformPostImportAsync(
-            request.ActionOptions.GetFoldersOrDefault(_uSyncConfig.GetFolders()),
+            request.ActionOptions.GetFoldersOrDefault(_uSyncConfig.GetFolders(request.ActionOptions.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet))),
             request.ActionOptions.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
             request.Actions);
 
@@ -137,7 +137,7 @@ internal class SyncActionService : ISyncActionService
         {
             Callbacks = callbacks,
             HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders())
+            Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders(options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet)))
         };
 
         var actions = (await _uSyncService.ExportHandlerAsync(options.Handler, importOptions)).ToList();
@@ -149,10 +149,17 @@ internal class SyncActionService : ISyncActionService
     }
 
     public void CleanExportFolder()
+        => CleanExportFolder(null);
+
+    private void CleanExportFolder(string? set)
     {
         try
         {
-            _uSyncService.CleanExportFolder(_uSyncConfig.GetWorkingFolder());
+            var folder = string.IsNullOrWhiteSpace(set)
+                ? _uSyncConfig.GetWorkingFolder()
+                : _uSyncConfig.GetFolders(set).Last();
+
+            _uSyncService.CleanExportFolder(folder);
         }
         catch
         {
@@ -200,8 +207,8 @@ internal class SyncActionService : ISyncActionService
 
         if (request.HandlerAction == HandlerActions.Export && request.Clean is true)
         {
-            // clean the export folder.  
-            CleanExportFolder();
+            // clean the export folder (the set's own folder, if it has one).  
+            CleanExportFolder(request.Set);
         }
 
     }

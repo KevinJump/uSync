@@ -24,7 +24,7 @@ public partial class SyncService
             return options.Folders;
 
         // return the default. 
-        return _uSyncConfig.GetFolders();
+        return _uSyncConfig.GetFolders(options.HandlerSet);
     }
 
     /// <inheritdoc/>>

@@ -414,16 +414,19 @@ internal class uSyncManagementService : ISyncManagementService
                 RequestId = requestId,
                 Username = user?.Username,
                 HandlerAction = action,
-                Clean = actionRequest.Options?.Clean ?? false
+                Clean = actionRequest.Options?.Clean ?? false,
+                Set = actionRequest.Options?.Set
             });
         }
 
         uSyncCallbacks callbacks = GetCallbacksFromRequest(actionRequest);
 
+        var set = actionRequest.Options?.Set ?? _configService.Settings.DefaultSet;
+
         var handlerOptions = new SyncActionOptions()
         {
-            Folders = _configService.GetFolders(),
-            Set = actionRequest.Options?.Set ?? _configService.Settings.DefaultSet,
+            Folders = _configService.GetFolders(set),
+            Set = set,
             Group = actionRequest.Options?.Group ?? "all",
             Force = actionRequest.Options?.Force ?? false,
             Actions = [],
