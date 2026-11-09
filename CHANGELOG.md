@@ -86,6 +86,40 @@ First beta of uSync for **Umbraco 19**, built against Umbraco 19.0.0-beta1 on
   obsolete. It works on 19.0.0-beta1 and will be moved over in a later
   release. (#1162)
 
+## [18.3.1] - 2026-11-07
+
+### Changed
+
+- **Item previews put the uSync files on the left.** The incoming version
+  now sits on the left and the site's current version on the right. Each side
+  has its own colour, so you can tell at a glance which one you're reading.
+  (#1195)
+
+- **Packages can steer the item previews.** Callers can choose where a
+  preview's incoming item comes from and set the headline above each side.
+  Previews also use the handler set the import would use. (#1192, #1193,
+  #1194)
+
+### Fixed
+
+- **Failed imports are named after the item.** A failed import was listed
+  under its file name (often `{guid}.config`). It now shows the item's alias
+  and carries its key and path, the same as a successful one. (#1200, #1205)
+
+- **A content preview shows the template from the uSync file.** The incoming
+  side showed the site's current template rather than the one in the file.
+  (#1203)
+
+- **File changes in reports are labelled.** Script, stylesheet and partial
+  view groups showed their raw type name, and a file change with no details
+  was headed "No changes". (#1204)
+
+- **A dependency lookup no longer throws on a key that isn't a folder.**
+  On Umbraco 17, looking up a key that belonged to something other than a
+  container threw instead of returning nothing. Umbraco 18 already returned
+  nothing, so this release only adds a guard and keeps the code the same as
+  v17. (#1202)
+
 ## [18.3.0] - 2026-11-03
 
 ### Added
