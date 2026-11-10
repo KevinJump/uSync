@@ -19,7 +19,6 @@ import {
 	type uSyncPreviewLabels,
 	type USyncActionView,
 } from '@jumoo/uSync';
-import { USYNC_CORE_CONTEXT_TOKEN, type uSyncWorkspaceContext } from '../workspace';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 import { umbExtensionsRegistry } from '@umbraco-cms/backoffice/extension-registry';
 
@@ -53,7 +52,6 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 	private _previewTypes = new Set<string>();
 
 	#repository = new uSyncActionRepository(this);
-	#actionContext?: uSyncWorkspaceContext;
 
 	// kept between renders, so the extension slot doesn't rebuild the preview each time.
 	#previewFilter = (_manifest: ManifestuSyncItemPreview) => false;
@@ -64,11 +62,6 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 
 		this.observe(umbExtensionsRegistry.byType('usync-item-preview'), (manifests) => {
 			this._previewTypes = new Set(manifests.flatMap((m) => m.forEntityTypes));
-		});
-
-		// optional: when opened from the dashboard, previews look in the folders of the set that ran.
-		this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
-			this.#actionContext = _instance;
 		});
 	}
 
@@ -102,7 +95,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		this._loading = true;
 		const data = source
 			? await source(item).catch(() => undefined)
-			: (await this.#repository.getPreview(item.handler, item.key, this.#actionContext?.lastSet)).data;
+			: (await this.#repository.getPreview(item.handler, item.key, this.data?.set)).data;
 
 		// moving through the list quickly can return previews out of order,
 		// so drop anything that isn't for the item we are now showing.
@@ -138,7 +131,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		if (!modalContext) return;
 
 		const modal = modalContext.open(this, USYNC_IMPORT_SINGLE_MODAL, {
-			data: { action: this._item },
+			data: { action: this._item, set: this.data?.set },
 		});
 
 		const data = await modal?.onSubmit().catch(() => {

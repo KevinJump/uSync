@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using System;
@@ -32,6 +33,7 @@ internal class SyncActionService : ISyncActionService
     private readonly ISyncService _uSyncService;
     private readonly ISyncHandlerFactory _handlerFactory;
     private readonly ISyncFileService _syncFileService;
+    private readonly IConfiguration _configuration;
 
     private readonly string _uSyncTempPath;
 
@@ -42,8 +44,10 @@ internal class SyncActionService : ISyncActionService
         ISyncHandlerFactory handlerFactory,
         ISyncFileService syncFileService,
         Umbraco.Cms.Core.Hosting.IHostingEnvironment hostingEnvironment,
-        IWebHostEnvironment webHostEnvironment)
+        IWebHostEnvironment webHostEnvironment,
+        IConfiguration configuration)
     {
+        _configuration = configuration;
         _uSyncConfig = uSyncConfig;
         _uSyncService = uSyncService;
         _handlerFactory = handlerFactory;
@@ -165,13 +169,19 @@ internal class SyncActionService : ISyncActionService
     {
         try
         {
-            var workingFolder = _uSyncConfig.GetWorkingFolder();
-            var folder = _uSyncConfig.GetFolders(
-                string.IsNullOrWhiteSpace(set) ? _uSyncConfig.Settings.DefaultSet : set).Last();
+            var setName = string.IsNullOrWhiteSpace(set) ? _uSyncConfig.Settings.DefaultSet : set;
+            var folder = _uSyncConfig.GetFolders(setName).Last();
 
-            if (IsSharedFolder(folder, workingFolder))
+            if (IsSharedFolder(folder, _uSyncConfig.GetWorkingFolder()))
             {
-                _logger.LogWarning("[uSync] Not cleaning {folder} for set {set}: the folder is, or contains, one of the global uSync folders. Give the set its own export folder (the last folder in its list).", folder, set);
+                _logger.LogWarning("[uSync] Not cleaning {folder} for set {set}: the folder is, or contains, one of the global uSync folders. Give the set its own export folder (the last folder in its list).", folder, setName);
+                return;
+            }
+
+            var nested = GetNestedSetFolder(folder, setName);
+            if (nested is not null)
+            {
+                _logger.LogWarning("[uSync] Not cleaning {folder} for set {set}: it contains {nested}, the export folder of set {otherSet}, which would be emptied too.", folder, setName, nested.Value.Folder, nested.Value.Set);
                 return;
             }
 
@@ -190,11 +200,40 @@ internal class SyncActionService : ISyncActionService
     private bool IsSharedFolder(string folder, string workingFolder)
     {
         var target = NormalisePath(folder);
-        if (target == NormalisePath(workingFolder)) return false;
+        if (target.Equals(NormalisePath(workingFolder), StringComparison.OrdinalIgnoreCase)) return false;
 
         return _uSyncConfig.GetFolders()
             .Select(NormalisePath)
             .Any(x => x.StartsWith(target, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    ///  another set whose export folder sits inside this folder (cleaning this folder would empty it).
+    /// </summary>
+    /// <remarks>
+    ///  sets that share the same export folder (e.g. sets without their own folders) are not nested.
+    /// </remarks>
+    private (string Set, string Folder)? GetNestedSetFolder(string folder, string setName)
+    {
+        var target = NormalisePath(folder);
+
+        var setNames = _configuration
+            .GetSection(uSync.Configuration.uSyncSetsConfig)
+            .GetChildren()
+            .Select(x => x.Key)
+            .Where(x => !x.Equals(setName, StringComparison.OrdinalIgnoreCase));
+
+        foreach (var otherSet in setNames)
+        {
+            var otherFolder = _uSyncConfig.GetFolders(otherSet).Last();
+            var other = NormalisePath(otherFolder);
+
+            if (!other.Equals(target, StringComparison.OrdinalIgnoreCase)
+                && other.StartsWith(target, StringComparison.OrdinalIgnoreCase))
+                return (otherSet, otherFolder);
+        }
+
+        return null;
     }
 
     private string NormalisePath(string folder)

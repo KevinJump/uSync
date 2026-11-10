@@ -226,7 +226,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         this.ItemContainerType = uSyncObjectType.ToContainerUmbracoObjectType(EntityType);
 
         this.DefaultConfig = GetDefaultConfig();
-        RootFolders = uSyncConfig.GetFolders();
+        // events (save, delete, move) export with the default set's config, so use its folders too.
+        RootFolders = uSyncConfig.GetFolders(uSyncConfig.Settings.DefaultSet);
 
         if (uSyncConfig.Settings.CacheFolderKeys)
         {
@@ -373,7 +374,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     protected virtual async Task<XElement?> GetMergedNodeAsync(string filePath)
     {
-        var allFiles = uSyncConfig.GetFolders()
+        var allFiles = RootFolders
             .Select(x => syncFileService.GetAbsPath($"{x}/{this.DefaultFolder}/{filePath}"))
             .ToArray();
 
@@ -1207,23 +1208,31 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
     /// <summary>
-    ///  Check to returned report to see if there is a delete and an update for the same item
-    ///  because if there is then we have issues.
-    /// </summary>
-    /// <summary>
     ///  the part of a file name after the given folder, or just the file name if it isn't in that folder.
     /// </summary>
+    /// <remarks>
+    ///  matches the last whole-folder occurrence, so a parent folder with a similar name (e.g. uSync/v17-site) isn't mistaken for it.
+    /// </remarks>
     private static string GetRelativeFileName(string? fileName, string folder)
     {
         if (string.IsNullOrEmpty(fileName)) return string.Empty;
 
-        var root = folder.Replace('\\', '/').Trim('/');
-        var path = fileName.Replace('\\', '/');
-        var index = root.Length == 0 ? -1 : path.IndexOf(root, StringComparison.OrdinalIgnoreCase);
+        var trimmed = folder.Replace('\\', '/').Trim('/');
+        if (trimmed.Length == 0) return Path.GetFileName(fileName);
 
-        return index < 0 ? Path.GetFileName(fileName) : path[(index + root.Length)..];
+        var root = trimmed + '/';
+        var path = fileName.Replace('\\', '/');
+        var index = path.LastIndexOf(root, StringComparison.OrdinalIgnoreCase);
+        while (index > 0 && path[index - 1] != '/')
+            index = path.LastIndexOf(root, index - 1, StringComparison.OrdinalIgnoreCase);
+
+        return index < 0 ? Path.GetFileName(fileName) : path[(index + trimmed.Length)..];
     }
 
+    /// <summary>
+    ///  Check to returned report to see if there is a delete and an update for the same item
+    ///  because if there is then we have issues.
+    /// </summary>
     protected virtual IEnumerable<uSyncAction> ReportDeleteCheck(string folder, IEnumerable<uSyncAction> actions)
     {
         var duplicates = new List<uSyncAction>();

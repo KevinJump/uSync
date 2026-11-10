@@ -287,7 +287,8 @@ public partial class SyncService : ISyncService
     /// <inheritdoc/>>
     public async Task<uSyncAction> ImportSingleItemAsync(Guid key, string handlerAlias, string? set)
     {
-        var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias);
+        var handlerOptions = string.IsNullOrWhiteSpace(set) ? null : new SyncHandlerOptions { Set = set };
+        var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias, handlerOptions);
         if (handlerConfig is null) return uSyncAction.Fail("Unknown", handlerAlias, "Unknown", ChangeType.Fail, $"Could not find handler with alias {handlerAlias}", new KeyNotFoundException(handlerAlias));
 
         var node = await handlerConfig.Handler.TryFindItemNodeAsync(key, _uSyncConfig.GetFolders(set));

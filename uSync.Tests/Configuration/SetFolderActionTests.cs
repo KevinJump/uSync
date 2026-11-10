@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
@@ -56,8 +58,19 @@ public class SetFolderActionTests
             Mock.Of<ISyncHandlerFactory>(),
             fileService.Object,
             hosting.Object,
-            Mock.Of<IWebHostEnvironment>());
+            Mock.Of<IWebHostEnvironment>(),
+            BuildConfiguration(sets));
     }
+
+    /// <summary>
+    ///  the uSync:Sets section, so the action service can find the other sets.
+    /// </summary>
+    private static IConfiguration BuildConfiguration(Dictionary<string, uSyncHandlerSetSettings> sets)
+        => new ConfigurationBuilder()
+            .AddInMemoryCollection(sets.Keys.ToDictionary(
+                name => $"{uSync.BackOffice.uSync.Configuration.uSyncSetsConfigPrefix}{name}:IsSelectable",
+                _ => (string?)"true"))
+            .Build();
 
     private static SyncStartActionRequest CleanExport(string? set)
         => new() { HandlerAction = HandlerActions.Export, Clean = true, Set = set };
@@ -93,6 +106,30 @@ public class SetFolderActionTests
         await service.StartProcessAsync(CleanExport("Set1"));
 
         _syncService.Verify(x => x.CleanExportFolder(It.IsAny<string>()), Times.Never);
+    }
+
+    [Test]
+    public async Task CleanExport_FolderContainingAnotherSetsFolder_IsNotCleaned()
+    {
+        var service = CreateService(new()
+        {
+            ["Default"] = new(),
+            ["Set1"] = new() { Folders = ["uSync/v17/set1/"] }
+        });
+
+        await service.StartProcessAsync(CleanExport("Default"));
+
+        _syncService.Verify(x => x.CleanExportFolder(It.IsAny<string>()), Times.Never);
+    }
+
+    [Test]
+    public async Task CleanExport_SetsSharingTheWorkingFolder_CleansIt()
+    {
+        var service = CreateService(new() { ["Default"] = new(), ["Set1"] = new() });
+
+        await service.StartProcessAsync(CleanExport("Set1"));
+
+        _syncService.Verify(x => x.CleanExportFolder("uSync/v17/"), Times.Once);
     }
 
     [Test]
