@@ -150,6 +150,7 @@ export type SyncRunningOperationResponse = {
     operationId?: string | null;
     requestId?: string | null;
     action?: string | null;
+    set?: string | null;
 };
 
 export type SyncSelectableSet = {
@@ -225,6 +226,7 @@ export type USyncSettings = {
     defaultSet: string;
     importAtStartup: string;
     exportAtStartup: string;
+    startupSet: string;
     exportOnSave: string;
     uiEnabledGroups: string;
     reportDebug: boolean;

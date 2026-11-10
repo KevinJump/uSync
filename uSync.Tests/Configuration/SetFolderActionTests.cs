@@ -33,6 +33,9 @@ public class SetFolderActionTests
     private Mock<ISyncService> _syncService = null!;
 
     private SyncActionService CreateService(Dictionary<string, uSyncHandlerSetSettings> sets, params ISyncFolder[] registered)
+        => CreateService(sets, [.. sets.Keys], registered);
+
+    private SyncActionService CreateService(Dictionary<string, uSyncHandlerSetSettings> sets, string[] configSets, params ISyncFolder[] registered)
     {
         var settings = new uSyncSettings { Folders = ["uSync/Root/", "uSync/v17/"] };
 
@@ -59,15 +62,15 @@ public class SetFolderActionTests
             fileService.Object,
             hosting.Object,
             Mock.Of<IWebHostEnvironment>(),
-            BuildConfiguration(sets));
+            BuildConfiguration(configSets));
     }
 
     /// <summary>
     ///  the uSync:Sets section, so the action service can find the other sets.
     /// </summary>
-    private static IConfiguration BuildConfiguration(Dictionary<string, uSyncHandlerSetSettings> sets)
+    private static IConfiguration BuildConfiguration(IEnumerable<string> setNames)
         => new ConfigurationBuilder()
-            .AddInMemoryCollection(sets.Keys.ToDictionary(
+            .AddInMemoryCollection(setNames.ToDictionary(
                 name => $"{uSync.BackOffice.uSync.Configuration.uSyncSetsConfigPrefix}{name}:IsSelectable",
                 _ => (string?)"true"))
             .Build();
@@ -145,6 +148,52 @@ public class SetFolderActionTests
         });
 
         _syncService.Verify(x => x.FinishBulkProcessAsync(HandlerActions.Export, It.IsAny<string?>(), "uSync/sets/set1/", It.IsAny<IEnumerable<uSyncAction>>()), Times.Once);
+    }
+
+    [Test]
+    public async Task FinishExport_IgnoresCallerFolders()
+    {
+        var service = CreateService(new() { ["Set1"] = new() { Folders = ["uSync/sets/set1/"] } });
+
+        await service.FinishProcessAsync(new SyncFinalActionRequest
+        {
+            RequestId = Guid.NewGuid(),
+            HandlerAction = HandlerActions.Export,
+            ActionOptions = new SyncActionOptions { Set = "Set1", Folders = ["uSync/somewhere-else/"] }
+        });
+
+        _syncService.Verify(x => x.FinishBulkProcessAsync(HandlerActions.Export, It.IsAny<string?>(), "uSync/sets/set1/", It.IsAny<IEnumerable<uSyncAction>>()), Times.Once);
+    }
+
+    [Test]
+    public async Task CleanExport_FolderContainingAnotherSetsReadFolder_IsNotCleaned()
+    {
+        var service = CreateService(new()
+        {
+            ["Set1"] = new() { Folders = ["uSync/sets/"] },
+            ["Set2"] = new() { Folders = ["uSync/sets/shared/", "uSync/set2/"] }
+        });
+
+        await service.StartProcessAsync(CleanExport("Set1"));
+
+        _syncService.Verify(x => x.CleanExportFolder(It.IsAny<string>()), Times.Never);
+    }
+
+    [Test]
+    public async Task CleanExport_DefaultSetNotInConfig_IsStillChecked()
+    {
+        var sets = new Dictionary<string, uSyncHandlerSetSettings>
+        {
+            ["Set1"] = new() { Folders = ["uSync/sets/"] },
+            ["Default"] = new() { Folders = ["uSync/sets/default/"] }
+        };
+
+        // only Set1 is in configuration, Default comes from code.
+        var service = CreateService(sets, configSets: ["Set1"]);
+
+        await service.StartProcessAsync(CleanExport("Set1"));
+
+        _syncService.Verify(x => x.CleanExportFolder(It.IsAny<string>()), Times.Never);
     }
 
     [Test]

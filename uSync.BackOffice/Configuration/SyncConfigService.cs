@@ -95,7 +95,14 @@ internal class SyncConfigService : ISyncConfigService
     /// <inheritdoc/>
     public string[] GetFolders(string? setName)
     {
-        if (string.IsNullOrWhiteSpace(setName) || Settings.FolderMode != SyncFolderMode.Normal)
+        if (Settings.FolderMode != SyncFolderMode.Normal)
+            return GetFolders();
+
+        // no set means the default set, so its folders (if it has any) are used.
+        if (string.IsNullOrWhiteSpace(setName))
+            setName = Settings.DefaultSet;
+
+        if (string.IsNullOrWhiteSpace(setName))
             return GetFolders();
 
         var setFolders = GetSetSettings(setName).Folders?

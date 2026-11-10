@@ -43,6 +43,30 @@ public class SetFoldersTests
         Assert.That(service.GetFolders(""), Is.EqualTo(service.GetFolders()));
     }
 
+    [TestCase(null)]
+    [TestCase("")]
+    public void NoSet_UsesDefaultSetFolders(string? set)
+    {
+        var service = CreateService(GlobalSettings(), new()
+        {
+            ["Default"] = new() { Folders = ["uSync/default-set/"] }
+        });
+
+        Assert.That(service.GetFolders(set), Is.EqualTo(new[] { "uSync/default-set/" }));
+    }
+
+    [TestCase("", "Default")]
+    [TestCase("  ", "Default")]
+    [TestCase("Deploy", "Deploy")]
+    public void StartupSet_FallsBackToDefault(string setting, string expected)
+    {
+        var settings = GlobalSettings();
+        settings.StartupSet = setting;
+        ISyncConfigService service = CreateService(settings, []);
+
+        Assert.That(service.GetStartupSet(), Is.EqualTo(expected));
+    }
+
     [Test]
     public void SetWithFolders_ReplacesGlobalFolders_Normalised()
     {

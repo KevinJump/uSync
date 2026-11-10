@@ -124,10 +124,21 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     public HandlerSettings DefaultConfig { get; set; }
 
+    private string[]? _rootFolders;
+
     /// <summary>
     ///  the root folders to use for the handler (based on settings).
     /// </summary>
-    protected string[] RootFolders { get; set; }
+    /// <remarks>
+    ///  events (save, delete, move) export with the default set's config, so these are the default
+    ///  set's folders. They are read from config each time (so changes to the set's folders are
+    ///  picked up without a restart) unless a handler sets them.
+    /// </remarks>
+    protected string[] RootFolders
+    {
+        get => _rootFolders ?? uSyncConfig.GetFolders(uSyncConfig.Settings.DefaultSet);
+        set => _rootFolders = value;
+    }
 
     /// <summary>
     ///  the UDIEntityType for the handler objects
@@ -226,8 +237,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         this.ItemContainerType = uSyncObjectType.ToContainerUmbracoObjectType(EntityType);
 
         this.DefaultConfig = GetDefaultConfig();
-        // events (save, delete, move) export with the default set's config, so use its folders too.
-        RootFolders = uSyncConfig.GetFolders(uSyncConfig.Settings.DefaultSet);
 
         if (uSyncConfig.Settings.CacheFolderKeys)
         {
@@ -1196,7 +1205,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             callback?.Invoke("Validating Report", 2, 3);
             var validationActions = await ReportMissingParentsAsync([.. actions]);
-            actions.AddRange(ReportDeleteCheck(folders.LastOrDefault() ?? uSyncConfig.GetWorkingFolder(), validationActions));
+            // folders are handler folders (root/handler), the delete check paths are relative to the root.
+            var rootFolder = Path.GetDirectoryName(folders.LastOrDefault()?.TrimEnd('/', '\\') ?? string.Empty);
+            actions.AddRange(ReportDeleteCheck(string.IsNullOrEmpty(rootFolder) ? uSyncConfig.GetWorkingFolder() : rootFolder, validationActions));
 
             callback?.Invoke($"Done ({this.ItemType})", 3, 3);
             return actions;
@@ -1226,7 +1237,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         while (index > 0 && path[index - 1] != '/')
             index = path.LastIndexOf(root, index - 1, StringComparison.OrdinalIgnoreCase);
 
-        return index < 0 ? Path.GetFileName(fileName) : path[(index + trimmed.Length)..];
+        return index < 0 ? Path.GetFileName(fileName) : path[(index + root.Length)..];
     }
 
     /// <summary>
@@ -2270,11 +2281,11 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
 
     private bool HasRootFolders()
-        => syncFileService.AnyFolderExists(uSyncConfig.GetFolders()[..^1]);
+        => syncFileService.AnyFolderExists(RootFolders[..^1]);
 
     private async Task<bool> RootItemExistsAsync(TObject item)
     {
-        foreach (var folder in uSyncConfig.GetFolders()[..^1])
+        foreach (var folder in RootFolders[..^1])
         {
             var filename = (await GetPathAsync(
                 Path.Combine(folder, DefaultFolder),

@@ -23,6 +23,11 @@ internal class SyncManagementSharedProgress
 
     public string? Action { get; set; }
 
+    /// <summary>
+    ///  the handler set the run is for (missing on rows written by older versions)
+    /// </summary>
+    public string? Set { get; set; }
+
     public string? Message { get; set; }
 
     public bool Complete { get; set; }

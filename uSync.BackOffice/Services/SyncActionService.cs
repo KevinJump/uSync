@@ -208,33 +208,49 @@ internal class SyncActionService : ISyncActionService
     }
 
     /// <summary>
-    ///  another set whose export folder sits inside this folder (cleaning this folder would empty it).
+    ///  another set that reads from or exports to a folder inside this folder (cleaning this folder would empty it).
     /// </summary>
     /// <remarks>
     ///  sets that share the same export folder (e.g. sets without their own folders) are not nested.
+    ///  the sets checked are the ones in configuration plus the default and startup sets, sets only
+    ///  registered in code can't be listed, so aren't checked.
     /// </remarks>
     private (string Set, string Folder)? GetNestedSetFolder(string folder, string setName)
     {
         var target = NormalisePath(folder);
 
-        var setNames = _configuration
-            .GetSection(uSync.Configuration.uSyncSetsConfig)
-            .GetChildren()
-            .Select(x => x.Key)
-            .Where(x => !x.Equals(setName, StringComparison.OrdinalIgnoreCase));
+        var setNames = _configuration.GetuSyncSetNames()
+            .Append(_uSyncConfig.Settings.DefaultSet)
+            .Append(uSync.Sets.DefaultSet)
+            .Append(_uSyncConfig.GetStartupSet())
+            .Where(x => !string.IsNullOrWhiteSpace(x) && !x.Equals(setName, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
 
         foreach (var otherSet in setNames)
         {
-            var otherFolder = _uSyncConfig.GetFolders(otherSet).Last();
-            var other = NormalisePath(otherFolder);
+            var otherFolders = _uSyncConfig.GetFolders(otherSet);
+            var exportFolder = otherFolders.Last();
 
-            if (!other.Equals(target, StringComparison.OrdinalIgnoreCase)
-                && other.StartsWith(target, StringComparison.OrdinalIgnoreCase))
+            foreach (var otherFolder in otherFolders)
+            {
+                var other = NormalisePath(otherFolder);
+                if (!other.StartsWith(target, StringComparison.OrdinalIgnoreCase)) continue;
+
+                // another set exporting to the same folder is a shared export folder, which is fine to clean.
+                if (other.Equals(target, StringComparison.OrdinalIgnoreCase) && otherFolder == exportFolder) continue;
+
                 return (otherSet, otherFolder);
+            }
         }
 
         return null;
     }
+
+    /// <summary>
+    ///  the default set's export folder (the working folder, unless the default set has its own folders).
+    /// </summary>
+    private string GetDefaultExportFolder()
+        => _uSyncConfig.GetFolders(_uSyncConfig.Settings.DefaultSet).Last();
 
     private string NormalisePath(string folder)
         => _syncFileService.GetAbsPath(folder).TrimEnd('/', '\\') + Path.DirectorySeparatorChar;
@@ -292,8 +308,10 @@ internal class SyncActionService : ISyncActionService
     /// <inheritdoc/>
     public async Task<SyncActionResult> FinishProcessAsync(SyncFinalActionRequest request)
     {
-        var (_, folders) = GetSetAndFolders(request.ActionOptions);
-        await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.ActionOptions.Group, folders.Last(), request.Actions);
+        // the version file goes in the set's export folder (the working folder unless the set has its own),
+        // not in any folders the caller passed in for the run.
+        var set = request.ActionOptions.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet);
+        await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.ActionOptions.Group, _uSyncConfig.GetFolders(set).Last(), request.Actions);
 
         long elapsed = 0;
         if (_timers.TryRemove(request.RequestId, out var timer))
@@ -318,7 +336,7 @@ internal class SyncActionService : ISyncActionService
 
     public Stream GetExportFolderAsStream()
     {
-        return _uSyncService.CompressFolder(_uSyncConfig.GetWorkingFolder());
+        return _uSyncService.CompressFolder(GetDefaultExportFolder());
     }
 
     public async Task<UploadImportResult> UnpackImportFromStreamAsync(Stream stream)
@@ -344,7 +362,7 @@ internal class SyncActionService : ISyncActionService
                 };
             }
 
-            _uSyncService.ReplaceFiles(tempFolder, _uSyncConfig.GetWorkingFolder(), true);
+            _uSyncService.ReplaceFiles(tempFolder, GetDefaultExportFolder(), true);
 
             return new UploadImportResult
             {

@@ -243,6 +243,7 @@ internal class uSyncManagementService : ISyncManagementService
             RequestId = requestId,
             OperationId = operationId,
             Action = action.ToString(),
+            Set = GetSetOrDefault(actionRequest),
         });
 
         return new PerformActionResponse
@@ -350,14 +351,15 @@ internal class uSyncManagementService : ISyncManagementService
 
         // local cache first, falling back to the shared row so a "what's running?"
         // check from a different server can still resolve the requestId.
-        var requestId = _syncManagementCache.GetRequestIdForOperation(operation.Id)
-            ?? (await _syncManagementCache.GetProgressForOperationAsync(operation.Id))?.RequestId;
+        var progress = await _syncManagementCache.GetProgressForOperationAsync(operation.Id);
+        var requestId = _syncManagementCache.GetRequestIdForOperation(operation.Id) ?? progress?.RequestId;
 
         return new SyncRunningOperationResponse
         {
             OperationId = operation.Id.ToString(),
             RequestId = requestId?.ToString(),
-            Action = action.ToString()
+            Action = action.ToString(),
+            Set = progress?.Set
         };
     }
 
@@ -397,6 +399,14 @@ internal class uSyncManagementService : ISyncManagementService
         return false;
     }
 
+    /// <summary>
+    ///  the handler set the request is for, or the default set.
+    /// </summary>
+    private string GetSetOrDefault(PerformActionRequest actionRequest)
+        => string.IsNullOrWhiteSpace(actionRequest.Options?.Set)
+            ? _configService.Settings.DefaultSet
+            : actionRequest.Options.Set;
+
     private async Task<PerformActionResponse> PerformActionInternalAsync(bool isFirstRequest, PerformActionRequest actionRequest, IUser? user, Guid? operationId = null)
     {
         if (Enum.TryParse(actionRequest.Action, out HandlerActions action) is false)
@@ -407,9 +417,7 @@ internal class uSyncManagementService : ISyncManagementService
 
         Guid requestId = GetRequestId(actionRequest);
 
-        var set = string.IsNullOrWhiteSpace(actionRequest.Options?.Set)
-            ? _configService.Settings.DefaultSet
-            : actionRequest.Options.Set;
+        var set = GetSetOrDefault(actionRequest);
 
         if (isFirstRequest)
         {
@@ -459,6 +467,7 @@ internal class uSyncManagementService : ISyncManagementService
             RequestId = requestId,
             OperationId = operationId,
             Action = action.ToString(),
+            Set = set,
             Status = summaries,
             Actions = actionViews,
             Complete = false,
@@ -490,6 +499,7 @@ internal class uSyncManagementService : ISyncManagementService
             RequestId = requestId,
             OperationId = operationId,
             Action = action.ToString(),
+            Set = GetSetOrDefault(actionRequest),
             Status = finalSummary,
             Actions = actionViews,
             Complete = true,
@@ -627,6 +637,6 @@ internal class uSyncManagementService : ISyncManagementService
         => _syncActionService.UnpackImportFromStreamAsync(stream).GetAwaiter().GetResult();
 
     public async Task<SyncFileVersionCheckResult> GetSyncFileInfo()
-        => await _syncVersionFileService.GetSyncFileInfo(_configService.GetWorkingFolder());
+        => await _syncVersionFileService.GetSyncFileInfo(_configService.GetFolders(_configService.Settings.DefaultSet).Last());
 
 }

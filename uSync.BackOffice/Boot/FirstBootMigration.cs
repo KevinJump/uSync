@@ -92,9 +92,11 @@ public class FirstBootMigration : UnscopedAsyncMigrationBase
 
             using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
             {
-                var results = await _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
+                var startupSet = _uSyncConfig.GetStartupSet();
+                var results = await _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(startupSet), false, new SyncHandlerOptions
                 {
-                    Group = _uSyncConfig.Settings.FirstBootGroup
+                    Group = _uSyncConfig.Settings.FirstBootGroup,
+                    Set = startupSet
                 });
 
                 changes = results.CountChanges();

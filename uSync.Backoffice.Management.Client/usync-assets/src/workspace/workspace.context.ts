@@ -381,6 +381,9 @@ export class uSyncWorkspaceContext
 		const { data } = await this.#repository.getRunningOperation();
 		if (!data?.operationId) return;
 
+		// the results we reattach to come from the set the run was started for.
+		this.#lastSet = data.set ?? undefined;
+
 		this.#working.setValue(true);
 		this.#completed.setValue(false);
 		this.#inBackground.setValue(true);
