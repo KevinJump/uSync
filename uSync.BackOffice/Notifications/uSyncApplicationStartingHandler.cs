@@ -171,22 +171,26 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         {
             using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
             {
+                var startupSet = _uSyncConfig.GetStartupSet();
+                var startupFolders = _uSyncConfig.GetFolders(startupSet);
+
                 var exportAtStartup = IsExportAtStartupEnabled();
-                if (exportAtStartup || (IsExportOnSaveOn() && !HasSyncFolders()))
+                if (exportAtStartup || (IsExportOnSaveOn() && !HasSyncFolders(startupFolders)))
                 {
 
                     var options = new SyncHandlerOptions
                     {
                         Group = exportAtStartup
                             ? _uSyncConfig.Settings.ExportAtStartup
-                            : _uSyncConfig.Settings.ExportOnSave
+                            : _uSyncConfig.Settings.ExportOnSave,
+                        Set = startupSet
                     };
 
                     if (_logger.IsEnabled(LogLevel.Information))
                         _logger.LogInformation("uSync: Running export at startup");
                     
                     
-                    _uSyncService.StartupExportAsync(_uSyncConfig.GetWorkingFolder(), options).Wait();
+                    _uSyncService.StartupExportAsync(startupFolders.Last(), options).Wait();
                 }
 
                 if (IsImportAtStartupEnabled())
@@ -200,9 +204,10 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
 
                     if (ShouldProceedWithImport(hasStopFile, hasOnceFile))
                     {
-                        await _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
+                        await _uSyncService.StartupImportAsync(startupFolders, false, new SyncHandlerOptions
                         {
-                            Group = _uSyncConfig.Settings.ImportAtStartup
+                            Group = _uSyncConfig.Settings.ImportAtStartup,
+                            Set = startupSet
                         });
 
                         await ProcessOnceFileAsync(workingFolder);
@@ -233,9 +238,9 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
     ///  checks if there are any of the sync folders (including root).
     /// </summary>
     /// <returns></returns>
-    private bool HasSyncFolders()
+    private bool HasSyncFolders(string[] folders)
     {
-        foreach (var folder in _uSyncConfig.GetFolders())
+        foreach (var folder in folders)
         {
             if (_syncFileService.DirectoryExists(folder)) return true;
         }

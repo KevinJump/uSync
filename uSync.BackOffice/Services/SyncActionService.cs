@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using System;
@@ -32,6 +33,7 @@ internal class SyncActionService : ISyncActionService
     private readonly ISyncService _uSyncService;
     private readonly ISyncHandlerFactory _handlerFactory;
     private readonly ISyncFileService _syncFileService;
+    private readonly IConfiguration _configuration;
 
     private readonly string _uSyncTempPath;
 
@@ -42,8 +44,10 @@ internal class SyncActionService : ISyncActionService
         ISyncHandlerFactory handlerFactory,
         ISyncFileService syncFileService,
         Umbraco.Cms.Core.Hosting.IHostingEnvironment hostingEnvironment,
-        IWebHostEnvironment webHostEnvironment)
+        IWebHostEnvironment webHostEnvironment,
+        IConfiguration configuration)
     {
+        _configuration = configuration;
         _uSyncConfig = uSyncConfig;
         _uSyncService = uSyncService;
         _handlerFactory = handlerFactory;
@@ -81,11 +85,12 @@ internal class SyncActionService : ISyncActionService
     {
         if (options.Handler is null) return new();
 
+        var (set, folders) = GetSetAndFolders(options);
         var importOptions = new uSyncImportOptions
         {
             Callbacks = callbacks,
-            HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = [.. options.GetFoldersOrDefault(_uSyncConfig.GetFolders())]
+            HandlerSet = set,
+            Folders = folders
         };
 
         var actions = (await _uSyncService.ReportHandlerAsync(options.Handler, importOptions)).ToList();
@@ -100,11 +105,12 @@ internal class SyncActionService : ISyncActionService
     {
         if (options.Handler is null) return new();
 
+        var (set, folders) = GetSetAndFolders(options);
         var importOptions = new uSyncImportOptions
         {
             Callbacks = callbacks,
-            HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders()),
+            HandlerSet = set,
+            Folders = folders,
             PauseDuringImport = true,
             Flags = options.GetImportFlags()
         };
@@ -119,10 +125,8 @@ internal class SyncActionService : ISyncActionService
 
     public async Task<SyncActionResult> ImportPostAsync(SyncFinalActionRequest request)
     {
-        var actions = await _uSyncService.PerformPostImportAsync(
-            request.ActionOptions.GetFoldersOrDefault(_uSyncConfig.GetFolders()),
-            request.ActionOptions.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            request.Actions);
+        var (set, folders) = GetSetAndFolders(request.ActionOptions);
+        var actions = await _uSyncService.PerformPostImportAsync(folders, set, request.Actions);
 
         if (request.Callbacks is not null)
             await request.Callbacks.RaiseUpdateAsync("Post Import Complete", 1, 1);
@@ -133,11 +137,12 @@ internal class SyncActionService : ISyncActionService
     {
         if (options.Handler is null) return new();
 
+        var (set, folders) = GetSetAndFolders(options);
         var importOptions = new uSyncImportOptions
         {
             Callbacks = callbacks,
-            HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders())
+            HandlerSet = set,
+            Folders = folders
         };
 
         var actions = (await _uSyncService.ExportHandlerAsync(options.Handler, importOptions)).ToList();
@@ -148,17 +153,107 @@ internal class SyncActionService : ISyncActionService
         return new SyncActionResult(actions);
     }
 
+    /// <summary>
+    ///  the handler set for these options, and the folders that set reads and writes.
+    /// </summary>
+    private (string Set, string[] Folders) GetSetAndFolders(SyncActionOptions options)
+    {
+        var set = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet);
+        return (set, options.GetFoldersOrDefault(_uSyncConfig.GetFolders(set)));
+    }
+
     public void CleanExportFolder()
+        => CleanExportFolder(null);
+
+    private void CleanExportFolder(string? set)
     {
         try
         {
-            _uSyncService.CleanExportFolder(_uSyncConfig.GetWorkingFolder());
+            var setName = string.IsNullOrWhiteSpace(set) ? _uSyncConfig.Settings.DefaultSet : set;
+            var folder = _uSyncConfig.GetFolders(setName).Last();
+
+            if (IsSharedFolder(folder, _uSyncConfig.GetWorkingFolder()))
+            {
+                _logger.LogWarning("[uSync] Not cleaning {folder} for set {set}: the folder is, or contains, one of the global uSync folders. Give the set its own export folder (the last folder in its list).", folder, setName);
+                return;
+            }
+
+            var nested = GetNestedSetFolder(folder, setName);
+            if (nested is not null)
+            {
+                _logger.LogWarning("[uSync] Not cleaning {folder} for set {set}: it contains {nested}, the export folder of set {otherSet}, which would be emptied too.", folder, setName, nested.Value.Folder, nested.Value.Set);
+                return;
+            }
+
+            _uSyncService.CleanExportFolder(folder);
         }
-        catch
+        catch (Exception ex)
         {
-            // 
+            _logger.LogWarning(ex, "[uSync] Failed to clean the export folder");
         }
     }
+
+    /// <summary>
+    ///  a set's export folder is shared if it is (or contains) one of the global folders,
+    ///  other than the working folder, which is what a normal clean export empties.
+    /// </summary>
+    private bool IsSharedFolder(string folder, string workingFolder)
+    {
+        var target = NormalisePath(folder);
+        if (target.Equals(NormalisePath(workingFolder), StringComparison.OrdinalIgnoreCase)) return false;
+
+        return _uSyncConfig.GetFolders()
+            .Select(NormalisePath)
+            .Any(x => x.StartsWith(target, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    ///  another set that reads from or exports to a folder inside this folder (cleaning this folder would empty it).
+    /// </summary>
+    /// <remarks>
+    ///  sets that share the same export folder (e.g. sets without their own folders) are not nested.
+    ///  the sets checked are the ones in configuration plus the default and startup sets, sets only
+    ///  registered in code can't be listed, so aren't checked.
+    /// </remarks>
+    private (string Set, string Folder)? GetNestedSetFolder(string folder, string setName)
+    {
+        var target = NormalisePath(folder);
+
+        var setNames = _configuration.GetuSyncSetNames()
+            .Append(_uSyncConfig.Settings.DefaultSet)
+            .Append(uSync.Sets.DefaultSet)
+            .Append(_uSyncConfig.GetStartupSet())
+            .Where(x => !string.IsNullOrWhiteSpace(x) && !x.Equals(setName, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var otherSet in setNames)
+        {
+            var otherFolders = _uSyncConfig.GetFolders(otherSet);
+            var exportFolder = otherFolders.Last();
+
+            foreach (var otherFolder in otherFolders)
+            {
+                var other = NormalisePath(otherFolder);
+                if (!other.StartsWith(target, StringComparison.OrdinalIgnoreCase)) continue;
+
+                // another set exporting to the same folder is a shared export folder, which is fine to clean.
+                if (other.Equals(target, StringComparison.OrdinalIgnoreCase) && otherFolder == exportFolder) continue;
+
+                return (otherSet, otherFolder);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///  the default set's export folder (the working folder, unless the default set has its own folders).
+    /// </summary>
+    private string GetDefaultExportFolder()
+        => _uSyncConfig.GetFolders(_uSyncConfig.Settings.DefaultSet).Last();
+
+    private string NormalisePath(string folder)
+        => _syncFileService.GetAbsPath(folder).TrimEnd('/', '\\') + Path.DirectorySeparatorChar;
 
     private string MakeValidImportFolder(string folder)
     {
@@ -200,8 +295,8 @@ internal class SyncActionService : ISyncActionService
 
         if (request.HandlerAction == HandlerActions.Export && request.Clean is true)
         {
-            // clean the export folder.  
-            CleanExportFolder();
+            // clean the export folder (the set's own folder, if it has one).  
+            CleanExportFolder(request.Set);
         }
 
     }
@@ -213,7 +308,10 @@ internal class SyncActionService : ISyncActionService
     /// <inheritdoc/>
     public async Task<SyncActionResult> FinishProcessAsync(SyncFinalActionRequest request)
     {
-        await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.ActionOptions.Group, request.Actions);
+        // the version file goes in the set's export folder (the working folder unless the set has its own),
+        // not in any folders the caller passed in for the run.
+        var set = request.ActionOptions.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet);
+        await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.ActionOptions.Group, _uSyncConfig.GetFolders(set).Last(), request.Actions);
 
         long elapsed = 0;
         if (_timers.TryRemove(request.RequestId, out var timer))
@@ -238,7 +336,7 @@ internal class SyncActionService : ISyncActionService
 
     public Stream GetExportFolderAsStream()
     {
-        return _uSyncService.CompressFolder(_uSyncConfig.GetWorkingFolder());
+        return _uSyncService.CompressFolder(GetDefaultExportFolder());
     }
 
     public async Task<UploadImportResult> UnpackImportFromStreamAsync(Stream stream)
@@ -264,7 +362,7 @@ internal class SyncActionService : ISyncActionService
                 };
             }
 
-            _uSyncService.ReplaceFiles(tempFolder, _uSyncConfig.GetWorkingFolder(), true);
+            _uSyncService.ReplaceFiles(tempFolder, GetDefaultExportFolder(), true);
 
             return new UploadImportResult
             {

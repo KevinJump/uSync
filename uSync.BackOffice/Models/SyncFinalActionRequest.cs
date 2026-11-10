@@ -68,4 +68,9 @@ public class SyncStartActionRequest
     ///  should the folder be cleaned before the action(export) runs?
     /// </summary>
     public bool Clean { get; set; }
+
+    /// <summary>
+    ///  the handler set the action is running for (used to pick the folder to clean)
+    /// </summary>
+    public string? Set { get; set; }
 }

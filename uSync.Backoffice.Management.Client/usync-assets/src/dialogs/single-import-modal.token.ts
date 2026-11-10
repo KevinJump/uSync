@@ -3,6 +3,9 @@ import { USyncActionView } from '../api';
 
 export interface SyncImportSingleModalData {
 	action: USyncActionView;
+
+	/** the handler set the item came from, the import looks in its folders. */
+	set?: string;
 }
 
 export interface SyncImportSingleModalResult {

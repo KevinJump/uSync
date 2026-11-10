@@ -22,9 +22,9 @@ public class SyncItemController : uSyncControllerBase
     [HttpPost("Import")]
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(uSyncActionView), 200)]
-    public async Task<IActionResult> ImportSingle([FromBody] uSyncActionView action)
+    public async Task<IActionResult> ImportSingle([FromBody] uSyncActionView action, [FromQuery] string? set = null)
     {
-        var result = await _syncService.ImportSingleItemAsync(action.Key, action.Handler);
+        var result = await _syncService.ImportSingleItemAsync(action.Key, action.Handler, set);
         return Ok(result.AsActionView());
     }
 }

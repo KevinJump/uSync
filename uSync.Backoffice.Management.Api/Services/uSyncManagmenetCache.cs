@@ -94,6 +94,7 @@ internal class uSyncManagementCache : ISyncManagementCache
             {
                 RequestId = progress.RequestId,
                 Action = progress.Action,
+                Set = progress.Set,
                 Message = progress.Message,
                 Complete = progress.Complete,
                 Status = progress.Status,
@@ -140,6 +141,7 @@ internal class uSyncManagementCache : ISyncManagementCache
                 RequestId = shared.RequestId,
                 OperationId = operationId,
                 Action = shared.Action ?? string.Empty,
+                Set = shared.Set,
                 Status = shared.Status ?? [],
                 Actions = shared.Actions ?? [],
                 Complete = shared.Complete,

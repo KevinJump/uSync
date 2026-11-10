@@ -124,10 +124,21 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     public HandlerSettings DefaultConfig { get; set; }
 
+    private string[]? _rootFolders;
+
     /// <summary>
     ///  the root folders to use for the handler (based on settings).
     /// </summary>
-    protected string[] RootFolders { get; set; }
+    /// <remarks>
+    ///  events (save, delete, move) export with the default set's config, so these are the default
+    ///  set's folders. They are read from config each time (so changes to the set's folders are
+    ///  picked up without a restart) unless a handler sets them.
+    /// </remarks>
+    protected string[] RootFolders
+    {
+        get => _rootFolders ?? uSyncConfig.GetFolders(uSyncConfig.Settings.DefaultSet);
+        set => _rootFolders = value;
+    }
 
     /// <summary>
     ///  the UDIEntityType for the handler objects
@@ -226,7 +237,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         this.ItemContainerType = uSyncObjectType.ToContainerUmbracoObjectType(EntityType);
 
         this.DefaultConfig = GetDefaultConfig();
-        RootFolders = uSyncConfig.GetFolders();
 
         if (uSyncConfig.Settings.CacheFolderKeys)
         {
@@ -373,7 +383,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     protected virtual async Task<XElement?> GetMergedNodeAsync(string filePath)
     {
-        var allFiles = uSyncConfig.GetFolders()
+        var allFiles = RootFolders
             .Select(x => syncFileService.GetAbsPath($"{x}/{this.DefaultFolder}/{filePath}"))
             .ToArray();
 
@@ -1195,7 +1205,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             callback?.Invoke("Validating Report", 2, 3);
             var validationActions = await ReportMissingParentsAsync([.. actions]);
-            actions.AddRange(ReportDeleteCheck(uSyncConfig.GetWorkingFolder(), validationActions));
+            // folders are handler folders (root/handler), the delete check paths are relative to the root.
+            var rootFolder = Path.GetDirectoryName(folders.LastOrDefault()?.TrimEnd('/', '\\') ?? string.Empty);
+            actions.AddRange(ReportDeleteCheck(string.IsNullOrEmpty(rootFolder) ? uSyncConfig.GetWorkingFolder() : rootFolder, validationActions));
 
             callback?.Invoke($"Done ({this.ItemType})", 3, 3);
             return actions;
@@ -1204,6 +1216,28 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             CleanCaches(cacheKey);
         }
+    }
+
+    /// <summary>
+    ///  the part of a file name after the given folder, or just the file name if it isn't in that folder.
+    /// </summary>
+    /// <remarks>
+    ///  matches the last whole-folder occurrence, so a parent folder with a similar name (e.g. uSync/v17-site) isn't mistaken for it.
+    /// </remarks>
+    private static string GetRelativeFileName(string? fileName, string folder)
+    {
+        if (string.IsNullOrEmpty(fileName)) return string.Empty;
+
+        var trimmed = folder.Replace('\\', '/').Trim('/');
+        if (trimmed.Length == 0) return Path.GetFileName(fileName);
+
+        var root = trimmed + '/';
+        var path = fileName.Replace('\\', '/');
+        var index = path.LastIndexOf(root, StringComparison.OrdinalIgnoreCase);
+        while (index > 0 && path[index - 1] != '/')
+            index = path.LastIndexOf(root, index - 1, StringComparison.OrdinalIgnoreCase);
+
+        return index < 0 ? Path.GetFileName(fileName) : path[(index + root.Length)..];
     }
 
     /// <summary>
@@ -1230,7 +1264,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
                 // add the delete message to the list of changes
                 var filename = Path.GetFileName(deleteAction.FileName) ?? string.Empty;
-                var relativePath = deleteAction.FileName?.Substring(folder.Length) ?? string.Empty;
+                var relativePath = GetRelativeFileName(deleteAction.FileName, folder);
 
                 details.Add(uSyncChange.Delete(filename, $"Delete: {deleteAction.Name} ({filename}", relativePath));
 
@@ -1238,7 +1272,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 foreach (var dup in actions.Where(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
                 {
                     var dupFilename = Path.GetFileName(dup.FileName) ?? string.Empty;
-                    var dupRelativePath = dup.FileName?.Substring(folder.Length) ?? string.Empty;
+                    var dupRelativePath = GetRelativeFileName(dup.FileName, folder);
 
                     details.Add(
                         uSyncChange.Update(
@@ -2247,11 +2281,11 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
 
     private bool HasRootFolders()
-        => syncFileService.AnyFolderExists(uSyncConfig.GetFolders()[..^1]);
+        => syncFileService.AnyFolderExists(RootFolders[..^1]);
 
     private async Task<bool> RootItemExistsAsync(TObject item)
     {
-        foreach (var folder in uSyncConfig.GetFolders()[..^1])
+        foreach (var folder in RootFolders[..^1])
         {
             var filename = (await GetPathAsync(
                 Path.Combine(folder, DefaultFolder),
@@ -2302,9 +2336,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     #endregion
 
     /// <inheritdoc/>
-    public async Task<XElement?> TryFindItemNodeAsync(Guid key)
+    public Task<XElement?> TryFindItemNodeAsync(Guid key)
+        => TryFindItemNodeAsync(key, RootFolders);
+
+    /// <inheritdoc/>
+    public async Task<XElement?> TryFindItemNodeAsync(Guid key, string[] rootFolders)
     {
-        var folders = GetDefaultHandlerFolders();
+        var folders = rootFolders.Select(f => Path.Combine(f, DefaultFolder)).ToArray();
         var items = await GetMergedItemsAsync(folders, new SyncMergeOptions());
 
         foreach (var item in items)

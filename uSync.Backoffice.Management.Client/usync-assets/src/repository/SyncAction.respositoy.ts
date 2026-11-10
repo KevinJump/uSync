@@ -159,8 +159,8 @@ export class uSyncActionRepository extends UmbControllerBase {
 		return await this.#settingsDataSource.getSets();
 	}
 
-	async importSingle(action: USyncActionView) {
-		return await this.#actionDataSource.importSingle(action);
+	async importSingle(action: USyncActionView, set?: string) {
+		return await this.#actionDataSource.importSingle(action, set);
 	}
 
 	async getSyncFileInfo() {
@@ -170,7 +170,7 @@ export class uSyncActionRepository extends UmbControllerBase {
 	/**
 	 * gets the current and incoming versions of an item, when its handler supports previews.
 	 */
-	async getPreview(handler: string, key: string) {
-		return await this.#actionDataSource.getPreview(handler, key);
+	async getPreview(handler: string, key: string, set?: string) {
+		return await this.#actionDataSource.getPreview(handler, key, set);
 	}
 }

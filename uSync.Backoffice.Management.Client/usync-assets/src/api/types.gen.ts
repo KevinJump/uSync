@@ -150,6 +150,7 @@ export type SyncRunningOperationResponse = {
     operationId?: string | null;
     requestId?: string | null;
     action?: string | null;
+    set?: string | null;
 };
 
 export type SyncSelectableSet = {
@@ -199,6 +200,7 @@ export type USyncHandlerSetSettings = {
         [key: string]: HandlerSettings;
     };
     isSelectable: boolean;
+    folders: Array<string>;
 };
 
 export type USyncOptions = {
@@ -224,6 +226,7 @@ export type USyncSettings = {
     defaultSet: string;
     importAtStartup: string;
     exportAtStartup: string;
+    startupSet: string;
     exportOnSave: string;
     uiEnabledGroups: string;
     reportDebug: boolean;
@@ -351,7 +354,9 @@ export type GetSyncFileInfoResponse = GetSyncFileInfoResponses[keyof GetSyncFile
 export type ImportSingleData = {
     body?: USyncActionView;
     path?: never;
-    query?: never;
+    query?: {
+        set?: string;
+    };
     url: '/umbraco/usync/api/v1/Import';
 };
 
@@ -400,6 +405,7 @@ export type GetPreviewData = {
     query?: {
         handler?: string;
         key?: string;
+        set?: string;
     };
     url: '/umbraco/usync/api/v1/Preview';
 };

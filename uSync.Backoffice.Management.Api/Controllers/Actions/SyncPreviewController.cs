@@ -23,9 +23,9 @@ public class SyncPreviewController : uSyncControllerBase
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(SyncItemPreviewResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetPreview(string handler, Guid key)
+    public async Task<IActionResult> GetPreview(string handler, Guid key, string? set = null)
     {
-        var result = await _previewService.GetPreviewAsync(handler, key);
+        var result = await _previewService.GetPreviewAsync(handler, key, set);
         if (result is null) return NotFound();
 
         var preview = result.Preview;
