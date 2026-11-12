@@ -9,6 +9,15 @@ re-export), see [`changes/format.md`](changes/format.md).
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 History is backfilled from the v18 release history starting at `v18.0.0`.
 
+## [19.0.0-rc1] - 2026-11-12
+
+Release candidate for **Umbraco 19**. Includes everything in 18.2.1, 18.3.0
+and 18.3.1, merged forward from `v18/main`.
+
+### Changed
+
+- Built against Umbraco 19.0.0-rc1 and Jumoo.Json 19.0.0-rc1.
+
 ## [19.0.0-beta01] - 2026-10-28
 
 First beta of uSync for **Umbraco 19**, built against Umbraco 19.0.0-beta1 on
