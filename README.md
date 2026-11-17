@@ -44,7 +44,7 @@ uSync is on [NuGet](https://www.nuget.org/packages/uSync). Add it to your Umbrac
 dotnet add package uSync
 ```
 
-Run the site and open **Settings > uSync** in the backoffice. With no configuration uSync exports settings and content to `uSync/v17` in the site's root folder.
+Run the site and open **Settings > uSync** in the backoffice. With no configuration uSync exports settings and content to `uSync/v18` in the site's root folder.
 
 The uSync major version matches the Umbraco major version, so uSync 17 runs on Umbraco 17.
 
