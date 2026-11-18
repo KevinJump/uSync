@@ -4,6 +4,16 @@ permissions:
   contents: read
   pull-requests: write
 
+# When this builds (Jumoo/jumoo-context#159, from its templates/workflows/dotnet-build.yml):
+#
+# - Dependabot PRs. Nobody builds those locally, so CI is the only check they get.
+# - Other PRs: no. /commit-pr builds and tests locally before opening the PR. The
+#   build job is skipped, which still satisfies a required status check.
+# - Nightly: each v{N}/main with commits in the last day, so a break from combined
+#   changes shows up the next morning. Dispatched, so each branch builds with its own
+#   copy of this file.
+# - On demand: Actions > Run workflow, on any branch.
+#
 # NOTE: uSync releases from "v{major}/main" - a branch per Umbraco major. Plain "main"
 # is kept in the filter so a re-created main, or a branch that hasn't been moved over
 # yet, still builds.
@@ -13,9 +23,12 @@ on:
     paths-ignore:
       - "**.md"
       - "docs/**"
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -26,10 +39,41 @@ env:
   schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
 jobs:
+  # Schedules only run on the default branch, so this job dispatches the build on each
+  # release branch that changed, rather than building it here.
+  nightly:
+    if: ${{ github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: dispatch a build for each branch changed in the last day
+        run: |
+          since=$(date -u -d '25 hours ago' +%s)
+          gh api "repos/$GITHUB_REPOSITORY/branches" --paginate -q '.[].name' \
+            | grep -E '^(v[0-9]+/)?main$' \
+            | while read -r branch; do
+                committed=$(gh api "repos/$GITHUB_REPOSITORY/commits/$branch" -q .commit.committer.date)
+                if [ "$(date -u -d "$committed" +%s)" -ge "$since" ]; then
+                  echo "$branch changed $committed - building"
+                  # an old branch (v13/main) may not have this workflow; don't let it stop the rest
+                  gh workflow run dotnet-build.yml --repo "$GITHUB_REPOSITORY" --ref "$branch" \
+                    || echo "::warning::couldn't dispatch a build on $branch"
+                else
+                  echo "$branch unchanged since $committed - skipping"
+                fi
+              done
+
   # Linux rather than Windows: nothing in the build needs Windows, and the ubuntu
   # runners start and build noticeably faster. It also means a path whose casing
   # doesn't match the repo fails here, on the PR, rather than in a release.
   build-project:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')
     runs-on: ubuntu-latest
 
     steps:
@@ -78,6 +122,9 @@ jobs:
         run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }} --no-build
 
   history-package:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')
     name: history package smoke check
     runs-on: ubuntu-latest
 
