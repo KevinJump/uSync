@@ -24,11 +24,11 @@
     "cross-env": "^10.1.0",
     "lit": "^3.3.3",
     "node-fetch": "^3.3.2",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "rm-rs": "^0.2.3",
     "typescript": "^6.0.3",
-    "vite": "^8.3.5",
-    "vite-plugin-checker": "^0.14.5"
+    "vite": "^8.3.8",
+    "vite-plugin-checker": "^1.0.0"
   },
   "overrides": {
     "js-yaml": "^4.3.1"
