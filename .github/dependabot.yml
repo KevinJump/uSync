@@ -4,13 +4,16 @@ updates:
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     # Umbraco and our own packages (Jumoo.*, which ship one branch per Umbraco major) set
     # the minimum for anyone installing this package, so they move when we move them.
     # This also opts them out of dependabot security updates.
     ignore:
       - dependency-name: "Umbraco.*"
       - dependency-name: "Jumoo.*"
+      # The Clean starter kit major tracks the Umbraco major (7 for v17, 8 for v18, 9 for v19).
+      - dependency-name: "Clean"
+        update-types: ["version-update:semver-major"]
     groups:
       nuget-dependencies:
         patterns:
@@ -22,7 +25,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/uSync.Backoffice.Management.Client/usync-assets"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     ignore:
       # pinned for the same reason as Umbraco.* / Jumoo.* above.
       - dependency-name: "@umbraco-cms/*"
@@ -45,7 +48,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/uSync.History/history-client"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     ignore:
       - dependency-name: "@umbraco-cms/*"
       - dependency-name: "@jumoo/*"
@@ -64,7 +67,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       github-actions:
         patterns:
