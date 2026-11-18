@@ -11,6 +11,9 @@ updates:
     ignore:
       - dependency-name: "Umbraco.*"
       - dependency-name: "Jumoo.*"
+      # The Clean starter kit major tracks the Umbraco major (7 for v17, 8 for v18, 9 for v19).
+      - dependency-name: "Clean"
+        update-types: ["version-update:semver-major"]
     groups:
       nuget-dependencies:
         patterns:
@@ -27,6 +30,10 @@ updates:
       # pinned for the same reason as Umbraco.* / Jumoo.* above.
       - dependency-name: "@umbraco-cms/*"
       - dependency-name: "@jumoo/*"
+      # The @microsoft/signalr major tracks the .NET major. v17 and v18 run .NET 10 so stay
+      # on signalr 10; v19 (.NET 11) takes 11.
+      - dependency-name: "@microsoft/signalr"
+        versions: [">= 11.0.0"]
       # TypeScript stays on v5: @hey-api/openapi-ts (generates the API client) doesn't
       # support TypeScript 7 yet. Move every client together once it does.
       - dependency-name: "typescript"
@@ -49,6 +56,10 @@ updates:
     ignore:
       - dependency-name: "@umbraco-cms/*"
       - dependency-name: "@jumoo/*"
+      # The @microsoft/signalr major tracks the .NET major. v17 and v18 run .NET 10 so stay
+      # on signalr 10; v19 (.NET 11) takes 11.
+      - dependency-name: "@microsoft/signalr"
+        versions: [">= 11.0.0"]
       - dependency-name: "typescript"
         versions: [">= 6.0.0"]
       - dependency-name: "@hey-api/*"
