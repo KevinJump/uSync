@@ -25,8 +25,10 @@
     "lit": "^3.3.3",
     "node-fetch": "^3.3.2",
     "prettier": "^3.9.10",
+    "rm-rs": "^0.2.3",
     "typescript": "^6.0.3",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "vite-plugin-checker": "^0.14.5"
   },
   "overrides": {
     "js-yaml": "^4.3.1"
