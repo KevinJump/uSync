@@ -11,6 +11,9 @@ updates:
     ignore:
       - dependency-name: "Umbraco.*"
       - dependency-name: "Jumoo.*"
+      # The Clean starter kit major tracks the Umbraco major (7 for v17, 8 for v18, 9 for v19).
+      - dependency-name: "Clean"
+        update-types: ["version-update:semver-major"]
     groups:
       nuget-dependencies:
         patterns:
