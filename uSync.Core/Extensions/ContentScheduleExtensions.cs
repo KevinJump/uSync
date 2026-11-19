@@ -16,7 +16,7 @@ public static class ContentScheduleExtensions
             switch (schedule.Action)
             {
                 case ContentScheduleAction.Release:
-                    if (schedule.Date < DateTime.Now)
+                    if (schedule.Date < DateTime.UtcNow)
                     {
                         defaultState = uSyncContentState.Published;
                     }
@@ -33,7 +33,7 @@ public static class ContentScheduleExtensions
                     }
                     break;
                 case ContentScheduleAction.Expire:
-                    if (schedule.Date < DateTime.Now)
+                    if (schedule.Date < DateTime.UtcNow)
                     {
                         defaultState = uSyncContentState.Unpublished;
                     }
