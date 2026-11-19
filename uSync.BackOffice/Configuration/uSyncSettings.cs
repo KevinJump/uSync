@@ -190,6 +190,18 @@ public class uSyncSettings
     public bool EnableHistory { get; set; } = true;
 
     /// <summary>
+    /// Delete history entries older than this many days, 0 means no age limit.
+    /// </summary>
+    [DefaultValue(0)]
+    public int HistoryMaxAgeDays { get; set; } = 0;
+
+    /// <summary>
+    /// Maximum number of history entries to keep (newest first), 0 means no limit.
+    /// </summary>
+    [DefaultValue(0)]
+    public int HistoryMaxEntries { get; set; } = 0;
+
+    /// <summary>
     /// Default file extension for the uSync files. 
     /// </summary>
     [DefaultValue("config")]

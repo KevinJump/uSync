@@ -348,7 +348,7 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
     {
         var key = Guid.Empty;
         var culture = scheduleNode.Element("Culture").ValueOrDefault(string.Empty);
-        var date = scheduleNode.Element("Date").ValueOrDefault(DateTime.MinValue);
+        var date = DateTime.SpecifyKind(scheduleNode.Element("Date").ValueOrDefault(DateTime.MinValue), DateTimeKind.Utc);
         var action = scheduleNode.Element("Action").ValueOrDefault(ContentScheduleAction.Release);
 
         return new ContentSchedule(key, culture, date, action);
@@ -548,7 +548,7 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
                 var importSchedule = GetContentScheduleFromNode(schedule);
                 if (cultures.IsValidOrBlank(importSchedule.Culture))
                 {
-                    if (importSchedule.Date < DateTime.Now)
+                    if (importSchedule.Date < DateTime.UtcNow)
                         continue; // don't add schedules in the past
 
                     if (logger.IsEnabled(LogLevel.Debug))
