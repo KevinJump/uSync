@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -44,6 +45,9 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHan
 
     private readonly IDictionaryItemService _dictionaryItemService;
 
+    // notification state key, used to pass descendants from deleting to deleted.
+    private const string _descendantsStateKey = "uSync.DictionaryDescendants";
+
     /// <inheritdoc/>
     public DictionaryHandler(
         ILogger<DictionaryHandler> logger,
@@ -81,6 +85,60 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHan
         }
 
         return [];
+    }
+
+    /// <summary>
+    ///  check roots, and collect the descendants of the items being deleted
+    /// </summary>
+    /// <remarks>
+    ///  Umbraco deletes the descendants without raising notifications for them,
+    ///  so we collect them here and write their delete markers when the delete is complete.
+    /// </remarks>
+    public override async Task HandleAsync(DeletingNotification<IDictionaryItem> notification, CancellationToken cancellationToken)
+    {
+        await base.HandleAsync(notification, cancellationToken);
+
+        if (notification.Cancel || !ShouldProcessEvent()) return;
+
+        try
+        {
+            var descendants = new List<IDictionaryItem>();
+            foreach (var item in notification.DeletedEntities)
+            {
+                descendants.AddRange(await _dictionaryItemService.GetDescendantsAsync(item.Key));
+            }
+
+            notification.State[_descendantsStateKey] = descendants;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to get the descendants of deleted dictionary items");
+        }
+    }
+
+    /// <summary>
+    ///  write delete markers for the deleted items and their descendants
+    /// </summary>
+    public override async Task HandleAsync(DeletedNotification<IDictionaryItem> notification, CancellationToken cancellationToken)
+    {
+        await base.HandleAsync(notification, cancellationToken);
+
+        if (!ShouldProcessEvent()) return;
+        if (!notification.State.TryGetValue(_descendantsStateKey, out var state)
+            || state is not IEnumerable<IDictionaryItem> descendants) return;
+
+        foreach (var descendant in descendants)
+        {
+            try
+            {
+                await ExportDeletedItemAsync(descendant, GetDefaultHandlerFolders(), DefaultConfig);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to create delete marker");
+                notification.Messages.Add(new EventMessage("uSync", $"Failed to mark as deleted : {ex.Message}", EventMessageType.Warning));
+            }
+        }
     }
 
     /// <inheritdoc/>

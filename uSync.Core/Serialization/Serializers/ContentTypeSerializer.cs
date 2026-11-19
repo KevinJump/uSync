@@ -305,10 +305,11 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         // New "KeepTemplates" Option, will merge uSync templates with existing ones (not a complete sync!)
         if (options.GetSetting<bool>(uSyncConstants.DefaultSettings.KeepTemplates, uSyncConstants.DefaultSettings.KeepTemplates_Default))
         {
+            var fileAliases = allowedTemplates.Select(x => x.Alias).ToHashSet(StringComparer.InvariantCultureIgnoreCase);
             allowedTemplates =
             [
                 ..allowedTemplates,
-                ..item.AllowedTemplates?.Where(x => !newTemplates.InvariantContains(x.Alias)) ?? [],
+                ..item.AllowedTemplates?.Where(x => !fileAliases.Contains(x.Alias)) ?? [],
             ];
             newTemplates = string.Join(",", allowedTemplates.Select(x => x.Alias).OrderBy(x => x));
         }
