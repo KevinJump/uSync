@@ -11,7 +11,6 @@ using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
-using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_15_0_0.LocalLinks;
 using Umbraco.Cms.Tests.Common.Testing;
 using Umbraco.Cms.Tests.Integration.Testing;
 
@@ -44,9 +43,6 @@ public class ContentTypeKeepTemplatesTests : UmbracoIntegrationTest
 
     protected override void CustomTestSetup(IUmbracoBuilder builder)
     {
-        // the RTE mapper needs the local link processor, which the test host doesn't register.
-        new ConvertLocalLinkComposer().Compose(builder);
-
         builder.AdduSync(settings =>
         {
             settings.ExportAtStartup = "None";
@@ -101,14 +97,14 @@ public class ContentTypeKeepTemplatesTests : UmbracoIntegrationTest
             Name = "Page",
             AllowedTemplates = [homePage]
         };
-        ContentTypeService.Save(contentType);
+        await ContentTypeService.CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         var node = (await Serializer.SerializeAsync(ContentTypeService.Get(contentType.Key), new SyncSerializerOptions())).Item;
         Assert.That(node.Element("Info")!.Element("AllowedTemplates")!.Elements("Template").Select(x => x.Value), Is.EqualTo(new[] { "homePage" }));
 
         var saved = ContentTypeService.Get(contentType.Key)!;
         saved.AllowedTemplates = [homePage, siteOnly];
-        ContentTypeService.Save(saved);
+        await ContentTypeService.UpdateAsync(saved, UmbConstants.Security.SuperUserKey);
 
         return (saved, node);
     }

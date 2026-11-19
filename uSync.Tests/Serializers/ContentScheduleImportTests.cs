@@ -12,7 +12,6 @@ using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
-using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_15_0_0.LocalLinks;
 using Umbraco.Cms.Tests.Common.Testing;
 using Umbraco.Cms.Tests.Integration.Testing;
 
@@ -49,9 +48,6 @@ public class ContentScheduleImportTests : UmbracoIntegrationTest
 
     protected override void CustomTestSetup(IUmbracoBuilder builder)
     {
-        // the RTE mapper needs the local link processor, which the test host doesn't register.
-        new ConvertLocalLinkComposer().Compose(builder);
-
         builder.AdduSync(settings =>
         {
             settings.ExportAtStartup = "None";
@@ -75,7 +71,7 @@ public class ContentScheduleImportTests : UmbracoIntegrationTest
     private ISyncSerializer<IContent> Serializer
         => GetRequiredService<SyncSerializerCollection>().GetSerializer<IContent>("ContentSerializer");
 
-    private IContent CreateContent()
+    private async Task<IContent> CreateContent()
     {
         var shortStringHelper = GetRequiredService<IShortStringHelper>();
         var contentType = new ContentType(shortStringHelper, -1)
@@ -88,7 +84,7 @@ public class ContentScheduleImportTests : UmbracoIntegrationTest
             Name = "Title",
             DataTypeId = UmbConstants.DataTypes.Textbox
         });
-        GetRequiredService<IContentTypeService>().Save(contentType);
+        await GetRequiredService<IContentTypeService>().CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         var contentService = GetRequiredService<IContentService>();
         var content = contentService.Create("page", -1, contentType);
@@ -100,7 +96,7 @@ public class ContentScheduleImportTests : UmbracoIntegrationTest
     [Test]
     public async Task Import_FutureRelease_LocalAheadOfUtc_KeepsSchedule()
     {
-        var content = CreateContent();
+        var content = await CreateContent();
         var node = (await Serializer.SerializeAsync(content, new SyncSerializerOptions())).Item;
 
         node.Element(Core.uSyncConstants.Xml.Info)!.Element("Schedule")!.ReplaceWith(
