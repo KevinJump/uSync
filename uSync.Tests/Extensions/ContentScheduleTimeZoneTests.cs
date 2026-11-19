@@ -31,7 +31,7 @@ public class ContentScheduleTimeZoneTests
     }
 
     private static IList<ContentSchedule> Schedule(ContentScheduleAction action, DateTime date)
-        => [new ContentSchedule(_culture, date, action)];
+        => [new ContentSchedule(_culture, date, action, false)];
 
     [Test]
     public void FutureRelease_LocalAheadOfUtc_IsPending()
