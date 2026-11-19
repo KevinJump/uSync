@@ -88,7 +88,7 @@ namespace uSync.History
                 if (historyJson is null)
                 {
                     _logger.LogWarning("Failed to serialize the history, not saving it.");
-                    return;
+                    return false;
                 }
 
                 var historyFolder = SyncHistoryService.GetHistoryFolder(_syncFileService, _hostingEnvironment);
