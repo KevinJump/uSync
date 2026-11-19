@@ -441,6 +441,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     string.Join("::", item.AllowedContentTypes.Select(x => x.Alias)?? []),
                     string.Join("::", allowed.Select(x => x.Alias) ?? []), "/Structure");
 
+                // umbraco ignores sort order when it compares allowed types, so a re-order
+                // alone doesn't make the item dirty (and it isn't saved). clearing first does.
+                item.AllowedContentTypes = [];
                 item.AllowedContentTypes = allowed.OrderBy(x => x.SortOrder);
             }
         }
