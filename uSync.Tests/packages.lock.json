@@ -2544,8 +2544,8 @@
       "usync.backoffice.management.api": {
         "type": "Project",
         "dependencies": {
-          "Umbraco.Cms.Api.Management": "[18.1.0, )",
-          "uSync.BackOffice": "[18.0.0, )"
+          "Umbraco.Cms.Api.Management": "[19.0.0-rc1, )",
+          "uSync.BackOffice": "[19.0.0, )"
         }
       },
       "usync.community.contrib": {
@@ -2565,8 +2565,8 @@
       "usync.history": {
         "type": "Project",
         "dependencies": {
-          "uSync.BackOffice": "[18.0.0, )",
-          "uSync.Backoffice.Management.Api": "[18.0.0, )"
+          "uSync.BackOffice": "[19.0.0, )",
+          "uSync.Backoffice.Management.Api": "[19.0.0, )"
         }
       },
       "Jumoo.Json": {
