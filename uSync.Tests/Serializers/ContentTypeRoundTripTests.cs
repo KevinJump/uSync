@@ -12,7 +12,6 @@ using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
-using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_15_0_0.LocalLinks;
 using Umbraco.Cms.Tests.Common.Testing;
 using Umbraco.Cms.Tests.Integration.Testing;
 
@@ -46,9 +45,6 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
 
     protected override void CustomTestSetup(IUmbracoBuilder builder)
     {
-        // the RTE mapper needs the local link processor, which the test host doesn't register.
-        new ConvertLocalLinkComposer().Compose(builder);
-
         builder.AdduSync(settings =>
         {
             settings.ExportAtStartup = "None";
@@ -101,11 +97,11 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
     private async Task<XElement> SerializeAsync(IContentType contentType)
         => (await Serializer.SerializeAsync(ContentTypeService.Get(contentType.Key), new SyncSerializerOptions())).Item;
 
-    private void UpdateSite(IContentType contentType, Action<IContentType> update)
+    private async Task UpdateSiteAsync(IContentType contentType, Action<IContentType> update)
     {
         var saved = ContentTypeService.Get(contentType.Key)!;
         update(saved);
-        ContentTypeService.Save(saved);
+        await ContentTypeService.UpdateAsync(saved, UmbConstants.Security.SuperUserKey);
     }
 
     /// <summary>
@@ -140,11 +136,11 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
         var order = 0;
         foreach (var property in contentType.PropertyGroups["content"]!.PropertyTypes!)
             property.SortOrder = order++;
-        ContentTypeService.Save(contentType);
+        await ContentTypeService.CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         var node = await SerializeAsync(contentType);
 
-        UpdateSite(contentType, site =>
+        await UpdateSiteAsync(contentType, site =>
         {
             site.PropertyTypes.First(x => x.Alias == "first").SortOrder = 2;
             site.PropertyTypes.First(x => x.Alias == "third").SortOrder = 0;
@@ -156,14 +152,14 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
         Assert.That(GroupOrder(imported, "content"), Is.EqualTo(new[] { "first", "second", "third" }));
     }
 
-    private IContentType[] CreateChildren(string prefix)
+    private async Task<IContentType[]> CreateChildrenAsync(string prefix)
     {
         var children = new[] { $"{prefix}One", $"{prefix}Two", $"{prefix}Three" }
             .Select(CreateContentType)
             .ToArray();
 
         foreach (var child in children)
-            ContentTypeService.Save(child);
+            await ContentTypeService.CreateAsync(child, UmbConstants.Security.SuperUserKey);
 
         return children;
     }
@@ -174,14 +170,14 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
     [Test]
     public async Task Import_AllowedChildren_DifferentSetAndOrder_MatchesFile()
     {
-        var children = CreateChildren("rtChildA");
+        var children = await CreateChildrenAsync("rtChildA");
         var parent = CreateContentType("rtParentA");
         parent.AllowedContentTypes = Sorted(children);
-        ContentTypeService.Save(parent);
+        await ContentTypeService.CreateAsync(parent, UmbConstants.Security.SuperUserKey);
 
         var node = await SerializeAsync(parent);
 
-        UpdateSite(parent, site => site.AllowedContentTypes = Sorted(children[2], children[0]));
+        await UpdateSiteAsync(parent, site => site.AllowedContentTypes = Sorted(children[2], children[0]));
         Assert.That(AllowedOrder(ContentTypeService.Get(parent.Key)!), Is.EqualTo(new[] { "rtChildAThree", "rtChildAOne" }));
 
         var imported = await ImportAsync(parent.Key, node);
@@ -193,14 +189,14 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
     [Test]
     public async Task Import_AllowedChildren_SameSetDifferentOrder_MatchesFile()
     {
-        var children = CreateChildren("rtChildB");
+        var children = await CreateChildrenAsync("rtChildB");
         var parent = CreateContentType("rtParentB");
         parent.AllowedContentTypes = Sorted(children);
-        ContentTypeService.Save(parent);
+        await ContentTypeService.CreateAsync(parent, UmbConstants.Security.SuperUserKey);
 
         var node = await SerializeAsync(parent);
 
-        UpdateSite(parent, site => site.AllowedContentTypes = Sorted(children[2], children[1], children[0]));
+        await UpdateSiteAsync(parent, site => site.AllowedContentTypes = Sorted(children[2], children[1], children[0]));
         Assert.That(AllowedOrder(ContentTypeService.Get(parent.Key)!), Is.EqualTo(new[] { "rtChildBThree", "rtChildBTwo", "rtChildBOne" }));
 
         var imported = await ImportAsync(parent.Key, node);
@@ -217,7 +213,7 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
         var property = TextBox("title");
         property.Description = description;
         contentType.AddPropertyType(property, "content", "Content");
-        ContentTypeService.Save(contentType);
+        await ContentTypeService.CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         var node = await SerializeAsync(contentType);
 
@@ -244,7 +240,7 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
         property.ValidationRegExp = "^[a-z]+$";
         property.ValidationRegExpMessage = regExMessage;
         contentType.AddPropertyType(property, "content", "Content");
-        ContentTypeService.Save(contentType);
+        await ContentTypeService.CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         return (contentType, await SerializeAsync(contentType));
     }
@@ -254,7 +250,7 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
     {
         var (contentType, node) = await SetupValidationAsync("file mandatory", "file regex");
 
-        UpdateSite(contentType, site =>
+        await UpdateSiteAsync(contentType, site =>
         {
             var property = site.PropertyTypes.First(x => x.Alias == "code");
             property.MandatoryMessage = "site mandatory";
@@ -278,7 +274,7 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
     {
         var (contentType, node) = await SetupValidationAsync(null, null);
 
-        UpdateSite(contentType, site =>
+        await UpdateSiteAsync(contentType, site =>
         {
             var property = site.PropertyTypes.First(x => x.Alias == "code");
             property.MandatoryMessage = "site mandatory";
@@ -303,11 +299,11 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
         var property = TextBox("title");
         property.LabelOnTop = fileValue;
         contentType.AddPropertyType(property, "content", "Content");
-        ContentTypeService.Save(contentType);
+        await ContentTypeService.CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         var node = await SerializeAsync(contentType);
 
-        UpdateSite(contentType, site => site.PropertyTypes.First(x => x.Alias == "title").LabelOnTop = !fileValue);
+        await UpdateSiteAsync(contentType, site => site.PropertyTypes.First(x => x.Alias == "title").LabelOnTop = !fileValue);
 
         var imported = await ImportAsync(contentType.Key, node);
 
@@ -323,11 +319,11 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
         var contentType = CreateContentType("rtTemplatesAdd");
         contentType.AllowedTemplates = [main, extra];
         contentType.SetDefaultTemplate(main);
-        ContentTypeService.Save(contentType);
+        await ContentTypeService.CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         var node = await SerializeAsync(contentType);
 
-        UpdateSite(contentType, site => site.AllowedTemplates = [main]);
+        await UpdateSiteAsync(contentType, site => site.AllowedTemplates = [main]);
         Assert.That(AllowedTemplates(ContentTypeService.Get(contentType.Key)!), Is.EqualTo(new[] { "rtAddMain" }));
 
         var imported = await ImportAsync(contentType.Key, node);
@@ -344,11 +340,11 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
         var contentType = CreateContentType("rtTemplatesRemove");
         contentType.AllowedTemplates = [main];
         contentType.SetDefaultTemplate(main);
-        ContentTypeService.Save(contentType);
+        await ContentTypeService.CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         var node = await SerializeAsync(contentType);
 
-        UpdateSite(contentType, site => site.AllowedTemplates = [main, extra]);
+        await UpdateSiteAsync(contentType, site => site.AllowedTemplates = [main, extra]);
         Assert.That(AllowedTemplates(ContentTypeService.Get(contentType.Key)!), Is.EqualTo(new[] { "rtRemoveExtra", "rtRemoveMain" }));
 
         var imported = await ImportAsync(contentType.Key, node);
@@ -365,12 +361,12 @@ public class ContentTypeRoundTripTests : UmbracoIntegrationTest
         var contentType = CreateContentType("rtTemplatesDefault");
         contentType.AllowedTemplates = [first, second];
         contentType.SetDefaultTemplate(second);
-        ContentTypeService.Save(contentType);
+        await ContentTypeService.CreateAsync(contentType, UmbConstants.Security.SuperUserKey);
 
         var node = await SerializeAsync(contentType);
         Assert.That(node.Element("Info")!.Element("DefaultTemplate")!.Value, Is.EqualTo("rtDefaultSecond"));
 
-        UpdateSite(contentType, site => site.SetDefaultTemplate(first));
+        await UpdateSiteAsync(contentType, site => site.SetDefaultTemplate(first));
         Assert.That(ContentTypeService.Get(contentType.Key)!.DefaultTemplate!.Alias, Is.EqualTo("rtDefaultFirst"));
 
         var imported = await ImportAsync(contentType.Key, node);
