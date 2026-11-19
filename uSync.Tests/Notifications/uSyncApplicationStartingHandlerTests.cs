@@ -158,10 +158,11 @@ public class uSyncApplicationStartingHandlerTests : UmbracoIntegrationTest
     }
 
     [Test]
-    public async Task StartupImport_KeepsOnceFile_WhenImportHasErrors()
+    public async Task StartupImport_KeepsOnceFile_WhenImportHasErrorsAndKeepIsOn()
     {
         var settings = GetRequiredService<ISyncConfigService>().Settings;
         settings.ImportAtStartup = "Settings";
+        settings.KeepOnceFileOnErrors = true;
         var workingFolder = CreateWorkingFolder(onceFile: true, stopFile: false);
 
         var syncService = MockStartupImport(FailedAction());
@@ -178,6 +179,22 @@ public class uSyncApplicationStartingHandlerTests : UmbracoIntegrationTest
         settings.ImportAtStartup = "Settings";
         settings.KeepOnceFileOnErrors = false;
         var workingFolder = CreateWorkingFolder(onceFile: true, stopFile: false);
+
+        var syncService = MockStartupImport(FailedAction());
+        await StartAsync(syncService.Object);
+
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.OnceFile)), Is.False);
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.StopFile)), Is.True);
+    }
+
+    [Test]
+    public async Task StartupImport_ReplacesOnceFile_WhenImportHasErrorsWithDefaultSettings()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ImportAtStartup = "Settings";
+        var workingFolder = CreateWorkingFolder(onceFile: true, stopFile: false);
+
+        Assert.That(settings.KeepOnceFileOnErrors, Is.False);
 
         var syncService = MockStartupImport(FailedAction());
         await StartAsync(syncService.Object);
