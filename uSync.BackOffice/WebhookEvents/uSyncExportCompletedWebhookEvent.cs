@@ -23,5 +23,9 @@ public class uSyncExportCompletedWebhookEvent :
 
     /// <inheritdoc/>
     public override string Alias => "uSync Export Completed";
+
+    /// <inheritdoc/>
+    public override object? ConvertNotificationToRequestPayload(uSyncExportCompletedNotification notification)
+        => uSyncBulkWebhookPayload.FromNotification(notification);
 }
 
