@@ -120,6 +120,18 @@ internal class WebhookPayloadSerializationTests
     }
 
     [Test]
+    public void ImportCompleted_WithNeverThrownException_Serializes()
+    {
+        var notification = new uSyncImportCompletedNotification(
+            [CreateFailAction(new Exception("not thrown"))], "settings");
+        var webhookEvent = new uSyncImportCompletedWebhookEvent(_firingService, _webhookService, _webhookSettings, _serverRoleAccessor);
+
+        var json = Serialize(webhookEvent.ConvertNotificationToRequestPayload(notification));
+
+        AssertCompletedJson(json, "not thrown");
+    }
+
+    [Test]
     public void ExportCompleted_WithThrownException_Serializes()
     {
         var notification = new uSyncExportCompletedNotification([CreateFailAction(GetThrownException())], "settings");
@@ -145,7 +157,7 @@ internal class WebhookPayloadSerializationTests
             Assert.That(json, Does.Contain("\"success\":true"));
             Assert.That(json, Does.Contain("\"change\":\"Import\""));
             Assert.That(json, Does.Contain("\"exceptionMessage\":null"));
-            Assert.That(json, Does.Not.Contain("\"exception\":"));
+            Assert.That(json, Does.Contain("\"exception\":null"));
         });
     }
 
@@ -215,8 +227,10 @@ internal class WebhookPayloadSerializationTests
             Assert.That(json, Does.Contain("\"change\":\"Fail\""));
             Assert.That(json, Does.Contain("\"name\":\"bad\""));
             Assert.That(json, Does.Contain("\"key\":"));
+            Assert.That(json, Does.Contain($"\"exception\":{{\"message\":\"{exceptionMessage}\"}}"));
             Assert.That(json, Does.Not.Contain("targetSite"));
-            Assert.That(json, Does.Not.Contain("\"exception\":"));
+            Assert.That(json, Does.Not.Contain("stackTrace"));
+            Assert.That(json, Does.Not.Contain("innerException"));
         });
     }
 }

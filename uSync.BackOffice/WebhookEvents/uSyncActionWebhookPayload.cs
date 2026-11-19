@@ -39,6 +39,11 @@ public class uSyncActionWebhookPayload
     public string? ExceptionMessage { get; set; }
 
     /// <summary>
+    ///  the exception encountered during the action (message only)
+    /// </summary>
+    public uSyncExceptionWebhookPayload? Exception { get; set; }
+
+    /// <summary>
     ///  type of change performed 
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -90,6 +95,9 @@ public class uSyncActionWebhookPayload
             ItemType = action.ItemType,
             Message = action.Message,
             ExceptionMessage = action.Exception?.Message,
+            Exception = action.Exception is null
+                ? null
+                : new uSyncExceptionWebhookPayload { Message = action.Exception.Message },
             Change = action.Change,
             FileName = action.FileName,
             Name = action.Name,
