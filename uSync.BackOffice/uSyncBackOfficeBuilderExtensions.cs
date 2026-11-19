@@ -23,6 +23,7 @@ using uSync.BackOffice.Legacy;
 using uSync.BackOffice.Notifications;
 using uSync.BackOffice.Preview;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.Startup;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Handlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
@@ -98,6 +99,7 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.Services.AdduSyncSignalR();
 
         builder.AddSyncTracker();
+        builder.Services.AddSingleton<ISyncStartupStatusService, SyncStartupStatusService>();
 
         builder.Services.AddTransient<ISyncLegacyService, SyncLegacyService>();
 

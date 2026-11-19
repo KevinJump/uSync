@@ -17,6 +17,7 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.Startup;
 using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.Notifications;
@@ -35,6 +36,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
     private readonly ISyncService _uSyncService;
     private readonly ILongRunningOperationService _longRunningOperationService;
     private readonly IServerRegistrationService _serverRegistrationService;
+    private readonly ISyncStartupStatusService _startupStatusService;
 
     /// <summary>
     /// Generate a new uSyncApplicationStartingHandler object
@@ -48,7 +50,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         ISyncFileService syncFileService,
         ISyncService uSyncService,
         ILongRunningOperationService longRunningOperationService,
-        IServerRegistrationService serverRegistrationService)
+        IServerRegistrationService serverRegistrationService,
+        ISyncStartupStatusService startupStatusService)
     {
         _runtimeState = runtimeState;
         _serverRegistrar = serverRegistrar;
@@ -63,6 +66,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         _uSyncService = uSyncService;
         _longRunningOperationService = longRunningOperationService;
         _serverRegistrationService = serverRegistrationService;
+        _startupStatusService = startupStatusService;
     }
 
     /// <summary>
@@ -116,7 +120,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
             _logger.LogInformation("uSync: Running startup in background");
 
         var enqueueAttempt = await _longRunningOperationService.RunAsync(
-            "uSync:Startup",
+            SyncStartupStatusService.StartupOperationType,
             _ => InituSyncAsync(),
             allowConcurrentExecution: false,
             runInBackground: runInBackground);
@@ -168,6 +172,10 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
     {
         var sw = Stopwatch.StartNew();
 
+        var importAtStartup = IsImportAtStartupEnabled();
+        DateTime? importStartedUtc = null;
+        var finalStatusWritten = false;
+
         try
         {
             using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
@@ -190,7 +198,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
                     _uSyncService.StartupExportAsync(_uSyncConfig.GetWorkingFolder(), options).Wait();
                 }
 
-                if (IsImportAtStartupEnabled())
+                if (importAtStartup)
                 {
                     if (_logger.IsEnabled(LogLevel.Information))
                         _logger.LogInformation("uSync: Running Import at startup {group}", _uSyncConfig.Settings.ImportAtStartup);
@@ -201,10 +209,21 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
 
                     if (ShouldProceedWithImport(hasStopFile, hasOnceFile))
                     {
+                        importStartedUtc = DateTime.UtcNow;
+                        await _startupStatusService.SetAsync(new SyncStartupImportStatus
+                        {
+                            State = SyncStartupImportState.Running,
+                            StartedUtc = importStartedUtc
+                        });
+
                         var results = await _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
                         {
                             Group = _uSyncConfig.Settings.ImportAtStartup
                         });
+
+                        await _startupStatusService.SetAsync(
+                            SyncStartupImportStatus.FromResults(results, importStartedUtc.Value, DateTime.UtcNow));
+                        finalStatusWritten = true;
 
                         _logger.LogImportErrors(results, "Startup import");
 
@@ -214,13 +233,32 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
                     {
                         if (_logger.IsEnabled(LogLevel.Information))
                             _logger.LogInformation("Startup Import blocked by {stopFile} file", _uSyncConfig.Settings.StopFile);
+
+                        await _startupStatusService.SetAsync(new SyncStartupImportStatus { State = SyncStartupImportState.Blocked });
+                        finalStatusWritten = true;
                     }
+                }
+                else
+                {
+                    await _startupStatusService.SetAsync(new SyncStartupImportStatus { State = SyncStartupImportState.NotConfigured });
+                    finalStatusWritten = true;
                 }
             }
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "uSync: Error during startup {message}", ex.Message);
+
+            // the import the pipeline is waiting for did not finish.
+            if (importAtStartup && finalStatusWritten is false)
+            {
+                await _startupStatusService.SetAsync(new SyncStartupImportStatus
+                {
+                    State = SyncStartupImportState.Failed,
+                    StartedUtc = importStartedUtc,
+                    CompletedUtc = DateTime.UtcNow
+                });
+            }
         }
         finally
         {

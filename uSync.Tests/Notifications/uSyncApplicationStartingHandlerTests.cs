@@ -25,6 +25,7 @@ using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Notifications;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.Startup;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Handlers;
 using uSync.BackOffice.SyncHandlers.Models;
@@ -155,6 +156,136 @@ public class uSyncApplicationStartingHandlerTests : UmbracoIntegrationTest
         await StartAsync();
 
         Assert.That(ExportedLanguageCodes(), Is.Empty);
+    }
+
+    [Test]
+    public async Task StartupStatus_IsNotConfigured_WhenImportAtStartupIsOff()
+    {
+        await StartAsync();
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.That(status.State, Is.EqualTo(SyncStartupImportState.NotConfigured));
+    }
+
+    [Test]
+    public async Task StartupStatus_IsCompleted_WhenImportSucceeds()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ExportAtStartup = "Settings";
+        Directory.CreateDirectory(_exportFolder);
+        await StartAsync();
+        Assert.That(ExportedLanguageCodes(), Does.Contain("en-GB"));
+
+        settings.ExportAtStartup = "None";
+        settings.ImportAtStartup = "Settings";
+        await StartAsync();
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.Completed));
+            Assert.That(status.StartedUtc, Is.Not.Null);
+            Assert.That(status.CompletedUtc, Is.Not.Null);
+            Assert.That(status.CompletedUtc, Is.GreaterThanOrEqualTo(status.StartedUtc));
+            Assert.That(status.ItemsProcessed, Is.GreaterThan(0));
+            Assert.That(status.Errors, Is.EqualTo(0));
+            Assert.That(status.IsStale, Is.False);
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_IsBlocked_WhenStopFileExists()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ImportAtStartup = "Settings";
+        Directory.CreateDirectory(_exportFolder);
+        var stopFile = Path.Combine(_exportFolder, settings.StopFile);
+        System.IO.File.WriteAllText(stopFile, "stop");
+
+        await StartAsync();
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.Blocked));
+            Assert.That(System.IO.File.Exists(stopFile), Is.True);
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_IsCompletedWithErrors_WhenAnItemFails()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ExportAtStartup = "Settings";
+        Directory.CreateDirectory(_exportFolder);
+        await StartAsync();
+
+        // turn the exported language into one with a culture that can't exist.
+        var languageFile = Directory.GetFiles(_exportFolder, "*.config", SearchOption.AllDirectories)
+            .Single(path => XDocument.Load(path).Root?.Element("IsoCode")?.Value == "en-GB");
+        var node = XDocument.Load(languageFile);
+        node.Root!.SetAttributeValue("Key", Guid.NewGuid().ToString());
+        node.Root!.SetAttributeValue("Alias", "not a culture!");
+        node.Root!.Element("IsoCode")!.Value = "not a culture!";
+        node.Save(Path.Combine(Path.GetDirectoryName(languageFile)!, "not-a-culture.config"));
+
+        settings.ExportAtStartup = "None";
+        settings.ImportAtStartup = "Settings";
+        await StartAsync();
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.CompletedWithErrors));
+            Assert.That(status.Errors, Is.GreaterThan(0));
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_RunningWithNoActiveOperation_IsStale()
+    {
+        var service = GetRequiredService<ISyncStartupStatusService>();
+        await service.SetAsync(new SyncStartupImportStatus
+        {
+            State = SyncStartupImportState.Running,
+            StartedUtc = DateTime.UtcNow
+        });
+
+        var status = await service.GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.Running));
+            Assert.That(status.IsStale, Is.True);
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_IsNone_WhenNothingStored()
+    {
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.None));
+            Assert.That(status.StartedUtc, Is.Null);
+            Assert.That(status.CompletedUtc, Is.Null);
+            Assert.That(status.ItemsProcessed, Is.EqualTo(0));
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_IsNone_WhenStoredValueIsNotJson()
+    {
+        GetRequiredService<IKeyValueService>().SetValue("uSync.StartupImport.Status", "not json");
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.That(status.State, Is.EqualTo(SyncStartupImportState.None));
     }
 
     [Test]
