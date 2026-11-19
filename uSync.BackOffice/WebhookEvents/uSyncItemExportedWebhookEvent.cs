@@ -25,4 +25,8 @@ public class uSyncItemExportedWebhookEvent :
 
     /// <inheritdoc/>
     public override string Alias => "uSyncItemExported";
+
+    /// <inheritdoc/>
+    public override object? ConvertNotificationToRequestPayload(uSyncExportedItemNotification notification)
+        => uSyncItemWebhookPayload.FromItem(notification.Item, notification.Change);
 }
