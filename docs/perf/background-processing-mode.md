@@ -21,6 +21,10 @@ connected — including reattaching after a page reload via
 `GET usync/api/v1/Running`. The user is free to navigate elsewhere in the
 backoffice while the sync runs.
 
+The startup import (`BackgroundStartup`, or `Background` mode) has its own
+status endpoint for deployment pipelines, `GET usync/api/v1/StartupStatus` -
+see [Startup import status](../startup-import-status.md).
+
 `allowConcurrentExecution: false` is used per action type (`uSync:Report`,
 `uSync:Import`, `uSync:Export`), so two background runs of the same action
 can't run concurrently — a second attempt is rejected rather than silently
