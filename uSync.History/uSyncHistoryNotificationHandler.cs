@@ -5,6 +5,7 @@ using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Security;
 
 using uSync.BackOffice;
+using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core.Extensions;
 using uSync.History.Service;
@@ -18,6 +19,7 @@ namespace uSync.History
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ISyncFileService _syncFileService;
         private readonly ISyncHistoryService _syncHistoryService;
+        private readonly ISyncConfigService _syncConfigService;
         private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
         private readonly ILogger<uSyncHistoryNotificationHandler> _logger;
 
@@ -26,13 +28,15 @@ namespace uSync.History
             IBackOfficeSecurityAccessor backOfficeSecurityAccessor,
             IHostingEnvironment hostingEnvironment,
             ILogger<uSyncHistoryNotificationHandler> logger,
-            ISyncHistoryService syncHistoryService)
+            ISyncHistoryService syncHistoryService,
+            ISyncConfigService syncConfigService)
         {
             _syncFileService = syncFileService;
             _backOfficeSecurityAccessor = backOfficeSecurityAccessor;
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
             _syncHistoryService = syncHistoryService;
+            _syncConfigService = syncConfigService;
         }
 
         public async Task HandleAsync(uSyncImportCompletedNotification notification, CancellationToken cancellationToken)
@@ -45,7 +49,8 @@ namespace uSync.History
 
             if (changeActions.Any())
             {
-                await SaveActions(changeActions, "Import", notification.Actions.Count());
+                if (await SaveActions(changeActions, "Import", notification.Actions.Count()))
+                    PruneHistory();
             }
         }
 
@@ -59,11 +64,12 @@ namespace uSync.History
 
             if (changeActions.Any())
             {
-                await SaveActions(changeActions, "Export", notification.Actions.Count());
+                if (await SaveActions(changeActions, "Export", notification.Actions.Count()))
+                    PruneHistory();
             }
         }
 
-        private async Task SaveActions(IEnumerable<uSyncAction> actions, string method, int total)
+        private async Task<bool> SaveActions(IEnumerable<uSyncAction> actions, string method, int total)
         {
             try
             {
@@ -79,16 +85,35 @@ namespace uSync.History
 
                 var historyJson = historyInfo.SerializeJsonString(true);
 
-                var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
-                var historyFile = Path.Combine(rootFolder, "uSync", "history", DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".json");
+                var historyFolder = SyncHistoryService.GetHistoryFolder(_syncFileService, _hostingEnvironment);
+                var historyFile = Path.Combine(historyFolder, DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".json");
 
                 _syncFileService.CreateFoldersForFile(historyFile);
 
                 await _syncFileService.SaveFileAsync(historyFile, historyJson);
+                return true;
             }
             catch(Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to save history.");
+                return false;
+            }
+        }
+
+        private void PruneHistory()
+        {
+            try
+            {
+                var settings = _syncConfigService.Settings;
+                SyncHistoryRetention.Prune(
+                    SyncHistoryService.GetHistoryFolder(_syncFileService, _hostingEnvironment),
+                    settings.HistoryMaxAgeDays,
+                    settings.HistoryMaxEntries,
+                    DateTime.UtcNow);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to prune history.");
             }
         }
     }

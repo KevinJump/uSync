@@ -65,8 +65,14 @@ internal class SyncHistoryService : ISyncHistoryService
     ///  returns the full path to the history folder. 
     /// </summary>
     private string GetHistoryFolder()
+        => GetHistoryFolder(_syncFileService, _hostingEnvironment);
+
+    /// <summary>
+    ///  the full path to the history folder, shared by everything that reads or writes history.
+    /// </summary>
+    internal static string GetHistoryFolder(ISyncFileService syncFileService, IHostingEnvironment hostingEnvironment)
     {
-        var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
+        var rootFolder = syncFileService.GetAbsPath(hostingEnvironment.LocalTempPath);
         var historyFolder = Path.Combine(rootFolder, "uSync", "history");
         return historyFolder;
     }
