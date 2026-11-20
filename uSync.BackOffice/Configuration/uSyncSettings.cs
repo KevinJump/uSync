@@ -59,11 +59,11 @@ public class uSyncSettings
     public bool IgnoreStopIfOnceExists { get; set; } = false;
 
     /// <summary>
-    ///  When enabled, a startup import that reports errors leaves the once file in place, so the import runs again at the next startup.
-    ///  When off (the default), the once file is always replaced with the stop file after the startup import.
+    ///  When enabled (the default), a startup import that reports errors leaves the once file in place, so the import runs again at the next startup.
+    ///  When off, the once file is always replaced with the stop file after the startup import.
     /// </summary>
-    [DefaultValue(false)]
-    public bool KeepOnceFileOnErrors { get; set; } = false;
+    [DefaultValue(true)]
+    public bool KeepOnceFileOnErrors { get; set; } = true;
 
     /// <summary>
     ///  lock specific types at root so they can't be changed in child sites. 

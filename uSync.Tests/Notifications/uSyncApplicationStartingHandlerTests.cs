@@ -319,19 +319,19 @@ public class uSyncApplicationStartingHandlerTests : UmbracoIntegrationTest
     }
 
     [Test]
-    public async Task StartupImport_ReplacesOnceFile_WhenImportHasErrorsWithDefaultSettings()
+    public async Task StartupImport_KeepsOnceFile_WhenImportHasErrorsWithDefaultSettings()
     {
         var settings = GetRequiredService<ISyncConfigService>().Settings;
         settings.ImportAtStartup = "Settings";
         var workingFolder = CreateWorkingFolder(onceFile: true, stopFile: false);
 
-        Assert.That(settings.KeepOnceFileOnErrors, Is.False);
+        Assert.That(settings.KeepOnceFileOnErrors, Is.True);
 
         var syncService = MockStartupImport(FailedAction());
         await StartAsync(syncService.Object);
 
-        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.OnceFile)), Is.False);
-        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.StopFile)), Is.True);
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.OnceFile)), Is.True);
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.StopFile)), Is.False);
     }
 
     [Test]
