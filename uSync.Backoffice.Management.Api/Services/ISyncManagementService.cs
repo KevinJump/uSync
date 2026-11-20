@@ -58,4 +58,14 @@ public interface ISyncManagementService
     /// </remarks>
     Task<SyncRunningOperationResponse> GetRunningOperationAsync()
         => Task.FromResult(new SyncRunningOperationResponse());
+
+    /// <summary>
+    ///  get the status of the last import at startup.
+    /// </summary>
+    /// <remarks>
+    ///  Added after the initial release of this interface - the default reports
+    ///  nothing recorded, so existing implementations keep compiling.
+    /// </remarks>
+    Task<SyncStartupStatusResponse> GetStartupStatusAsync()
+        => Task.FromResult(new SyncStartupStatusResponse { State = "None" });
 }
