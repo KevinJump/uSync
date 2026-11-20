@@ -9,6 +9,8 @@ using System.Xml.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Moq;
+
 using NUnit.Framework;
 
 using Umbraco.Cms.Core;
@@ -23,8 +25,11 @@ using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Notifications;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.Startup;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Handlers;
+using uSync.BackOffice.SyncHandlers.Models;
+using uSync.Core;
 using uSync.Core.Serialization;
 using uSync.Core.Serialization.Serializers;
 
@@ -153,12 +158,262 @@ public class uSyncApplicationStartingHandlerTests : UmbracoIntegrationTest
         Assert.That(ExportedLanguageCodes(), Is.Empty);
     }
 
-    private Task StartAsync()
+    [Test]
+    public async Task StartupStatus_IsNotConfigured_WhenImportAtStartupIsOff()
     {
-        var handler = ActivatorUtilities.CreateInstance<uSyncApplicationStartingHandler>(Services);
+        await StartAsync();
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.That(status.State, Is.EqualTo(SyncStartupImportState.NotConfigured));
+    }
+
+    [Test]
+    public async Task StartupStatus_IsCompleted_WhenImportSucceeds()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ExportAtStartup = "Settings";
+        Directory.CreateDirectory(_exportFolder);
+        await StartAsync();
+        Assert.That(ExportedLanguageCodes(), Does.Contain("en-GB"));
+
+        settings.ExportAtStartup = "None";
+        settings.ImportAtStartup = "Settings";
+        await StartAsync();
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.Completed));
+            Assert.That(status.StartedUtc, Is.Not.Null);
+            Assert.That(status.CompletedUtc, Is.Not.Null);
+            Assert.That(status.CompletedUtc, Is.GreaterThanOrEqualTo(status.StartedUtc));
+            Assert.That(status.ItemsProcessed, Is.GreaterThan(0));
+            Assert.That(status.Errors, Is.EqualTo(0));
+            Assert.That(status.IsStale, Is.False);
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_IsBlocked_WhenStopFileExists()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ImportAtStartup = "Settings";
+        Directory.CreateDirectory(_exportFolder);
+        var stopFile = Path.Combine(_exportFolder, settings.StopFile);
+        System.IO.File.WriteAllText(stopFile, "stop");
+
+        await StartAsync();
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.Blocked));
+            Assert.That(System.IO.File.Exists(stopFile), Is.True);
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_IsCompletedWithErrors_WhenAnItemFails()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ExportAtStartup = "Settings";
+        Directory.CreateDirectory(_exportFolder);
+        await StartAsync();
+
+        // turn the exported language into one with a culture that can't exist.
+        var languageFile = Directory.GetFiles(_exportFolder, "*.config", SearchOption.AllDirectories)
+            .Single(path => XDocument.Load(path).Root?.Element("IsoCode")?.Value == "en-GB");
+        var node = XDocument.Load(languageFile);
+        node.Root!.SetAttributeValue("Key", Guid.NewGuid().ToString());
+        node.Root!.SetAttributeValue("Alias", "not a culture!");
+        node.Root!.Element("IsoCode")!.Value = "not a culture!";
+        node.Save(Path.Combine(Path.GetDirectoryName(languageFile)!, "not-a-culture.config"));
+
+        settings.ExportAtStartup = "None";
+        settings.ImportAtStartup = "Settings";
+        await StartAsync();
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.CompletedWithErrors));
+            Assert.That(status.Errors, Is.GreaterThan(0));
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_RunningWithNoActiveOperation_IsStale()
+    {
+        var service = GetRequiredService<ISyncStartupStatusService>();
+        await service.SetAsync(new SyncStartupImportStatus
+        {
+            State = SyncStartupImportState.Running,
+            StartedUtc = DateTime.UtcNow
+        });
+
+        var status = await service.GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.Running));
+            Assert.That(status.IsStale, Is.True);
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_IsNone_WhenNothingStored()
+    {
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.State, Is.EqualTo(SyncStartupImportState.None));
+            Assert.That(status.StartedUtc, Is.Null);
+            Assert.That(status.CompletedUtc, Is.Null);
+            Assert.That(status.ItemsProcessed, Is.EqualTo(0));
+        });
+    }
+
+    [Test]
+    public async Task StartupStatus_IsNone_WhenStoredValueIsNotJson()
+    {
+        GetRequiredService<IKeyValueService>().SetValue("uSync.StartupImport.Status", "not json");
+
+        var status = await GetRequiredService<ISyncStartupStatusService>().GetAsync();
+
+        Assert.That(status.State, Is.EqualTo(SyncStartupImportState.None));
+    }
+
+    [Test]
+    public async Task StartupImport_KeepsOnceFile_WhenImportHasErrorsAndKeepIsOn()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ImportAtStartup = "Settings";
+        settings.KeepOnceFileOnErrors = true;
+        var workingFolder = CreateWorkingFolder(onceFile: true, stopFile: false);
+
+        var syncService = MockStartupImport(FailedAction());
+        await StartAsync(syncService.Object);
+
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.OnceFile)), Is.True);
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.StopFile)), Is.False);
+    }
+
+    [Test]
+    public async Task StartupImport_ReplacesOnceFile_WhenImportHasErrorsAndKeepIsOff()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ImportAtStartup = "Settings";
+        settings.KeepOnceFileOnErrors = false;
+        var workingFolder = CreateWorkingFolder(onceFile: true, stopFile: false);
+
+        var syncService = MockStartupImport(FailedAction());
+        await StartAsync(syncService.Object);
+
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.OnceFile)), Is.False);
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.StopFile)), Is.True);
+    }
+
+    [Test]
+    public async Task StartupImport_ReplacesOnceFile_WhenImportHasErrorsWithDefaultSettings()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ImportAtStartup = "Settings";
+        var workingFolder = CreateWorkingFolder(onceFile: true, stopFile: false);
+
+        Assert.That(settings.KeepOnceFileOnErrors, Is.False);
+
+        var syncService = MockStartupImport(FailedAction());
+        await StartAsync(syncService.Object);
+
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.OnceFile)), Is.False);
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.StopFile)), Is.True);
+    }
+
+    [Test]
+    public async Task StartupImport_ReplacesOnceFile_WhenImportHasNoErrors()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ImportAtStartup = "Settings";
+        var workingFolder = CreateWorkingFolder(onceFile: true, stopFile: false);
+
+        var syncService = MockStartupImport(
+            uSyncAction.SetAction(true, "en-GB", change: ChangeType.Import, filename: "languages/en-gb.config"));
+        await StartAsync(syncService.Object);
+
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.OnceFile)), Is.False);
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.StopFile)), Is.True);
+    }
+
+    [Test]
+    public async Task StartupImport_IsBlocked_WhenStopFileExistsWithoutOnceFile()
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        settings.ImportAtStartup = "Settings";
+        var workingFolder = CreateWorkingFolder(onceFile: false, stopFile: true);
+
+        var syncService = MockStartupImport(FailedAction());
+        await StartAsync(syncService.Object);
+
+        syncService.Verify(x => x.StartupImportAsync(
+            It.IsAny<string[]>(), It.IsAny<bool>(), It.IsAny<SyncHandlerOptions>(), It.IsAny<uSyncCallbacks>()),
+            Times.Never);
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.OnceFile)), Is.False);
+        Assert.That(System.IO.File.Exists(Path.Combine(workingFolder, settings.StopFile)), Is.True);
+    }
+
+    [Test]
+    public void DescribeErrors_ListsAtMostTenItems_AndCountsTheRest()
+    {
+        var actions = Enumerable.Range(1, 12)
+            .Select(x => uSyncAction.SetAction(false, $"item{x}", change: ChangeType.Fail, filename: x == 1 ? null : $"file{x}.config"))
+            .Append(uSyncAction.SetAction(true, "ok", change: ChangeType.Import))
+            .ToList();
+
+        var description = actions.DescribeErrors();
+
+        Assert.That(description, Does.StartWith("item1 ("));
+        Assert.That(description, Does.Contain("file10.config"));
+        Assert.That(description, Does.Not.Contain("file11.config"));
+        Assert.That(description, Does.Not.Contain("ok"));
+        Assert.That(description, Does.EndWith("(and 2 more)"));
+    }
+
+    private Task StartAsync(params object[] parameters)
+    {
+        var handler = ActivatorUtilities.CreateInstance<uSyncApplicationStartingHandler>(Services, parameters);
         return handler.HandleAsync(
             new UmbracoApplicationStartingNotification(RuntimeLevel.Run, false),
             CancellationToken.None);
+    }
+
+    private static uSyncAction FailedAction()
+        => uSyncAction.SetAction(false, "broken", change: ChangeType.Fail, message: "failed", filename: "languages/broken.config");
+
+    private static Mock<ISyncService> MockStartupImport(params uSyncAction[] results)
+    {
+        var syncService = new Mock<ISyncService>();
+        syncService
+            .Setup(x => x.StartupImportAsync(It.IsAny<string[]>(), It.IsAny<bool>(), It.IsAny<SyncHandlerOptions>(), It.IsAny<uSyncCallbacks>()))
+            .ReturnsAsync(results);
+        return syncService;
+    }
+
+    private string CreateWorkingFolder(bool onceFile, bool stopFile)
+    {
+        var settings = GetRequiredService<ISyncConfigService>().Settings;
+        var workingFolder = GetRequiredService<ISyncFileService>()
+            .GetAbsPath(GetRequiredService<ISyncConfigService>().GetWorkingFolder());
+        Directory.CreateDirectory(workingFolder);
+
+        if (onceFile) System.IO.File.WriteAllText(Path.Combine(workingFolder, settings.OnceFile), "once");
+        if (stopFile) System.IO.File.WriteAllText(Path.Combine(workingFolder, settings.StopFile), "stop");
+
+        return workingFolder;
     }
 
     private string[] ExportedLanguageCodes()

@@ -6,6 +6,7 @@ import {
 	css,
 	state,
 	nothing,
+	repeat,
 } from '@umbraco-cms/backoffice/external/lit';
 import { ChangeType, USyncActionView } from '@jumoo/uSync';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
@@ -15,6 +16,8 @@ import {
 } from '@umbraco-cms/backoffice/modal';
 import { USYNC_DETAILS_MODAL, uSyncPreviewLabels, uSyncPreviewSource } from '@jumoo/uSync';
 import { uSyncShowDetailEvent } from './events';
+import { debounce } from '@umbraco-cms/backoffice/utils';
+import type { UUIInputElement } from '@umbraco-cms/backoffice/external/uui';
 
 @customElement('usync-results')
 export class uSyncResultsView extends UmbElementMixin(LitElement) {
@@ -56,8 +59,65 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 	@state()
 	changeCount = 0;
 
+	@state()
+	private _filtersOpen: boolean = false;
+
+	/**
+	 * the change types picked in the filter row, empty means show every type.
+	 */
+	@state()
+	private _changeTypes: Set<string> = new Set();
+
+	@state()
+	private _search: string = '';
+
 	#toggleShowAll() {
 		this.showAll = !this.showAll;
+
+		// no-change items are hidden without 'show all', so a no-change filter can't match anything.
+		if (!this.showAll && this._changeTypes.has(ChangeType.NO_CHANGE)) {
+			this.#toggleChangeType(ChangeType.NO_CHANGE);
+		}
+	}
+
+	#toggleFilters() {
+		this._filtersOpen = !this._filtersOpen;
+	}
+
+	#toggleChangeType(change: string) {
+		const changeTypes = new Set(this._changeTypes);
+		if (!changeTypes.delete(change)) changeTypes.add(change);
+		this._changeTypes = changeTypes;
+	}
+
+	#setSearch = debounce((value: string) => {
+		this._search = value;
+	}, 300);
+
+	#onSearchInput(e: InputEvent) {
+		this.#setSearch(((e.target as UUIInputElement).value as string) ?? '');
+	}
+
+	#hasFilters() {
+		if (this.hideResultBar) return false;
+		return this._changeTypes.size > 0 || this._search.trim() !== '';
+	}
+
+	/**
+	 * the results that pass the change type and search filters. the
+	 * no-change / 'show all' rule isn't applied here, it stays where
+	 * the rows are shown.
+	 */
+	#filteredResults() {
+		const results = this.results || [];
+		if (!this.#hasFilters()) return results;
+
+		const search = this._search.trim().toLowerCase();
+		return results.filter(
+			(r) =>
+				(this._changeTypes.size === 0 || this._changeTypes.has(r.change)) &&
+				(search === '' || (r.name ?? '').toLowerCase().includes(search)),
+		);
 	}
 
 	async #showDetail(e: uSyncShowDetailEvent) {
@@ -90,7 +150,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 	 * can step through them. exports have no details, so are left out.
 	 */
 	#visibleItems() {
-		const groups = this.groupBy(this.results || [], (result) => result.itemType);
+		const groups = this.groupBy(this.#filteredResults(), (result) => result.itemType);
 		return Object.values(groups)
 			.flat()
 			.filter(
@@ -113,50 +173,138 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		this.changeCount =
 			this.results?.filter((r) => r.change !== ChangeType.NO_CHANGE).length ?? 0;
 
-		const groups = this.groupBy(this.results || [], (result) => result.itemType);
-		const groupsHtml = [];
+		const groups = Object.entries(
+			this.groupBy(this.#filteredResults(), (result) => result.itemType),
+		).filter(
+			([, results]) =>
+				this.showAll || results.some((r) => r.change !== ChangeType.NO_CHANGE),
+		);
 
-		for (const key in groups) {
-			const groupChanges =
-				groups[key].filter((r) => r.change !== ChangeType.NO_CHANGE).length ?? 0;
-			if (groupChanges === 0 && !this.showAll) continue;
+		const noChange = this.changeCount == 0 && !this.showAll;
+		const noMatch = this.#hasFilters() && groups.length === 0;
 
-			const groupHtml = html`<usync-result-group
-				.groupName=${key}
-				.results=${groups[key]}
-				.showAll=${this.showAll}
-				@show-detail=${this.#showDetail}></usync-result-group> `;
+		// one template for both states, so the header (and the search box) isn't re-created.
+		return html`<div id="result-box">
+			${this.renderResultBar(this.results?.length || 0, this.changeCount)}
+			${noChange
+				? this.#renderNoChange()
+				: noMatch
+					? this.#renderNoMatch()
+					: this.#renderGroups(groups)}
+		</div>`;
+	}
 
-			groupsHtml.push(groupHtml);
-		}
+	/**
+	 * keyed on the group name, so each group keeps its own element (and its
+	 * expanded state) when the filters add or remove the groups before it.
+	 */
+	#renderGroups(groups: Array<[string, Array<USyncActionView>]>) {
+		return repeat(
+			groups,
+			([key]) => key,
+			([key, results]) =>
+				html`<usync-result-group
+					.groupName=${key}
+					.results=${results}
+					.showAll=${this.showAll}
+					@show-detail=${this.#showDetail}></usync-result-group>`,
+		);
+	}
 
-		return this.changeCount == 0 && !this.showAll
-			? html`
-					${this.renderResultBar(this.results?.length || 0, this.changeCount)}
-					<div class="empty">
-						<umb-localize key="uSync_noChange"></umb-localize>
-					</div>
-				`
-			: html`<div id="result-box">
-					${this.renderResultBar(this.results?.length || 0, this.changeCount)}
-					${groupsHtml}
-				</div>`;
+	#renderNoChange() {
+		return html`<div class="empty">
+			<umb-localize key="uSync_noChange"></umb-localize>
+		</div>`;
 	}
 
 	renderResultBar(count: number, changes: number) {
 		if (this.hideResultBar) return nothing;
 		const localKey = changes === 0 ? 'uSync_noChangeCount' : 'uSync_changeCount';
 
+		const searchLabel = this.localize.termOrDefault(
+			'uSync_searchResults',
+			'Search by name',
+		);
+
+		const filterLabel = this.localize.termOrDefault('uSync_filterResults', 'Filter results');
+
 		return html`<div class="result-header">
-			<uui-toggle
-				.label=${this.localize.termOrDefault('uSync_showAll', 'Show all items')}
-				?checked=${this.showAll}
-				@change=${this.#toggleShowAll}></uui-toggle>
-			<umb-localize .key=${localKey} .args=${[count, changes]}
-				>${changes}/${count} items</umb-localize
-			>
+			<div class="result-summary">
+				<uui-toggle
+					.label=${this.localize.termOrDefault('uSync_showAll', 'Show all items')}
+					?checked=${this.showAll}
+					@change=${this.#toggleShowAll}></uui-toggle>
+				<div class="result-summary-right">
+					<umb-localize .key=${localKey} .args=${[count, changes]}
+						>${changes}/${count} items</umb-localize
+					>
+					<uui-button
+						compact
+						label=${filterLabel}
+						title=${filterLabel}
+						aria-expanded=${this._filtersOpen ? 'true' : 'false'}
+						@click=${this.#toggleFilters}>
+						<uui-icon
+							name="icon-navigation-down"
+							class="expand-arrow ${this._filtersOpen ? 'open' : ''}"></uui-icon>
+					</uui-button>
+				</div>
+			</div>
+			${this._filtersOpen
+				? html`<div class="result-filters">
+						<div class="change-types">${this.#renderChangeTypeCounts()}</div>
+						<uui-input
+							label=${searchLabel}
+							placeholder=${searchLabel}
+							.value=${this._search}
+							@input=${this.#onSearchInput}>
+							<uui-icon name="icon-search" slot="prepend"></uui-icon>
+						</uui-input>
+					</div>`
+				: nothing}
 		</div>`;
 	}
+
+	#renderNoMatch() {
+		return html`<div class="empty">
+			${this.localize.termOrDefault(
+				'uSync_noMatchingItems',
+				'No items match the current filters',
+			)}
+		</div>`;
+	}
+
+	#renderChangeTypeCounts() {
+		const counts = new Map<string, number>();
+		for (const result of this.results || []) {
+			if (result.change === ChangeType.NO_CHANGE && !this.showAll) continue;
+			counts.set(result.change, (counts.get(result.change) ?? 0) + 1);
+		}
+
+		return [...counts].map(([change, count]) => {
+			const failure = this.#failureTypes.includes(change);
+			const selected = this._changeTypes.has(change);
+			return html`<button
+				type="button"
+				class="change-type"
+				aria-pressed=${selected ? 'true' : 'false'}
+				@click=${() => this.#toggleChangeType(change)}>
+				<uui-tag
+					look=${selected ? 'primary' : 'secondary'}
+					color=${failure ? 'danger' : 'default'}>
+					${failure ? html`<uui-icon name="icon-alert"></uui-icon>` : nothing}
+					${this.localize.termOrDefault('uSync_changeType' + change, change)}: ${count}
+				</uui-tag>
+			</button>`;
+		});
+	}
+
+	#failureTypes: Array<string> = [
+		ChangeType.FAIL,
+		ChangeType.IMPORT_FAIL,
+		ChangeType.MISMATCH,
+		ChangeType.PARENT_MISSING,
+	];
 
 	static styles = css`
 		:host {
@@ -179,12 +327,79 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		}
 
 		.result-header {
-			display: flex;
-			justify-content: space-between;
-			padding: var(--uui-size-space-4);
 			border: 1px solid var(--uui-color-border);
 			border-radius: var(--uui-border-radius);
-			padding: var(--uui-size-space-4);
+		}
+
+		.result-summary {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--uui-size-space-4);
+			padding: var(--uui-size-space-3) var(--uui-size-space-4);
+		}
+
+		.result-summary-right {
+			display: flex;
+			align-items: center;
+			gap: var(--uui-size-space-3);
+		}
+
+		.expand-arrow {
+			transition: transform 200ms ease-in-out;
+		}
+
+		.expand-arrow.open {
+			transform: rotate(180deg);
+		}
+
+		.result-filters {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--uui-size-space-3);
+			padding: var(--uui-size-space-3) var(--uui-size-space-4);
+			border-top: 1px solid var(--uui-color-border);
+			animation: filters-in 200ms ease-out;
+		}
+
+		@keyframes filters-in {
+			from {
+				opacity: 0;
+				transform: translateY(-4px);
+			}
+			to {
+				opacity: 1;
+				transform: none;
+			}
+		}
+
+		.change-types {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: var(--uui-size-space-2);
+		}
+
+		button.change-type {
+			all: unset;
+			cursor: pointer;
+			border-radius: var(--uui-border-radius);
+		}
+
+		button.change-type:focus-visible {
+			outline: 2px solid var(--uui-color-focus);
+			outline-offset: 2px;
+		}
+
+		button.change-type:hover uui-tag {
+			filter: brightness(0.95);
+		}
+
+		.result-filters uui-input {
+			width: 15rem;
+			--uui-input-height: var(--uui-size-10);
 		}
 
 		.result-header h3 {
