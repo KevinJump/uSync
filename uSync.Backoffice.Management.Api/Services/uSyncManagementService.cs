@@ -11,6 +11,8 @@ using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.Startup;
+using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.BackOffice.Tracker;
 
@@ -32,6 +34,7 @@ internal class uSyncManagementService : ISyncManagementService
     private readonly ILongRunningOperationService _longRunningOperationService;
 
     private readonly ISyncTrackerService _syncTrackerService;
+    private readonly ISyncStartupStatusService _startupStatusService;
 
     public uSyncManagementService(
         ISyncActionService syncActionService,
@@ -41,7 +44,8 @@ internal class uSyncManagementService : ISyncManagementService
         IHubContext<SyncHub> hubContext,
         ISyncHandlerFactory handlerFactory,
         ILongRunningOperationService longRunningOperationService,
-        ISyncTrackerService syncTrackerService)
+        ISyncTrackerService syncTrackerService,
+        ISyncStartupStatusService startupStatusService)
     {
         _syncActionService = syncActionService;
         _configService = configService;
@@ -51,6 +55,7 @@ internal class uSyncManagementService : ISyncManagementService
         _handlerFactory = handlerFactory;
         _longRunningOperationService = longRunningOperationService;
         _syncTrackerService = syncTrackerService;
+        _startupStatusService = startupStatusService;
     }
 
     /// <summary>
@@ -348,6 +353,22 @@ internal class uSyncManagementService : ISyncManagementService
             OperationId = operation.Id.ToString(),
             RequestId = requestId?.ToString(),
             Action = action.ToString()
+        };
+    }
+
+    public async Task<SyncStartupStatusResponse> GetStartupStatusAsync()
+    {
+        var status = await _startupStatusService.GetAsync();
+
+        return new SyncStartupStatusResponse
+        {
+            State = status.State.ToString(),
+            StartedUtc = status.StartedUtc,
+            CompletedUtc = status.CompletedUtc,
+            ItemsProcessed = status.ItemsProcessed,
+            Changes = status.Changes,
+            Errors = status.Errors,
+            IsStale = status.IsStale
         };
     }
 

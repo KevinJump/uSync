@@ -99,6 +99,8 @@ public class FirstBootMigration : UnscopedAsyncMigrationBase
                 });
 
                 changes = results.CountChanges();
+
+                _logger.LogImportErrors(results, "First boot import");
             };
 
             sw.Stop();
