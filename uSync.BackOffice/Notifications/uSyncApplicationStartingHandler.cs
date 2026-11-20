@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -200,12 +201,14 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
 
                     if (ShouldProceedWithImport(hasStopFile, hasOnceFile))
                     {
-                        await _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
+                        var results = await _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
                         {
                             Group = _uSyncConfig.Settings.ImportAtStartup
                         });
 
-                        await ProcessOnceFileAsync(workingFolder);
+                        _logger.LogImportErrors(results, "Startup import");
+
+                        await ProcessOnceFileAsync(workingFolder, results);
                     }
                     else
                     {
@@ -277,10 +280,21 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
     /// <summary>
     ///  Process the once file (if it exists we rename it to usync.stop).
     /// </summary>
-    private async Task ProcessOnceFileAsync(string folder)
+    /// <remarks>
+    ///  when the import had errors and KeepOnceFileOnErrors is on, the once file
+    ///  is left in place so the import runs again at the next startup.
+    /// </remarks>
+    private async Task ProcessOnceFileAsync(string folder, IEnumerable<uSyncAction> results)
     {
         if (_syncFileService.FileExists($"{folder}/{_uSyncConfig.Settings.OnceFile}"))
         {
+            if (results.ContainsErrors() && _uSyncConfig.Settings.KeepOnceFileOnErrors)
+            {
+                _logger.LogWarning("uSync: Startup import reported {errorCount} errors, keeping the {onceFile} file so the import will run again at the next startup",
+                    results.CountErrors(), _uSyncConfig.Settings.OnceFile);
+                return;
+            }
+
             _syncFileService.DeleteFile($"{folder}/{_uSyncConfig.Settings.OnceFile}");
             await _syncFileService.SaveFileAsync($"{folder}/{_uSyncConfig.Settings.StopFile}", "uSync Stop file, prevents startup import");
 
