@@ -81,6 +81,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 	}
 
 	#hasFilters() {
+		if (this.hideResultBar) return false;
 		return this._errorsOnly || this._search.trim() !== '';
 	}
 
@@ -171,19 +172,20 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 			groupsHtml.push(groupHtml);
 		}
 
+		const noChange = this.changeCount == 0 && !this.showAll;
 		const noMatch = this.#hasFilters() && groupsHtml.length === 0;
 
-		return this.changeCount == 0 && !this.showAll
-			? html`
-					${this.renderResultBar(this.results?.length || 0, this.changeCount)}
-					<div class="empty">
-						<umb-localize key="uSync_noChange"></umb-localize>
-					</div>
-				`
-			: html`<div id="result-box">
-					${this.renderResultBar(this.results?.length || 0, this.changeCount)}
-					${noMatch ? this.#renderNoMatch() : groupsHtml}
-				</div>`;
+		// one template for both states, so the header (and the search box) isn't re-created.
+		return html`<div id="result-box">
+			${this.renderResultBar(this.results?.length || 0, this.changeCount)}
+			${noChange ? this.#renderNoChange() : noMatch ? this.#renderNoMatch() : groupsHtml}
+		</div>`;
+	}
+
+	#renderNoChange() {
+		return html`<div class="empty">
+			<umb-localize key="uSync_noChange"></umb-localize>
+		</div>`;
 	}
 
 	renderResultBar(count: number, changes: number) {
