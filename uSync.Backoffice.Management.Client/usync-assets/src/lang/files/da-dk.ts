@@ -98,7 +98,7 @@ export default {
 		changeHeading: 'Resultater',
 		changeCount: '{1}/{0} ændringer',
 		noChangeCount: '0/{0} ændringer',
-		failedCount: '{0} fejlede',
+		filterResults: 'Filtrer resultater',
 		searchResults: 'Søg efter navn',
 		noMatchingItems: 'Ingen elementer matcher de aktuelle filtre',
 

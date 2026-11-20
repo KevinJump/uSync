@@ -140,7 +140,7 @@ export default {
 		changeHeading: 'Results',
 		changeCount: '{1}/{0} changes',
 		noChangeCount: '0/{0} changes',
-		failedCount: '{0} failed',
+		filterResults: 'Filter results',
 		searchResults: 'Search by name',
 		noMatchingItems: 'No items match the current filters',
 

@@ -98,7 +98,7 @@ export default {
 		changeHeading: 'Resultados',
 		changeCount: '{1}/{0} cambios',
 		noChangeCount: '0/{0} cambios',
-		failedCount: '{0} fallidos',
+		filterResults: 'Filtrar resultados',
 		searchResults: 'Buscar por nombre',
 		noMatchingItems: 'Ningún elemento coincide con los filtros actuales',
 

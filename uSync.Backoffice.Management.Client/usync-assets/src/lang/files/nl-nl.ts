@@ -98,7 +98,7 @@ export default {
 		changeHeading: 'Resultaten',
 		changeCount: '{1}/{0} wijzigingen',
 		noChangeCount: '0/{0} wijzigingen',
-		failedCount: '{0} mislukt',
+		filterResults: 'Resultaten filteren',
 		searchResults: 'Zoeken op naam',
 		noMatchingItems: 'Geen items komen overeen met de huidige filters',
 

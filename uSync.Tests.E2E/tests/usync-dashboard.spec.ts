@@ -57,6 +57,7 @@ test.describe('uSync dashboard', () => {
 		await expect(results).toBeVisible({ timeout: 2 * 60 * 1000 });
 
 		await results.locator('uui-toggle').click();
+		await results.locator('uui-button[label="Filter results"]').click();
 
 		const search = results.locator('uui-input').locator('input');
 		const noMatch = results.getByText('No items match the current filters');
