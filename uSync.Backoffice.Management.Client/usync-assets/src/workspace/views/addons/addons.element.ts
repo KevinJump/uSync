@@ -45,6 +45,10 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
 								<uui-icon name="icon-operator"></uui-icon>
 								<h4>people</h4>
 							</div>
+							<div class="logo">
+								<uui-icon name="icon-alarm-clock"></uui-icon>
+								<h4>timeline</h4>
+							</div>
 						</div>
 
 						<div class="cta">
