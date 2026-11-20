@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 using System;
 using System.Collections.Generic;
@@ -22,13 +23,49 @@ public static class uSyncActionExtensions
     ///  does this list of actions have any that in an error state?
     /// </summary>
     public static bool ContainsErrors(this IEnumerable<uSyncAction> actions)
-        => actions.Any(x => x.Change != Core.ChangeType.Hidden && x.Change >= Core.ChangeType.Fail || !x.Success);
+        => actions.Any(IsError);
 
     /// <summary>
     ///  does this list of actions have any that in an error state?
     /// </summary>
     public static int CountErrors(this IEnumerable<uSyncAction> actions)
-        => actions.Count(x => x.Change != Core.ChangeType.Hidden && x.Change >= Core.ChangeType.Fail || !x.Success);
+        => actions.Count(IsError);
+
+    private static bool IsError(uSyncAction action)
+        => action.Change != Core.ChangeType.Hidden && action.Change >= Core.ChangeType.Fail || !action.Success;
+
+    /// <summary>
+    ///  the most failed items we list in an import error warning.
+    /// </summary>
+    internal const int MaxLoggedErrors = 10;
+
+    /// <summary>
+    ///  describe the failed items in a list of actions (file name or name, plus handler alias),
+    ///  listing at most <see cref="MaxLoggedErrors"/> and saying how many more were left out.
+    /// </summary>
+    internal static string DescribeErrors(this IEnumerable<uSyncAction> actions)
+    {
+        var errors = actions.Where(IsError).ToList();
+
+        var items = string.Join(", ", errors
+            .Take(MaxLoggedErrors)
+            .Select(x => $"{(string.IsNullOrWhiteSpace(x.FileName) ? x.Name : x.FileName)} ({x.HandlerAlias})"));
+
+        return errors.Count > MaxLoggedErrors
+            ? $"{items} (and {errors.Count - MaxLoggedErrors} more)"
+            : items;
+    }
+
+    /// <summary>
+    ///  log a single warning with the error count and the failed items, when an import reported errors.
+    /// </summary>
+    internal static void LogImportErrors(this ILogger logger, IEnumerable<uSyncAction> actions, string importName)
+    {
+        if (!actions.ContainsErrors() || !logger.IsEnabled(LogLevel.Warning)) return;
+
+        logger.LogWarning("uSync: {importName} reported {errorCount} errors: {failedItems}",
+            importName, actions.CountErrors(), actions.DescribeErrors());
+    }
 
     /// <summary>
     ///  count how many actions in this list are for changes

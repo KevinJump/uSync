@@ -58,6 +58,14 @@ public class uSyncPerformActionController : uSyncControllerBase
     public async Task<SyncRunningOperationResponse> Running()
         => await _managementService.GetRunningOperationAsync();
 
+    /// <summary>
+    ///  status of the last import at startup - polled by deployment pipelines.
+    /// </summary>
+    [HttpGet("StartupStatus")]
+    [ProducesResponseType(typeof(SyncStartupStatusResponse), 200)]
+    public async Task<SyncStartupStatusResponse> StartupStatus()
+        => await _managementService.GetStartupStatusAsync();
+
 
     [HttpPost("Download")]
     [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK)]

@@ -14,6 +14,7 @@ public static class uSyncWebhookEventsBuilderExtensions
     {
         builder.WebhookEvents()
             .Add<uSyncImportCompletedWebhookEvent>()
+            .Add<uSyncImportFailedWebhookEvent>()
             .Add<uSyncExportCompletedWebhookEvent>()
             .Add<uSyncItemImportedWebhookEvent>()
             .Add<uSyncItemExportedWebhookEvent>();
