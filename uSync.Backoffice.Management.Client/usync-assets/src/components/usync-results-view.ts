@@ -50,6 +50,12 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 	@property({ attribute: false })
 	previewLabels?: uSyncPreviewLabels;
 
+	/**
+	 * the handler set these results came from, previews and imports look in its folders.
+	 */
+	@property({ type: String })
+	set?: string;
+
 	@state()
 	showAll: boolean = false;
 
@@ -70,6 +76,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 				items: this.#visibleItems(),
 				previewSource: this.previewSource,
 				previewLabels: this.previewLabels,
+				set: this.set,
 				showActions: (item) =>
 					!this.hideActions &&
 					(item.change == ChangeType.CREATE ||

@@ -39,11 +39,8 @@ public class uSyncSettingsController : uSyncControllerBase
     [ProducesResponseType<List<SyncSelectableSet>>(StatusCodes.Status200OK)]
     public IActionResult GetSets()
     {
-        var section = _configuration.GetSection(
-            BackOffice.uSync.Configuration.uSyncSetsConfig);
-
-        var children = section.GetChildren();
-        if (children is null || !children.Any())
+        var setNames = _configuration.GetuSyncSetNames().ToList();
+        if (setNames.Count == 0)
         {
             var defaultSet = new SyncSelectableSet
             {
@@ -56,13 +53,13 @@ public class uSyncSettingsController : uSyncControllerBase
 
         List<SyncSelectableSet> sets = new();
 
-        foreach (var item in section.GetChildren())
+        foreach (var setName in setNames)
         {
-            var settings = _configService.GetSetSettings(item.Key);
+            var settings = _configService.GetSetSettings(setName);
             if (settings is null || settings.Enabled is false) continue;
             sets.Add(new SyncSelectableSet
             {
-                Name = item.Key,
+                Name = setName,
                 Settings = settings
             });
         }

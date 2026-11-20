@@ -115,6 +115,12 @@ public interface ISyncService
     Task<uSyncAction> ImportSingleItemAsync(Guid key, string handlerAlias);
 
     /// <summary>
+    ///  import a single item by key, finding it in the folders of the given handler set
+    /// </summary>
+    Task<uSyncAction> ImportSingleItemAsync(Guid key, string handlerAlias, string? set)
+        => ImportSingleItemAsync(key, handlerAlias);
+
+    /// <summary>
     ///  get the ordered nodes for a process and handler
     /// </summary>
     Task<IList<OrderedNodeInfo>> LoadOrderedNodesAsync(ISyncHandler handler, string[] handlerFolders);
@@ -165,6 +171,15 @@ public interface ISyncService
     ///  trigger the end of the bulk process
     /// </summary>
     Task FinishBulkProcessAsync(HandlerActions action, string? group, IEnumerable<uSyncAction> actions);
+
+    /// <summary>
+    ///  trigger the end of the bulk process, writing the version file for an export to <paramref name="exportFolder"/>
+    /// </summary>
+    /// <remarks>
+    ///  used when a handler set exports to its own folder rather than the global working folder.
+    /// </remarks>
+    Task FinishBulkProcessAsync(HandlerActions action, string? group, string exportFolder, IEnumerable<uSyncAction> actions)
+        => FinishBulkProcessAsync(action, group, actions);
 
     /// <summary>
     ///  merge the given folders in single 'production' files for each handler.

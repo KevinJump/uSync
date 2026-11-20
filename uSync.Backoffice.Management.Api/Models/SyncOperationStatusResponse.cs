@@ -39,4 +39,9 @@ public class SyncRunningOperationResponse
     public string? RequestId { get; set; }
 
     public string? Action { get; set; }
+
+    /// <summary>
+    ///  the handler set the run is for, so a reattached client can preview and import from its folders.
+    /// </summary>
+    public string? Set { get; set; }
 }

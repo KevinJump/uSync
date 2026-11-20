@@ -2,7 +2,9 @@
 using Microsoft.Extensions.Hosting;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace uSync;
 
@@ -29,6 +31,18 @@ public static class uSyncConfigExtensions
         configurationBuilder.AddJsonFile($"{fileRootName}.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
         configurationBuilder.AddJsonFile($"{fileRootName}.{Environment.MachineName}.json", optional: true, reloadOnChange: true);
     }
+
+    /// <summary>
+    ///  the names of the handler sets in the uSync:Sets configuration section.
+    /// </summary>
+    /// <remarks>
+    ///  sets only registered in code (named options) aren't in configuration, so aren't listed.
+    /// </remarks>
+    public static IEnumerable<string> GetuSyncSetNames(this IConfiguration configuration)
+        => configuration
+            .GetSection(BackOffice.uSync.Configuration.uSyncSetsConfig)
+            .GetChildren()
+            .Select(x => x.Key);
 
     /// <summary>
     ///  add usync.json files sources to the applications configuration

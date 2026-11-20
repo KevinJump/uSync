@@ -15,6 +15,11 @@ internal class SyncManagementProgress
 
     public required string Action { get; set; }
 
+    /// <summary>
+    ///  the handler set the run is for (its results come from that set's folders)
+    /// </summary>
+    public string? Set { get; set; }
+
     public IEnumerable<SyncHandlerSummary> Status { get; set; } = [];
 
     public IEnumerable<uSyncActionView> Actions { get; set; } = [];

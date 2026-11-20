@@ -74,6 +74,10 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	@state()
 	_results: Array<USyncActionView> = [];
 
+	/** the handler set the results on screen came from */
+	@state()
+	_resultsSet?: string;
+
 	@state()
 	_disabled: boolean = false;
 
@@ -139,6 +143,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 			this.observe(_instance.results, (_results) => {
 				this._results = _results;
+				this._resultsSet = _instance.lastSet;
 			});
 
 			this.observe(_instance.completed, async (_completed) => {
@@ -324,7 +329,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	#renderReport() {
 		if (!this._completed) return nothing;
 
-		return html`<usync-results .results=${this._results}></usync-results>`;
+		return html`<usync-results .results=${this._results} .set=${this._resultsSet}></usync-results>`;
 	}
 
 	#renderBackgroundBanner() {

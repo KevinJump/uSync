@@ -168,6 +168,11 @@ public interface ISyncHandler
     Task<XElement?> TryFindItemNodeAsync(Guid key) => Task.FromResult<XElement?>(null);
 
     /// <summary>
+    ///  find an element by its key, looking in the given uSync root folders (e.g. a handler set's folders)
+    /// </summary>
+    Task<XElement?> TryFindItemNodeAsync(Guid key, string[] rootFolders) => TryFindItemNodeAsync(key);
+
+    /// <summary>
     ///  build the current and incoming versions of an item without saving anything.
     /// </summary>
     /// <remarks>

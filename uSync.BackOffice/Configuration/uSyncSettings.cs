@@ -96,6 +96,15 @@ public class uSyncSettings
     public string ExportAtStartup { get; set; } = "None";
 
     /// <summary>
+    /// The handler set used by the startup import, startup export and first boot import (blank = the Default set)
+    /// </summary>
+    /// <remarks>
+    ///  the set's own folders (if it has any) are used for the import or export.
+    /// </remarks>
+    [DefaultValue("")]
+    public string StartupSet { get; set; } = string.Empty;
+
+    /// <summary>
     /// Export when an item is saved in Umbraco
     /// </summary>
     [DefaultValue(uSync.EverythingGroupName)]

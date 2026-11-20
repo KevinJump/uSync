@@ -63,11 +63,6 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		this.observe(umbExtensionsRegistry.byType('usync-item-preview'), (manifests) => {
 			this._previewTypes = new Set(manifests.flatMap((m) => m.forEntityTypes));
 		});
-
-		// this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
-		// 	if (!_instance) return;
-		// 	this.#actionContext = _instance;
-		// });
 	}
 
 	connectedCallback() {
@@ -100,7 +95,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		this._loading = true;
 		const data = source
 			? await source(item).catch(() => undefined)
-			: (await this.#repository.getPreview(item.handler, item.key)).data;
+			: (await this.#repository.getPreview(item.handler, item.key, this.data?.set)).data;
 
 		// moving through the list quickly can return previews out of order,
 		// so drop anything that isn't for the item we are now showing.
@@ -136,7 +131,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 		if (!modalContext) return;
 
 		const modal = modalContext.open(this, USYNC_IMPORT_SINGLE_MODAL, {
-			data: { action: this._item },
+			data: { action: this._item, set: this.data?.set },
 		});
 
 		const data = await modal?.onSubmit().catch(() => {

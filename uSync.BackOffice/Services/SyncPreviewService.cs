@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Scoping;
 
+using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.Preview;
 using uSync.BackOffice.SyncHandlers;
@@ -23,17 +24,20 @@ internal class SyncPreviewService : ISyncPreviewService
     private readonly ICoreScopeProvider _scopeProvider;
     private readonly SyncPreviewMapperCollection _mappers;
     private readonly ILogger<SyncPreviewService> _logger;
+    private readonly ISyncConfigService _configService;
 
     public SyncPreviewService(
         ISyncHandlerFactory handlerFactory,
         ICoreScopeProvider scopeProvider,
         SyncPreviewMapperCollection mappers,
-        ILogger<SyncPreviewService> logger)
+        ILogger<SyncPreviewService> logger,
+        ISyncConfigService configService)
     {
         _handlerFactory = handlerFactory;
         _scopeProvider = scopeProvider;
         _mappers = mappers;
         _logger = logger;
+        _configService = configService;
     }
 
     /// <inheritdoc/>
@@ -46,6 +50,25 @@ internal class SyncPreviewService : ISyncPreviewService
         if (node is null) return default;
 
         return await GetPreviewAsync(handlerConfig, node, null, null);
+    }
+
+    /// <inheritdoc/>
+    public async Task<SyncPreviewResult?> GetPreviewAsync(string handlerAlias, Guid key, string? set)
+    {
+        if (string.IsNullOrWhiteSpace(set)) return await GetPreviewAsync(handlerAlias, key);
+
+        var handlerOptions = new SyncHandlerOptions { Set = set };
+        var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias, handlerOptions);
+        if (handlerConfig is null) return default;
+
+        // find the item, and anything it uses, in the set's folders.
+        var folders = _configService.GetFolders(set);
+        Task<XElement?> findNode(ISyncHandler handler, Guid itemKey) => handler.TryFindItemNodeAsync(itemKey, folders);
+
+        var node = await findNode(handlerConfig.Handler, key);
+        if (node is null) return default;
+
+        return await GetPreviewAsync(handlerConfig, node, findNode, handlerOptions);
     }
 
     /// <inheritdoc/>

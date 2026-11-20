@@ -38,6 +38,11 @@ export interface uSyncDetailsModalData {
 	 * items don't come from this site's uSync folders.
 	 */
 	previewLabels?: uSyncPreviewLabels;
+
+	/**
+	 * the handler set the items came from, previews and imports look in its folders.
+	 */
+	set?: string;
 }
 
 export interface uSyncDetailsModalValue {
