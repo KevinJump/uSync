@@ -8,8 +8,9 @@ using Umbraco.Cms.Core.Webhooks;
 namespace uSync.BackOffice.WebhookEvents;
 
 /// <summary>
-///  webhook event for when an import has been completed
+///  webhook event for when an export has been completed
 /// </summary>
+[WebhookEvent("uSync export completed")]
 public class uSyncExportCompletedWebhookEvent :
     WebhookEventBase<uSyncExportCompletedNotification>
 {
