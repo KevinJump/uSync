@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Options;
@@ -171,6 +172,92 @@ internal class WebhookPayloadSerializationTests
 
         Assert.That(json, Does.Contain("\"actions\":[]"));
     }
+
+    [Test]
+    public void ImportCompleted_IncludesSummaryAndFailures()
+    {
+        var notification = new uSyncImportCompletedNotification(
+        [
+            uSyncAction.SetAction(true, "a", "ContentType", ChangeType.Create, "created"),
+            uSyncAction.SetAction(true, "b", "ContentType", ChangeType.Import, "imported"),
+            uSyncAction.SetAction(true, "c", "ContentType", ChangeType.NoChange, "same"),
+            uSyncAction.SetAction(true, "d", "ContentType", ChangeType.Delete, "deleted"),
+            CreateFailAction(new Exception("bad one")),
+        ], "settings");
+
+        var payload = (uSyncBulkWebhookPayload)CreateImportCompleted().ConvertNotificationToRequestPayload(notification);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(payload.Server, Is.EqualTo(Environment.MachineName));
+            Assert.That(payload.Summary.Total, Is.EqualTo(5));
+            Assert.That(payload.Summary.Created, Is.EqualTo(1));
+            Assert.That(payload.Summary.Updated, Is.EqualTo(1));
+            Assert.That(payload.Summary.Deleted, Is.EqualTo(1));
+            Assert.That(payload.Summary.NoChange, Is.EqualTo(1));
+            Assert.That(payload.Summary.Failed, Is.EqualTo(1));
+            Assert.That(payload.Failures, Has.Count.EqualTo(1));
+            Assert.That(payload.Failures[0].Name, Is.EqualTo("bad"));
+            Assert.That(payload.Actions, Has.Count.EqualTo(5));
+        });
+
+        var json = Serialize(payload);
+        Assert.Multiple(() =>
+        {
+            Assert.That(json, Does.Contain("\"summary\":{\"total\":5"));
+            Assert.That(json, Does.Contain("\"failures\":[{"));
+            Assert.That(json, Does.Contain("\"server\":"));
+        });
+    }
+
+    [Test]
+    public void ImportCompleted_CapsFailures()
+    {
+        var actions = Enumerable.Range(0, uSyncBulkWebhookPayload.MaxFailures + 10)
+            .Select(_ => CreateFailAction(new Exception("x")))
+            .ToList();
+
+        var payload = (uSyncBulkWebhookPayload)CreateImportCompleted()
+            .ConvertNotificationToRequestPayload(new uSyncImportCompletedNotification(actions, "settings"));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(payload.Failures, Has.Count.EqualTo(uSyncBulkWebhookPayload.MaxFailures));
+            Assert.That(payload.Summary.Failed, Is.EqualTo(uSyncBulkWebhookPayload.MaxFailures + 10));
+        });
+    }
+
+    [Test]
+    public void ImportFailed_FiresOnlyWhenImportHasErrors()
+    {
+        var webhookEvent = new uSyncImportFailedWebhookEvent(_firingService, _webhookService, _webhookSettings, _serverRoleAccessor);
+        var ok = uSyncAction.SetAction(true, "home", "ContentType", ChangeType.Import, "imported");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(webhookEvent.Alias, Is.EqualTo("uSyncImportFailed"));
+            Assert.That(webhookEvent.ShouldFireWebhookForNotification(
+                new uSyncImportCompletedNotification([ok], "settings")), Is.False);
+            Assert.That(webhookEvent.ShouldFireWebhookForNotification(
+                new uSyncImportCompletedNotification(null, "settings")), Is.False);
+            Assert.That(webhookEvent.ShouldFireWebhookForNotification(
+                new uSyncImportCompletedNotification([ok, CreateFailAction(new Exception("x"))], "settings")), Is.True);
+        });
+    }
+
+    [Test]
+    public void ImportFailed_Serializes()
+    {
+        var notification = new uSyncImportCompletedNotification([CreateFailAction(GetThrownException())], "settings");
+        var webhookEvent = new uSyncImportFailedWebhookEvent(_firingService, _webhookService, _webhookSettings, _serverRoleAccessor);
+
+        var json = Serialize(webhookEvent.ConvertNotificationToRequestPayload(notification));
+
+        AssertCompletedJson(json, "boom");
+    }
+
+    private uSyncImportCompletedWebhookEvent CreateImportCompleted()
+        => new(_firingService, _webhookService, _webhookSettings, _serverRoleAccessor);
 
     private string Serialize(object payload)
     {
