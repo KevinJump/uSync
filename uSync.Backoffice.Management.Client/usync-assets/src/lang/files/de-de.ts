@@ -102,6 +102,23 @@ export default {
 		searchResults: 'Nach Namen suchen',
 		noMatchingItems: 'Keine Elemente entsprechen den aktuellen Filtern',
 
+		changeTypeNoChange: 'Keine Änderung',
+		changeTypeCreate: 'Erstellen',
+		changeTypeImport: 'Import',
+		changeTypeExport: 'Export',
+		changeTypeUpdate: 'Aktualisieren',
+		changeTypeDelete: 'Löschen',
+		changeTypeWillChange: 'Wird geändert',
+		changeTypeInformation: 'Information',
+		changeTypeRolledback: 'Zurückgesetzt',
+		changeTypeFail: 'Fehlgeschlagen',
+		changeTypeImportFail: 'Import fehlgeschlagen',
+		changeTypeMismatch: 'Abweichung',
+		changeTypeParentMissing: 'Übergeordnetes Element fehlt',
+		changeTypeHidden: 'Ausgeblendet',
+		changeTypeClean: 'Bereinigen',
+		changeTypeRemoved: 'Entfernt',
+
 		legacyInfo: `<p>uSync hat einen Legacy-uSync-Ordner unter <strong>%0%</strong> gefunden.<br />
 						Der Inhalt muss wahrscheinlich konvertiert werden</p>`,
 

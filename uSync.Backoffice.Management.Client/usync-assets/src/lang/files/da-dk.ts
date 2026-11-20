@@ -102,6 +102,23 @@ export default {
 		searchResults: 'Søg efter navn',
 		noMatchingItems: 'Ingen elementer matcher de aktuelle filtre',
 
+		changeTypeNoChange: 'Ingen ændring',
+		changeTypeCreate: 'Opret',
+		changeTypeImport: 'Import',
+		changeTypeExport: 'Eksport',
+		changeTypeUpdate: 'Opdater',
+		changeTypeDelete: 'Slet',
+		changeTypeWillChange: 'Vil ændres',
+		changeTypeInformation: 'Information',
+		changeTypeRolledback: 'Rullet tilbage',
+		changeTypeFail: 'Fejlet',
+		changeTypeImportFail: 'Import fejlet',
+		changeTypeMismatch: 'Uoverensstemmelse',
+		changeTypeParentMissing: 'Overordnet mangler',
+		changeTypeHidden: 'Skjult',
+		changeTypeClean: 'Ryd op',
+		changeTypeRemoved: 'Fjernet',
+
 		legacyInfo: `<p>uSync har fundet en ældre uSync-mappe på <strong>%0%</strong>.<br />
 						Det er sandsynligt, at indholdet skal konverteres på en eller anden måde</p>`,
 

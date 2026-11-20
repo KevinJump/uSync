@@ -232,10 +232,21 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 			counts.set(result.change, (counts.get(result.change) ?? 0) + 1);
 		}
 
-		return [...counts].map(
-			([change, count]) => html`<span class="change-type">${change}: ${count}</span>`,
-		);
+		return [...counts].map(([change, count]) => {
+			const failure = this.#failureTypes.includes(change);
+			return html`<uui-tag look="secondary" color=${failure ? 'danger' : 'default'}>
+				${failure ? html`<uui-icon name="icon-alert"></uui-icon>` : nothing}
+				${this.localize.termOrDefault('uSync_changeType' + change, change)}: ${count}
+			</uui-tag>`;
+		});
 	}
+
+	#failureTypes: Array<string> = [
+		ChangeType.FAIL,
+		ChangeType.IMPORT_FAIL,
+		ChangeType.MISMATCH,
+		ChangeType.PARENT_MISSING,
+	];
 
 	#renderFailedToggle() {
 		const failed = this.results?.filter((r) => r.success === false).length ?? 0;

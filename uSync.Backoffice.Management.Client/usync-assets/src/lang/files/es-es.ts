@@ -102,6 +102,23 @@ export default {
 		searchResults: 'Buscar por nombre',
 		noMatchingItems: 'Ningún elemento coincide con los filtros actuales',
 
+		changeTypeNoChange: 'Sin cambios',
+		changeTypeCreate: 'Crear',
+		changeTypeImport: 'Importar',
+		changeTypeExport: 'Exportar',
+		changeTypeUpdate: 'Actualizar',
+		changeTypeDelete: 'Eliminar',
+		changeTypeWillChange: 'Cambiará',
+		changeTypeInformation: 'Información',
+		changeTypeRolledback: 'Revertido',
+		changeTypeFail: 'Fallido',
+		changeTypeImportFail: 'Importación fallida',
+		changeTypeMismatch: 'Discrepancia',
+		changeTypeParentMissing: 'Falta el elemento padre',
+		changeTypeHidden: 'Oculto',
+		changeTypeClean: 'Limpiar',
+		changeTypeRemoved: 'Eliminado',
+
 		legacyInfo: `<p>uSync ha encontrado una carpeta uSync heredada en <strong>%0%</strong>.<br />
 						Es probable que su contenido necesite convertirse de alguna manera</p>`,
 

@@ -144,6 +144,23 @@ export default {
 		searchResults: 'Search by name',
 		noMatchingItems: 'No items match the current filters',
 
+		changeTypeNoChange: 'No change',
+		changeTypeCreate: 'Create',
+		changeTypeImport: 'Import',
+		changeTypeExport: 'Export',
+		changeTypeUpdate: 'Update',
+		changeTypeDelete: 'Delete',
+		changeTypeWillChange: 'Will change',
+		changeTypeInformation: 'Information',
+		changeTypeRolledback: 'Rolled back',
+		changeTypeFail: 'Failed',
+		changeTypeImportFail: 'Import failed',
+		changeTypeMismatch: 'Mismatch',
+		changeTypeParentMissing: 'Parent missing',
+		changeTypeHidden: 'Hidden',
+		changeTypeClean: 'Clean',
+		changeTypeRemoved: 'Removed',
+
 		legacyInfo: `<p>uSync has found a legacy uSync folder at <strong>%0%</strong>.<br />
 						Its likely that the content in it will need coverting in someway</p>`,
 
