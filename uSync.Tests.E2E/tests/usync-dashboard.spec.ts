@@ -42,4 +42,29 @@ test.describe('uSync dashboard', () => {
 		await expect(page.locator('usync-progress-box')).toBeVisible();
 		await expect(page.locator('usync-results')).toBeVisible({ timeout: 2 * 60 * 1000 });
 	});
+
+	test('can search the report results', async ({ umbracoUi }) => {
+		test.setTimeout(3 * 60 * 1000);
+
+		const page = umbracoUi.page;
+		const settings = page
+			.locator('usync-action-box')
+			.filter({ has: page.getByRole('heading', { name: 'Settings' }) });
+
+		await settings.locator('uui-button.action-button[label="Report"]').click();
+
+		const results = page.locator('usync-results');
+		await expect(results).toBeVisible({ timeout: 2 * 60 * 1000 });
+
+		await results.locator('uui-toggle').click();
+
+		const search = results.locator('uui-input').locator('input');
+		const noMatch = results.getByText('No items match the current filters');
+
+		await search.fill('zz-no-such-item-zz');
+		await expect(noMatch).toBeVisible();
+
+		await search.fill('');
+		await expect(noMatch).toBeHidden();
+	});
 });
