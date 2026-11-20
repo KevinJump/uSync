@@ -140,6 +140,9 @@ export default {
 		changeHeading: 'Results',
 		changeCount: '{1}/{0} changes',
 		noChangeCount: '0/{0} changes',
+		failedCount: '{0} failed',
+		searchResults: 'Search by name',
+		noMatchingItems: 'No items match the current filters',
 
 		legacyInfo: `<p>uSync has found a legacy uSync folder at <strong>%0%</strong>.<br />
 						Its likely that the content in it will need coverting in someway</p>`,

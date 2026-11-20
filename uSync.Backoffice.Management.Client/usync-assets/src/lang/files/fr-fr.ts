@@ -98,6 +98,9 @@ export default {
 		changeHeading: 'Résultats',
 		changeCount: '{1}/{0} modifications',
 		noChangeCount: '0/{0} modifications',
+		failedCount: '{0} en échec',
+		searchResults: 'Rechercher par nom',
+		noMatchingItems: 'Aucun élément ne correspond aux filtres actuels',
 
 		legacyInfo: `<p>uSync a trouvé un dossier uSync hérité à <strong>%0%</strong>.<br />
 						Il est probable que son contenu devra être converti d'une façon ou d'une autre</p>`,

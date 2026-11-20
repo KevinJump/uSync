@@ -98,6 +98,9 @@ export default {
 		changeHeading: 'Ergebnisse',
 		changeCount: '{1}/{0} Änderungen',
 		noChangeCount: '0/{0} Änderungen',
+		failedCount: '{0} fehlgeschlagen',
+		searchResults: 'Nach Namen suchen',
+		noMatchingItems: 'Keine Elemente entsprechen den aktuellen Filtern',
 
 		legacyInfo: `<p>uSync hat einen Legacy-uSync-Ordner unter <strong>%0%</strong> gefunden.<br />
 						Der Inhalt muss wahrscheinlich konvertiert werden</p>`,

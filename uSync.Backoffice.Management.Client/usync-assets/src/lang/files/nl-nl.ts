@@ -98,6 +98,9 @@ export default {
 		changeHeading: 'Resultaten',
 		changeCount: '{1}/{0} wijzigingen',
 		noChangeCount: '0/{0} wijzigingen',
+		failedCount: '{0} mislukt',
+		searchResults: 'Zoeken op naam',
+		noMatchingItems: 'Geen items komen overeen met de huidige filters',
 
 		legacyInfo: `<p>uSync heeft een verouderde uSync-map gevonden op <strong>%0%</strong>.<br />
 						Het is waarschijnlijk dat de inhoud op de een of andere manier geconverteerd moet worden</p>`,
