@@ -105,11 +105,17 @@ public class ContentHandler : PublishableContentHandlerBase<IContent>, ISyncHand
                     ordering: null,
                     loadTemplates: true));
             }
+
+            // one (light) entity query tells us which children have no children of their own,
+            // so the export doesn't have to query for the children of every leaf item.
+            if (items.Count > 0) RememberLeaves(entityService.GetChildren(parent.Id));
             return items;
         }
         else
         {
-            return await Task.FromResult(GetRootItems());
+            var rootItems = GetRootItems().ToList();
+            if (rootItems.Count > 0) RememberLeaves(entityService.GetChildren(Umbraco.Cms.Core.Constants.System.Root));
+            return await Task.FromResult(rootItems);
         }
     }
 
