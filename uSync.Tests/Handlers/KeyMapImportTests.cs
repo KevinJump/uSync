@@ -119,7 +119,7 @@ public class KeyMapImportTests : UmbracoIntegrationTest
             Assert.That(aboutActions.All(x => x.Success), Is.True, string.Join(", ", aboutActions.Select(x => x.Message)));
             Assert.That(reloadedHome.Key, Is.EqualTo(home.Key), "home keeps its key on this site");
             Assert.That(reloadedAbout.ParentId, Is.EqualTo(home.Id), "about is still under home");
-            Assert.That(contentService.GetPagedChildren(site.Id, 0, 10, out _).Count(x => x.Name == "home"), Is.EqualTo(1), "no second home");
+            Assert.That(contentService.CountChildren(site.Id), Is.EqualTo(1), "no second home");
         });
 
         // with the keys mapped the report sees no changes.
