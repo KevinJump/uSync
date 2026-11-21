@@ -482,10 +482,11 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (logger.IsEnabled(LogLevel.Trace))
                 logger.LogTrace("{Id} Setting Key {Key}", item.Id, key);
 
-            if (item.Id > 0 && options.DoNotSave is false)
-                await OnKeyChange(item, item.Key, key);
+            var oldKey = item.Key;
+            SyncKeyHelper.SetKey(item, key, item.Name ?? node.GetAlias());
 
-            item.Key = key;
+            if (item.HasIdentity && options.DoNotSave is false)
+                await OnKeyChange(item, oldKey, key);
         }
 
         var createDate = info.Element("CreateDate").ValueOrDefault(item.CreateDate);

@@ -1472,6 +1472,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                     {
                         action.Message = $"{action.Change}";
                     }
+
+                    AddKeyConflictWarning(action, node, change.CurrentNode);
                 }
                 actions.Add(action);
             }
@@ -1491,6 +1493,23 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")];
 
         }
+    }
+
+    /// <summary>
+    ///  when the item on this site has a different key to the file, and Umbraco
+    ///  won't let us change it, the import will fail, so say so in the report.
+    /// </summary>
+    private void AddKeyConflictWarning(uSyncAction action, XElement node, XElement current)
+    {
+        var fileKey = node.GetKey();
+        var localKey = current.GetKey();
+        if (!SyncKeyHelper.IsKeyConflict(fileKey, localKey)) return;
+
+        var message = uSyncKeyConflictException.BuildMessage(ItemType, node.GetAlias(), localKey, fileKey);
+        action.Message = message;
+        action.Details = [
+            uSyncChange.Warning(Core.uSyncConstants.Xml.Key, "Key conflict", message),
+            .. action.Details ?? []];
     }
 
     private static uSyncChange MakeRawChange(XElement node, XElement current)

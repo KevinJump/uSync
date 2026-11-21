@@ -83,7 +83,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
                 if (logger.IsEnabled(LogLevel.Debug))
                     logger.LogDebug("Forcing key sync of dictionary item - if the keys are out of sync on existing items this can cause a SQL Constraint error");
 
-                item.Key = key;
+                SyncKeyHelper.SetKey(item, key, item.ItemKey);
             }
         }
 
