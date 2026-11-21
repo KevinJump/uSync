@@ -299,20 +299,22 @@ public class SyncXmlTracker<TObject>
 
     private static uSyncChange? Compare(string target, string source, string path, string name, bool maskValue)
     {
-        if (source.TryParseToJsonNode(out _) is true)
+        // identical strings are identical json too, so we can skip parsing either of them.
+        if (string.Equals(source, target, StringComparison.Ordinal)) return null;
+
+        if (source.TryParseToJsonNode(out var sourceJson) is true)
         {
-            return SyncXmlTracker<TObject>.JsonChange(target, source, path, name, maskValue);
+            return SyncXmlTracker<TObject>.JsonChange(target, source, sourceJson, path, name, maskValue);
         }
         else
         {
             return SyncXmlTracker<TObject>.StringChange(target, source, path, name, maskValue);
         }
     }
-    private static uSyncChange? JsonChange(string target, string source, string path, string name, bool maskValue)
+    private static uSyncChange? JsonChange(string target, string source, JsonNode sourceJson, string path, string name, bool maskValue)
     {
         try
         {
-            var sourceJson = source.ConvertToJsonNode();
             var targetJson = target.ConvertToJsonNode();
 
             if (JsonNode.DeepEquals(sourceJson, targetJson)) return null;

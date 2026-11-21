@@ -17,7 +17,7 @@ public class MNTPickerConfigSerializer : SyncDataTypeSerializerBase, IConfigurat
 
     public string Name => "MNTPNodeSerializer";
 
-    public string[] Editors => ["Umbraco.MultiNodeTreePicker"];
+    public string[] Editors { get; } = ["Umbraco.MultiNodeTreePicker"];
 
     private const string _startNodeKey = "startNode";
     private const string _idKey = "id";

@@ -12,7 +12,7 @@ internal class ContentPickerConfigSerializer : PickerConfigurationSerializerBase
         _contentTypeService = contentTypeService;
     }
     public string Name => nameof(ContentPickerConfigSerializer);
-    public string[] Editors => [Constants.PropertyEditors.Aliases.ContentPicker];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.ContentPicker];
 
     protected override IContentType? GetByAlias(string alias)
         => _contentTypeService.Get(alias);

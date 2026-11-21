@@ -5,7 +5,7 @@ internal class MarkdownMigratingConfigSerializer : ConfigurationSerializerBase, 
 {
     public string Name => nameof(MarkdownMigratingConfigSerializer);
 
-    public string[] Editors => [Constants.PropertyEditors.Aliases.MarkdownEditor];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.MarkdownEditor];
 
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
         => MigratePropertyNames(configuration, new()
