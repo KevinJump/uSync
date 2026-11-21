@@ -936,6 +936,10 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 if (await CanSkipChildExportsAsync(concreteType, config))
                     continue;
             }
+
+            // nothing beneath this item, so don't go looking for folders or children.
+            if (IsKnownLeaf(item.Value)) continue;
+
             actions.AddRange(await ExportAllAsync(item.Value, folders, config, callback));
         }
 
@@ -961,6 +965,15 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </remarks>
     protected virtual Task<bool> CanSkipChildExportsAsync(TObject item, HandlerSettings config)
         => Task.FromResult(false);
+
+    /// <summary>
+    ///  do we already know this item has nothing beneath it (no folders or children)?
+    /// </summary>
+    /// <remarks>
+    ///  lets an export all skip the lookups for children on leaf items, only
+    ///  return true when you are sure there is nothing there.
+    /// </remarks>
+    protected virtual bool IsKnownLeaf(TContainer item) => false;
 
     /// <summary>
     /// Fetch all child items beneath a given container
@@ -1688,8 +1701,11 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  Cleans up the handler folder, removing duplicate files for this item
     ///  </summary>
     ///  <remarks>
-    ///   e.g if someone renames a thing (and we are using the name in the file) 
+    ///   e.g if someone renames a thing (and we are using the name in the file)
     ///   this will clean anything else in the folder that has that key / alias
+    ///
+    ///   only the root element of each file (its name and attributes) is loaded and
+    ///   passed to <see cref="DoItemsMatch(XElement, TObject)"/>.
     ///  </remarks>
     protected virtual async Task CleanUpAsync(TObject item, string newFile, string folder)
     {
@@ -1711,9 +1727,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             {
                 try
                 {
-                    var node = await syncFileService.LoadXElementAsync(file);
+                    // the match only needs the key, alias and empty action, which are all
+                    // on the root element - so we don't parse the whole file for every
+                    // item in the folder each time something is saved.
+                    var node = await syncFileService.LoadRootElementAsync(file);
 
-                    // if this XML file matches the item we have just saved. 
+                    // if this XML file matches the item we have just saved.
 
                     if (!node.IsEmptyItem() || node.GetEmptyAction() != SyncActionType.Rename)
                     {
@@ -1846,10 +1865,14 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     {
         if (syncFileService.FileExists(path))
         {
+            // most of the time the existing file is this item, which we can tell
+            // from the key on the root element without parsing the whole file.
+            var root = await syncFileService.LoadRootElementAsync(path);
+            if (GetItemKey(item) == root.GetKey()) return path;
+
             var node = await syncFileService.LoadXElementAsync(path);
 
             if (node == null) return path;
-            if (GetItemKey(item) == node.GetKey()) return path;
             if (GetXmlMatchString(node).Equals(GetItemMatchString(item), StringComparison.InvariantCultureIgnoreCase)) return path;
 
             // get here we have a clash, we should append something
@@ -2302,18 +2325,83 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     #endregion
 
     /// <inheritdoc/>
+    /// <remarks>
+    ///  rather than loading (and merging) every file in the handler folders, this reads just the
+    ///  root element of each file to find the one with the key, and then only merges that file.
+    /// </remarks>
     public async Task<XElement?> TryFindItemNodeAsync(Guid key)
     {
-        var folders = GetDefaultHandlerFolders();
-        var items = await GetMergedItemsAsync(folders, new SyncMergeOptions());
+        if (key == Guid.Empty) return null;
 
-        foreach (var item in items)
+        var folders = GetDefaultHandlerFolders();
+        var relativePath = await FindRelativePathForKeyAsync(folders, key);
+        if (relativePath is null) return null;
+
+        var files = folders
+            .Select(x => Path.Combine(syncFileService.GetAbsPath(x), relativePath))
+            .Where(syncFileService.FileExists)
+            .ToArray();
+
+        var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
+        return await syncFileService.MergeFilesAsync(files, baseTracker);
+    }
+
+    /// <summary>
+    ///  find the path (relative to the handler folder) of the file that holds the item with this key.
+    /// </summary>
+    /// <remarks>
+    ///  matches how the merge picks items: the last folder wins, an item (or delete) is
+    ///  preferred to a clean marker (which has the key of the item it cleans), and
+    ///  renames and other empty markers are ignored.
+    /// </remarks>
+    private async Task<string?> FindRelativePathForKeyAsync(string[] folders, Guid key)
+    {
+        var extension = $".{uSyncConfig.Settings.DefaultExtension}";
+        string? itemPath = null;
+        string? cleanPath = null;
+
+        foreach (var folder in folders)
         {
-            if (item.Node.GetKey() == key)
-                return item.Node;
+            var absFolder = syncFileService.GetAbsPath(folder);
+            if (syncFileService.DirectoryExists(absFolder) is false) continue;
+
+            // with flat guid names we know where the file will be.
+            IEnumerable<string> candidates = DefaultConfig.UseFlatStructure && DefaultConfig.GuidNames
+                && syncFileService.FileExists(Path.Combine(absFolder, $"{key}{extension}"))
+                ? [Path.Combine(absFolder, $"{key}{extension}")]
+                : syncFileService.GetFiles(absFolder, $"*{extension}", true);
+
+            foreach (var file in candidates)
+            {
+                XElement root;
+                try
+                {
+                    root = await syncFileService.LoadRootElementAsync(file);
+                }
+                catch (Exception ex)
+                {
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug(ex, "Unable to read {file} while looking for {key}", file, key);
+                    continue;
+                }
+
+                if (root.GetKey() != key) continue;
+
+                var relative = file.Substring(absFolder.Length).TrimStart(['\\', '/']);
+                switch (root.GetEmptyAction())
+                {
+                    case SyncActionType.Clean:
+                        cleanPath = relative;
+                        break;
+                    case SyncActionType.None when root.IsEmptyItem() is false:
+                    case SyncActionType.Delete:
+                        itemPath = relative;
+                        break;
+                }
+            }
         }
 
-        return null;
+        return itemPath ?? cleanPath;
     }
 
     /// <inheritdoc/>
