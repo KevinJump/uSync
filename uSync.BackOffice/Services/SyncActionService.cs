@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Resources;
+using System.Threading;
 using System.Threading.Tasks;
 
 using uSync.BackOffice.Configuration;
@@ -66,7 +67,7 @@ internal class SyncActionService : ISyncActionService
 
         var handlerOptions = new SyncHandlerOptions
         {
-            Group = options.GetGroupOrDefault(_uSyncConfig.Settings.UIEnabledGroups),
+            Group = string.IsNullOrWhiteSpace(options.Group) ? _uSyncConfig.Settings.UIEnabledGroups : options.Group,
             Action = action,
             Set = handlerSet
         };
@@ -79,6 +80,8 @@ internal class SyncActionService : ISyncActionService
     public async Task<SyncActionResult> ReportHandlerAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
         if (options.Handler is null) return new();
+
+        await RunPendingKeyScanAsync(options, HandlerActions.Report);
 
         var importOptions = new uSyncImportOptions
         {
@@ -98,6 +101,8 @@ internal class SyncActionService : ISyncActionService
     public async Task<SyncActionResult> ImportHandlerAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
         if (options.Handler is null) return new();
+
+        await RunPendingKeyScanAsync(options, HandlerActions.Import);
 
         var importOptions = new uSyncImportOptions
         {
@@ -197,12 +202,36 @@ internal class SyncActionService : ISyncActionService
 
         await _uSyncService.StartBulkProcessAsync(request.HandlerAction);
 
+        // the UI runs one handler per request, so the key scan (which needs
+        // every handler) runs at the start of the first handler request.
+        if (_uSyncConfig.Settings.KeyConflict == SyncKeyConflictMode.Map
+            && request.HandlerAction is HandlerActions.Import or HandlerActions.Report)
+        {
+            Interlocked.Exchange(ref _keyScanPending, 1);
+        }
+
         if (request.HandlerAction == HandlerActions.Export && request.Clean is true)
         {
             // clean the export folder.  
             CleanExportFolder();
         }
 
+    }
+
+    private int _keyScanPending;
+
+    private async Task RunPendingKeyScanAsync(SyncActionOptions options, HandlerActions action)
+    {
+        if (Interlocked.Exchange(ref _keyScanPending, 0) == 0) return;
+
+        var handlers = _handlerFactory.GetValidHandlers(new SyncHandlerOptions
+        {
+            Group = string.IsNullOrWhiteSpace(options.Group) ? _uSyncConfig.Settings.UIEnabledGroups : options.Group,
+            Action = action,
+            Set = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet)
+        });
+
+        await _uSyncService.ScanKeyConflictsAsync([.. options.GetFoldersOrDefault(_uSyncConfig.GetFolders())], handlers);
     }
 
     /// <inheritdoc/>

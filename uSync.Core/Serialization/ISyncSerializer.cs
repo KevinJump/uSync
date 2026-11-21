@@ -59,6 +59,15 @@ public interface ISyncSerializer<TObject> : ISyncSerializerBase
     Task<TObject?> FindItemAsync(XElement node);
     Task<TObject?> FindItemAsync(Guid key);
     Task<TObject?> FindItemAsync(string alias);
+
+    /// <summary>
+    ///  find an existing item that matches the node by name/alias (ignoring the key).
+    /// </summary>
+    /// <remarks>
+    ///  used by key mapping (KeyConflict: Map) to find items on this site
+    ///  that have a different key to the file.
+    /// </remarks>
+    Task<TObject?> FindItemByNameAsync(XElement node) => Task.FromResult<TObject?>(default);
     Task SaveItemAsync(TObject item);
     Task DeleteItemAsync(TObject item);
 

@@ -112,7 +112,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         if (item.Key != key)
         {
             details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key, uSyncConstants.Xml.Key);
-            item.Key = key;
+            SyncKeyHelper.SetKey(item, key, name);
         }
 
         var editorAlias = info?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
