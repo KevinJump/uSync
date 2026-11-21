@@ -8,7 +8,7 @@ namespace uSync.Core.DataTypes.DataTypeSerializers;
 internal class NumericMigratingConfigSerializer : ConfigurationSerializerBase, IConfigurationSerializer
 {
     public string Name => nameof(NumericMigratingConfigSerializer);
-    public string[] Editors => [
+    public string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.Integer,
         Constants.PropertyEditors.Aliases.Decimal];
 
