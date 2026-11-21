@@ -2,6 +2,7 @@ using Jumoo.Json;
 
 using Microsoft.Extensions.Logging;
 
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -23,9 +24,31 @@ using static uSync.Core.Extensions.ObjectPropertyExtensions;
 
 namespace uSync.Core.Serialization.Serializers;
 
-public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TObject>, ISyncContentSerializer<TObject>
+public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TObject>, ISyncContentSerializer<TObject>, ISyncCachedSerializer
     where TObject : IContentBase
 {
+    /// <summary>
+    ///  keys of the items created during the current import (null when no import cache is active).
+    /// </summary>
+    /// <remarks>
+    ///  a parent created by this import can only have children this import created, and they
+    ///  are found by key - so we don't need to look through its children by name when creating
+    ///  new items beneath it (which on a first import means loading every sibling for every item).
+    /// </remarks>
+    private ConcurrentDictionary<Guid, byte>? _createdKeys;
+
+    /// <inheritdoc/>
+    public virtual void InitializeCache() => _createdKeys = new();
+
+    /// <inheritdoc/>
+    public virtual void DisposeCache() => _createdKeys = null;
+
+    /// <summary>
+    ///  was the item with this key created by the current import?
+    /// </summary>
+    protected bool WasCreatedThisImport(Guid key)
+        => _createdKeys?.ContainsKey(key) is true;
+
     protected UmbracoObjectTypes umbracoObjectType;
     protected UmbracoObjectTypes containerType = UmbracoObjectTypes.Unknown;
 
@@ -859,31 +882,40 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         var parentKey = node.GetParentKey();
 
-        if (parentKey != Guid.Empty)
-        {
-            item = await FindItemAsync(alias, parentKey);
-            if (item is not null)
-                return Attempt.Succeed(item);
-        }
-
-        // create
         var parent = default(TObject);
 
         if (parentKey != Guid.Empty)
         {
             parent = await FindItemAsync(parentKey);
+
+            // look for an existing item with the same name under the parent - unless this
+            // import created the parent, then any children it has were also created by this
+            // import and would have been found by their key above.
+            if (parent is not null && WasCreatedThisImport(parentKey) is false)
+            {
+                item = await FindItemAsync(alias, parent);
+                if (item is not null)
+                    return Attempt.Succeed(item);
+            }
         }
 
+        // create
         var contentTypeAlias = node.Element(uSyncConstants.Xml.Info)?
             .Element("ContentType").ValueOrDefault(node.Name.LocalName) ?? node.Name.LocalName;
 
-        return await CreateItemAsync(new ContentItemCreationOptions
+        var attempt = await CreateItemAsync(new ContentItemCreationOptions
         {
             Alias = alias,
             Parent = parent,
             ContentTypeAlias = contentTypeAlias,
             Node = node,
         }, options);
+
+        var key = node.GetKey();
+        if (attempt.Success && key != Guid.Empty)
+            _createdKeys?.TryAdd(key, 0);
+
+        return attempt;
     }
 
     protected virtual Task<Attempt<TObject?>> CreateItemAsync(ContentItemCreationOptions creation, SyncSerializerOptions options)

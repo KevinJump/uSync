@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -78,11 +79,17 @@ public class MediaHandler : ContentHandlerBase<IMedia>, ISyncHandler, ISyncClean
             {
                 items.AddRange(_mediaService.GetPagedChildren(parent.Id, page++, pageSize, out total));
             }
+
+            // one (light) entity query tells us which children have no children of their own,
+            // so the export doesn't have to query for the children of every leaf item.
+            if (items.Count > 0) RememberLeaves(entityService.GetChildren(parent.Id));
             return items;
         }
         else
         {
-            return await Task.FromResult(_mediaService.GetRootMedia());
+            var rootItems = _mediaService.GetRootMedia().ToList();
+            if (rootItems.Count > 0) RememberLeaves(entityService.GetChildren(Umbraco.Cms.Core.Constants.System.Root));
+            return await Task.FromResult(rootItems);
         }
     }
 

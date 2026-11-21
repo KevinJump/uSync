@@ -147,6 +147,19 @@ public interface ISyncFileService
     Task<Guid> LoadKeyFromFileAsync(string file);
 
     /// <summary>
+    ///  load just the root element of a file (its name and attributes, without any child nodes).
+    /// </summary>
+    /// <remarks>
+    ///  This streams the file and stops at the root element, for when all we need is the
+    ///  item's Key, Alias or 'empty' action (e.g. when looking for duplicate files of an item).
+    /// </remarks>
+    async Task<XElement> LoadRootElementAsync(string file)
+    {
+        var node = await LoadXElementAsync(file);
+        return new XElement(node.Name, node.Attributes());
+    }
+
+    /// <summary>
     ///  merge all the files in the given folders into a single xml node, that can be bulk imported
     /// </summary>
     Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string fileName, string extension);
