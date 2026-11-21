@@ -315,6 +315,19 @@ public class uSyncSettings
     public SyncProcessingMode ProcessingMode { get; set; } = SyncProcessingMode.Normal;
 
     /// <summary>
+    ///  What to do when an item on this site matches an item in the uSync files
+    ///  (by name or alias) but has a different key.
+    /// </summary>
+    /// <remarks>
+    ///  Set (the default) sets the key on the item, which Umbraco 18+ won't allow,
+    ///  so the import fails with a key-conflict error. Map keeps a map of file keys
+    ///  to the keys on this site and swaps them in the files as they are imported.
+    ///  None of the mapping code runs unless this is Map.
+    /// </remarks>
+    [DefaultValue(SyncKeyConflictMode.Set)]
+    public SyncKeyConflictMode KeyConflict { get; set; } = SyncKeyConflictMode.Set;
+
+    /// <summary>
     ///  location of the 'production' folder to use when in production mode,
     ///  or when creating the production mode files.
     /// </summary>
@@ -386,4 +399,21 @@ public enum SyncProcessingMode
     ///  Background processing things happen in the background. 
     /// </summary>
     Background,
+}
+
+/// <summary>
+///  how uSync handles an item that matches by name but has a different key.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<SyncKeyConflictMode>))]
+public enum SyncKeyConflictMode
+{
+    /// <summary>
+    ///  set the key on the item (fails on Umbraco 18+ with a key-conflict error).
+    /// </summary>
+    Set,
+
+    /// <summary>
+    ///  map the key in the files to the key on this site.
+    /// </summary>
+    Map,
 }

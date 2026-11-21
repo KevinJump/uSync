@@ -161,6 +161,14 @@ public interface ISyncHandler
     Task<IReadOnlyList<OrderedNodeInfo>> FetchAllNodesAsync(string[] folders);
 
     /// <summary>
+    ///  add items that match by name/alias but have a different key to the key map.
+    /// </summary>
+    /// <remarks>
+    ///  only does anything when KeyConflict is set to Map.
+    /// </remarks>
+    Task ScanKeyConflictsAsync(IEnumerable<XElement> nodes) => Task.CompletedTask;
+
+    /// <summary>
     ///  find an element by its key
     /// </summary>
     /// <param name="key"></param>

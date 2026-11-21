@@ -154,6 +154,15 @@ public interface ISyncService
     /// </summary>
     Task StartBulkProcessAsync(HandlerActions action);
 
+    /// <summary>
+    ///  scan the files for the handlers, and add any items that match by name/alias
+    ///  but have a different key to the key map.
+    /// </summary>
+    /// <remarks>
+    ///  only does anything when KeyConflict is set to Map. 
+    /// </remarks>
+    Task ScanKeyConflictsAsync(string[] folders, IEnumerable<HandlerConfigPair> handlers) => Task.CompletedTask;
+
 
     /// <summary>
     ///  trigger the end of the bulk process

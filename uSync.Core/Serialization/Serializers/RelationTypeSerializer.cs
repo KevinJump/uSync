@@ -49,7 +49,7 @@ public class RelationTypeSerializer
         if (item.Key != key)
         {
             details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
-            item.Key = key;
+            SyncKeyHelper.SetKey(item, key, alias);
         }
 
         if (item.Name != name)

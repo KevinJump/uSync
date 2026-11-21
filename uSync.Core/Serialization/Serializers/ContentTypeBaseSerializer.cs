@@ -266,7 +266,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (item.Key != key)
         {
             changes.AddUpdate(uSyncConstants.Xml.Key, item.Key, key, "");
-            item.Key = key;
+            SyncKeyHelper.SetKey(item, key, node.GetAlias());
         }
 
         var alias = SetSafeAliasValue(item, node, true);
@@ -488,7 +488,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             if (key != Guid.Empty && result.Property.Key != key)
             {
                 changes.AddUpdate(uSyncConstants.Xml.Key, result.Property.Key, key, $"{alias}/Key");
-                result.Property.Key = key;
+                SyncKeyHelper.SetKey(result.Property, key, $"{item.Alias}/{alias}");
             }
 
             if (result.Property.Alias != alias)
@@ -877,7 +877,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 if (tab.Key != Guid.Empty && existing.Key != tab.Key)
                 {
                     changes.AddUpdate(uSyncConstants.Xml.Key, existing.Key.ToString(), tab.Key.ToString(), $"Tabs/{tab.Name}/Key");
-                    existing.Key = tab.Key;
+                    SyncKeyHelper.SetKey(existing, tab.Key, $"{item.Alias}/{tab.Alias}");
                 }
 
                 if (existing.SortOrder != tab.SortOrder)
