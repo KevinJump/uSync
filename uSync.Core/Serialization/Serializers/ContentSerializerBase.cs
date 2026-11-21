@@ -485,7 +485,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             var oldKey = item.Key;
             SyncKeyHelper.SetKey(item, key, item.Name ?? node.GetAlias());
 
-            if (item.Id > 0 && options.DoNotSave is false)
+            if (item.HasIdentity && options.DoNotSave is false)
                 await OnKeyChange(item, oldKey, key);
         }
 
