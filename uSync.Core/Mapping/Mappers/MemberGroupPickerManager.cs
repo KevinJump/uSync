@@ -23,7 +23,7 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
     }
 
     public override string Name => "Member Group Picker Mapper";
-    public override string[] Editors => [
+    public override string[] Editors { get; } = [
         Umbraco.Cms.Core.Constants.PropertyEditors.Aliases.MemberGroupPicker
     ];
 

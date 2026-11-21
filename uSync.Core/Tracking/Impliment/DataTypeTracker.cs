@@ -21,7 +21,7 @@ public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<ID
         _configMergers = configMergers;
     }
 
-    public override List<TrackingItem> TrackingItems =>
+    public override List<TrackingItem> TrackingItems { get; protected set; } =
     [
         TrackingItem.Single("Name", "/Info/Name"),
         TrackingItem.Single("EditorAlias", "/Info/EditorAlias"),

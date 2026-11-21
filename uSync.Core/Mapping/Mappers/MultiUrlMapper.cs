@@ -18,7 +18,7 @@ public class MultiUrlMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "MultiUrl Mapper";
 
-    public override string[] Editors => [
+    public override string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.MultiUrlPicker
     ];
 

@@ -38,4 +38,8 @@
 	  <Folder Include="Notifications\" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="uSync.Tests" />
+	</ItemGroup>
+
 </Project>

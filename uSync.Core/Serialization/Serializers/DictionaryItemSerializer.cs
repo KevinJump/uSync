@@ -248,7 +248,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
 
     protected override XElement CleanseNode(XElement node)
     {
-        var clone = XElement.Parse(node.ToString());
+        var clone = node.CloneWithoutWhitespace();
         var keyAttribute = clone.Attribute(uSyncConstants.Xml.Key);
         if (keyAttribute != null) keyAttribute.Value = Guid.Empty.ToString();
         return base.CleanseNode(clone);

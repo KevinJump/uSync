@@ -9,7 +9,7 @@ namespace uSync.Core.DataTypes.DataTypeSerializers;
 internal class DataListMigratingConfigSerializer : ConfigurationSerializerBase, IConfigurationSerializer
 {
     public string Name => nameof(DataListMigratingConfigSerializer);
-    public string[] Editors => [
+    public string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.CheckBoxList,
         Constants.PropertyEditors.Aliases.DropDownListFlexible,
         Constants.PropertyEditors.Aliases.RadioButtonList

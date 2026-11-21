@@ -10,7 +10,7 @@ public class TemplateTracker : SyncXmlTrackAndMerger<ITemplate>, ISyncTracker<IT
         : base(serializers)
     { }
 
-    public override List<TrackingItem> TrackingItems =>
+    public override List<TrackingItem> TrackingItems { get; protected set; } =
     [
         TrackingItem.Single("Name", "/Name"),
         TrackingItem.Single("Parent", "/Parent"),
