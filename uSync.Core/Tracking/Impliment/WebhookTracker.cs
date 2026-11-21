@@ -10,7 +10,7 @@ namespace uSync.Core.Tracking.Impliment
         {
         }
 
-        public override List<TrackingItem> TrackingItems => [
+        public override List<TrackingItem> TrackingItems { get; protected set; } = [
             TrackingItem.Single("Enabled", "/Enabled"),
             TrackingItem.Many("Events", "/Events/Event", "Event"),
             TrackingItem.Many("Headers", "/Headers/Header", "@Key"),

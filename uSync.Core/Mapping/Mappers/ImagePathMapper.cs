@@ -42,7 +42,7 @@ public class ImagePathMapper : ImagePathMapperBase, ISyncMapper
 
     public override string Name => "ImageCropper Mapper";
 
-    public override string[] Editors => [
+    public override string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.ImageCropper
     ];
 

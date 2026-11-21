@@ -10,7 +10,7 @@ public class DictionaryItemTracker : SyncXmlTrackAndMerger<IDictionaryItem>, ISy
         : base(serializers)
     { }
 
-    public override List<TrackingItem> TrackingItems =>
+    public override List<TrackingItem> TrackingItems { get; protected set; } =
     [
         TrackingItem.Single("Parent", "/Info/Parent"),
         TrackingItem.Many("Translation", "/Translations/Translation", "@Language")

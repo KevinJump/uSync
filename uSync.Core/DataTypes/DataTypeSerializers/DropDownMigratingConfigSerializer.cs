@@ -14,7 +14,7 @@ internal class DropDownMigratingConfigSerializer : ConfigurationSerializerBase, 
     private const string _multipleKey = "multiple";
 
     public string Name => nameof(DropDownMigratingConfigSerializer);
-    public string[] Editors => [Constants.PropertyEditors.Aliases.MultipleDropDown];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.MultipleDropDown];
 
     public SyncEditorReplacement? GetEditorReplacement(string editorAlias, IDictionary<string, object> configuration)
         => configuration.TryGetBoolean(_multipleKey, out var multiple) && multiple is false

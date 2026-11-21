@@ -56,7 +56,7 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper, ISyncProperty
 
     public override string Name => "TinyMCE RTE Mapper";
 
-    public override string[] Editors => [
+    public override string[] Editors { get; } = [
         "Umbraco.TinyMCE",
         Constants.PropertyEditors.Aliases.RichText,
         $"{Constants.PropertyEditors.Aliases.Grid}.rte"

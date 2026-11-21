@@ -11,7 +11,7 @@ public class DomainTracker : SyncXmlTrackAndMerger<IDomain>, ISyncTracker<IDomai
     {
     }
 
-    public override List<TrackingItem> TrackingItems =>
+    public override List<TrackingItem> TrackingItems { get; protected set; } =
     [
         TrackingItem.Single("Domain > Wildcard", "/Info/IsWildcard"),
         TrackingItem.Single("Domain > Language", "/Info/Language"),

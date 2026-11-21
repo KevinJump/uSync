@@ -16,7 +16,7 @@ public class RichTextConfigSerializer : SyncDataTypeSerializerBase, IConfigurati
 
     public string Name => "RichTextNodeSerializer";
 
-    public string[] Editors => ["Umbraco.RichText"];
+    public string[] Editors { get; } = ["Umbraco.RichText"];
 
     private const string _mediaParentIdKey = "mediaParentId";
 

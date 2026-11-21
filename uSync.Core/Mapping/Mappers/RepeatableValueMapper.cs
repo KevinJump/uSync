@@ -18,7 +18,7 @@ public class RepeatableValueMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "Repeatable Text Mapper";
 
-    public override string[] Editors => [
+    public override string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.MultipleTextstring
     ];
 

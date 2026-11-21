@@ -38,7 +38,7 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
     public override string Name => "RTE Block Data Content Mapper";
 
     /// <inheritdoc />
-    public override string[] Editors => [
+    public override string[] Editors { get; } = [
         "Umbraco.TinyMCE",
         Constants.PropertyEditors.Aliases.RichText,
         $"{Constants.PropertyEditors.Aliases.Grid}.rte"

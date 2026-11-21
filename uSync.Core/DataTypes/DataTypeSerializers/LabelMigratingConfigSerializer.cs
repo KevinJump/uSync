@@ -8,7 +8,7 @@ internal class LabelMigratingConfigSerializer : ConfigurationSerializerBase, ICo
     private const string _valueTypeKey = Constants.PropertyEditors.ConfigurationKeys.DataValueType;
 
     public string Name => nameof(LabelMigratingConfigSerializer);
-    public string[] Editors => [Constants.PropertyEditors.Aliases.Label];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.Label];
 
     /// <summary>
     ///  v19 gives each label value type its own editor (Umbraco.Label.Integer, etc.)

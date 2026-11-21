@@ -6,7 +6,7 @@ internal class MultipleTextMigratingConfigSerializer : ConfigurationSerializerBa
 {
     public string Name => nameof(MultipleTextMigratingConfigSerializer);
 
-    public string[] Editors => [Constants.PropertyEditors.Aliases.MultipleTextstring];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.MultipleTextstring];
 
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
         => MigratePropertyNames(configuration, new()

@@ -24,7 +24,7 @@ public class KeyPickerMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "Key Picker Mapper";
 
-    public override string[] Editors => [
+    public override string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.MultipleDocumentPicker,
         Constants.PropertyEditors.Aliases.MultipleMemberPicker
     ];

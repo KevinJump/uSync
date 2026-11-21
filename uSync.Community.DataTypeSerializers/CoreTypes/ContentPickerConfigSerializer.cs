@@ -15,7 +15,7 @@ public class ContentPickerConfigSerializer : SyncDataTypeSerializerBase, IConfig
     { }
 
     public string Name => "ContentPickerNodeSerializer";
-    public string[] Editors => ["Umbraco.ContentPicker"];
+    public string[] Editors { get; } = ["Umbraco.ContentPicker"];
 
     private const string _startNodeIdKey = "startNodeId";
 

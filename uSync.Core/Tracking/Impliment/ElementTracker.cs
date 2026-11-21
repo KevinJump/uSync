@@ -10,7 +10,7 @@ public class ElementTracker : SyncXmlTrackAndMerger<EntityContainer>, ISyncTrack
         : base(serializers)
     { }
 
-    public override List<TrackingItem> TrackingItems =>
+    public override List<TrackingItem> TrackingItems { get; protected set; } =
     [
         TrackingItem.Single("Parent", "/Parent"),
         TrackingItem.Single("SortOrder", "/SortOrder")

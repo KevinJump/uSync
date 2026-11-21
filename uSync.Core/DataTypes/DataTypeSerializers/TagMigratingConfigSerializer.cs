@@ -6,7 +6,7 @@ internal class TagMigratingConfigSerializer : ConfigurationSerializerBase, IConf
 {
     public string Name => nameof(TagMigratingConfigSerializer);
 
-    public string[] Editors => [Constants.PropertyEditors.Aliases.Tags];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.Tags];
 
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
     {

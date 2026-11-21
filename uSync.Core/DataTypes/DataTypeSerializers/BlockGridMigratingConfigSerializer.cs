@@ -17,7 +17,7 @@ internal class BlockGridMigratingConfigSerializer : ConfigurationSerializerBase,
     private const string _maxAllowedKey = "maxAllowed";
 
     public string Name => nameof(BlockGridMigratingConfigSerializer);
-    public string[] Editors => [Constants.PropertyEditors.Aliases.BlockGrid];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.BlockGrid];
 
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
     {

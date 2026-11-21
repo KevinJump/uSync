@@ -26,7 +26,7 @@ public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "MediaPicker3 Mapper";
 
-    public override string[] Editors => [
+    public override string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.MediaPicker3,
         Constants.PropertyEditors.Aliases.SingleMediaPicker];
 

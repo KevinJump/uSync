@@ -8,7 +8,7 @@ namespace uSync.Core.Mapping.Mappers;
 internal class BlockGridMapper : SyncBlockMapperBase<BlockGridValue>, ISyncMapper
 {
     public override string Name => "NuBlock Grid Mapper";
-    public override string[] Editors => [Constants.PropertyEditors.Aliases.BlockGrid];
+    public override string[] Editors { get; } = [Constants.PropertyEditors.Aliases.BlockGrid];
 
     public BlockGridMapper(
         IEntityService entityService,

@@ -12,7 +12,7 @@ internal class MultiUrlPickerMigratingConfigSerializer : ConfigurationSerializer
     private const string _maxNumberKey = "maxNumber";
 
     public string Name => nameof(MultiUrlPickerMigratingConfigSerializer);
-    public string[] Editors => [Constants.PropertyEditors.Aliases.MultiUrlPicker];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.MultiUrlPicker];
 
     public SyncEditorReplacement? GetEditorReplacement(string editorAlias, IDictionary<string, object> configuration)
         => IsSingleLink(configuration)
