@@ -349,6 +349,16 @@ public abstract class SyncSerializerRoot<TObject>
         }
     }
 
+    /// <summary>
+    ///  find an existing item that matches the node by name/alias (ignoring the key).
+    /// </summary>
+    public virtual async Task<TObject?> FindItemByNameAsync(XElement node)
+    {
+        var (_, alias) = FindKeyAndAlias(node);
+        if (string.IsNullOrWhiteSpace(alias)) return default;
+        return await FindItemAsync(alias);
+    }
+
     public virtual async Task<TObject?> FindItemAsync(XElement node)
     {
         var (key, alias) = FindKeyAndAlias(node);

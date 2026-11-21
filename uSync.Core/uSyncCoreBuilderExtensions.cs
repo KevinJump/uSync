@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using Umbraco.Cms.Core.DependencyInjection;
 
@@ -75,6 +76,9 @@ public static class uSyncCoreBuilderExtensions
             .Add(builder.TypeLoader.GetTypes<ISyncDependencyItem>());
 
         // the item factory lets us get to these collections from one place. 
+        // key map does nothing in core, the back office replaces it when KeyConflict is Map.
+        builder.Services.TryAddSingleton<ISyncKeyMap, NullSyncKeyMap>();
+
         builder.Services.AddSingleton<ISyncItemFactory, SyncItemFactory>();
 
         return builder;

@@ -485,7 +485,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             var oldKey = item.Key;
             SyncKeyHelper.SetKey(item, key, item.Name ?? node.GetAlias());
 
-            if (item.HasIdentity && options.DoNotSave is false)
+            // the key isn't changed when key mapping is on.
+            if (item.Key == key && item.HasIdentity && options.DoNotSave is false)
                 await OnKeyChange(item, oldKey, key);
         }
 
@@ -1042,6 +1043,24 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // if we get here, we could try for parent alias, alias ??
         // (really we would need full path e.g home/blog/2019/posts/)
         return default;
+    }
+
+    /// <summary>
+    ///  content is matched by name under its parent (as when importing).
+    /// </summary>
+    public override async Task<TObject?> FindItemByNameAsync(XElement node)
+    {
+        var parentKey = node.Element(uSyncConstants.Xml.Info)
+            ?.Element(uSyncConstants.Xml.Parent)
+            ?.Attribute(uSyncConstants.Xml.Key)
+            .ValueOrDefault(Guid.Empty) ?? Guid.Empty;
+
+        if (parentKey == Guid.Empty) return default;
+
+        var parent = await FindItemAsync(parentKey);
+        if (parent is null) return default;
+
+        return await FindItemAsync(node.GetAlias(), parent);
     }
 
     public override Task<TObject?> FindItemAsync(string alias)

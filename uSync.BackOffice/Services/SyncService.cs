@@ -179,6 +179,9 @@ public partial class SyncService : ISyncService
                 Status = HandlerStatus.Pending
             });
 
+            // find items that match by name but have a different key (KeyConflict: Map only)
+            await ScanKeyConflictsAsync(folders, handlers);
+
             var importOptions = new uSyncImportOptions
             {
                 Flags = force ? SerializerFlags.Force : SerializerFlags.None,

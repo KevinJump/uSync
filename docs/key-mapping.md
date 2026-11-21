@@ -1,6 +1,8 @@
 # Key mapping (Umbraco 18+)
 
-Status: design sketch. Rollout step 1 (key-conflict error) is built; the rest isn't.
+Status: built. Step 1 (key-conflict error) shipped in #1276; steps 2-4
+(`KeyConflict: Map`) are built as described below, with the changes listed
+under [As built](#as-built).
 
 ## Problem
 
@@ -259,3 +261,44 @@ map.
 - `Map`, mapped item deleted locally, then the import runs again: the entry
   is removed and the item is created with the file key.
 - Two siblings with the same name: a key-conflict error, no mapping.
+
+## As built
+
+Where the build differs from the design above:
+
+- **Storage**: no new table. The map is one JSON value in Umbraco's
+  `umbracoKeyValue` table (key `uSync_KeyMap`), loaded whole on first use and
+  written back whole on change. No migration, so first-boot imports can use it
+  too. Writes are held while a batch is open (`ISyncKeyMap.BeginBatch`): the
+  scan and `ImportAllAsync` each write once.
+- **Where it runs**: in the handlers (`SyncHandlerRoot`), not the serializer
+  root. Handlers reach the map through `ISyncItemFactory.KeyMap`, so no
+  handler or serializer constructors changed. Localize + discovery run at
+  `ImportSingleElementAsync`, `ReportElementSingleAsync`, `BuildPreviewAsync`,
+  and Localize at `ImportSecondPassAsync`. Every caller (UI, startup,
+  Publisher, TimeMachine) goes through these.
+- **Discovery** uses a new `ISyncSerializer.FindItemByNameAsync(node)`.
+  Content's `FindItemAsync(node)` only matches by key, and its name match lives
+  in `FindOrCreateAsync`, so the new method copies that match (by name under
+  the parent). Content at the root isn't matched by name, as before.
+- **Property types, tabs and containers**: `SyncKeyHelper.SetKey` checks an
+  ambient scope (`SyncKeyHelper.BeginKeyMapScope`, an `AsyncLocal`) that the
+  handler opens around each item. Inside it, a saved item with a different key
+  is mapped instead of changed, so these are mapped as they're imported and
+  swapped on the next run. This also applies on v17 when `Map` is on: `Map`
+  means map, whatever the Umbraco version.
+- **Clean**: keys read from files for clean/delete-missing checks go through
+  the map (`ToLocalKey`), so mapped items aren't deleted as "missing".
+- **Pre-scan**: `ISyncService.ScanKeyConflictsAsync(folders, handlers)`. It runs
+  before the handler loop in `SyncService.ImportAsync`. In the UI
+  (`SyncActionService`) the start request marks a scan as pending, and the
+  first Import/Report handler request runs it over every handler in the
+  set/group, so the client didn't change. Production (single file) folders are
+  scanned too.
+- **Paged imports** (`ImportPartialAsync`/`ReportPartialAsync`, used by
+  Publisher) get per-item discovery only, with no pre-scan. Forward references
+  in a first paged import can be missed until the next run.
+- **View/clear**: a health check ("uSync - Key map") lists the mappings and has
+  actions to remove one mapping or clear them all. There's no dashboard UI.
+- **Ambiguous name matches** aren't detected. The first match wins, as in
+  `FindOrCreateAsync`.
