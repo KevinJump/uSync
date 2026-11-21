@@ -1,9 +1,6 @@
 ﻿using Jumoo.Json;
 
-using Microsoft.Extensions.DependencyInjection;
-
 using Umbraco.Cms.Core;
-using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.PropertyEditors;
@@ -115,18 +112,16 @@ public abstract class SyncValueMapperBase
             : entityService.Get(udi.Guid);
     }
 
-    private SyncEntityCache? _entityCache;
-
     /// <summary>
     ///  the uSync entity cache (cleared at the start and end of each sync run and when content or media changes).
     /// </summary>
     /// <remarks>
-    ///  resolved when first needed, so mappers don't need it in their constructors. Only use
-    ///  it for lookups where a briefly out of date name doesn't matter (e.g dependency checks),
-    ///  because it isn't cleared when every type of item is saved.
+    ///  set by the <see cref="SyncValueMapperCollection"/> when it hands out the mapper, so mappers
+    ///  don't need it in their constructors (null when a mapper is used outside the collection).
+    ///  Only use it for lookups where a briefly out of date name doesn't matter (e.g dependency
+    ///  checks), because it isn't cleared when every type of item is saved.
     /// </remarks>
-    protected SyncEntityCache? EntityCache
-        => _entityCache ??= StaticServiceProvider.Instance?.GetService<SyncEntityCache>();
+    protected internal SyncEntityCache? EntityCache { get; internal set; }
 
     /// <summary>
     ///  helper to convert object to a string (with all the checks)
