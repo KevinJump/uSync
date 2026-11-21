@@ -92,7 +92,12 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
     {
         return uSyncTaskHelper.FromResultOf<IEnumerable<IEntity>>(() =>
         {
-            if (parent is null) return _contentService.GetRootContent();
+            if (parent is null)
+            {
+                var rootItems = _contentService.GetRootContent().ToList();
+                if (rootItems.Count > 0) RememberLeaves(entityService.GetChildren(Umbraco.Cms.Core.Constants.System.Root));
+                return rootItems;
+            }
 
             var items = new List<IContent>();
             const int pageSize = 5000;
@@ -110,6 +115,10 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
                     ordering: null,
                     loadTemplates: true));
             }
+
+            // one (light) entity query tells us which children have no children of their own,
+            // so the export doesn't have to query for the children of every leaf item.
+            if (items.Count > 0) RememberLeaves(entityService.GetChildren(parent.Id));
             return items;
 
         });

@@ -89,7 +89,7 @@ internal class SyncFileService : ISyncFileService
     public void DeleteFile(string path)
     {
         var localPath = GetAbsPath(path);
-        if (FileExists(localPath))
+        if (File.Exists(localPath))
             File.Delete(localPath);
     }
 
@@ -105,7 +105,7 @@ internal class SyncFileService : ISyncFileService
     {
         var localPath = GetAbsPath(path);
 
-        if (!FileExists(localPath)) return null;
+        if (!File.Exists(localPath)) return null;
         return File.OpenRead(localPath);
     }
 
@@ -113,12 +113,10 @@ internal class SyncFileService : ISyncFileService
     public FileStream OpenWrite(string path)
     {
         var localPath = GetAbsPath(path);
+        CreateFoldersForFile(localPath);
 
-        if (FileExists(localPath))
-            DeleteFile(localPath);
-
-        CreateFoldersForFile(path);
-        return File.OpenWrite(localPath);
+        // FileMode.Create truncates an existing file, so we don't need to check for and delete it first.
+        return new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.None);
     }
 
     /// <inheritdoc/>
@@ -171,7 +169,7 @@ internal class SyncFileService : ISyncFileService
     {
         var localPath = GetAbsPath(folder);
 
-        if (!DirectoryExists(localPath)) return [];
+        if (!Directory.Exists(localPath)) return [];
 
         return Directory.GetFiles(localPath, extensions, allFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
     }
@@ -180,7 +178,7 @@ internal class SyncFileService : ISyncFileService
     public IEnumerable<string> GetDirectories(string folder)
     {
         var localPath = GetAbsPath(folder);
-        if (!DirectoryExists(localPath)) return [];
+        if (!Directory.Exists(localPath)) return [];
 
         return Directory.GetDirectories(localPath);
 
@@ -189,20 +187,19 @@ internal class SyncFileService : ISyncFileService
     /// <inheritdoc/>
     public async Task<XElement> LoadXElementAsync(string file)
     {
-        EnsureFileExists(file);
+        var localPath = GetAbsPath(file);
 
         try
         {
-            using (var stream = OpenRead(file))
+            using (var stream = OpenReadOrThrow(localPath))
+            using (var xmlReader = XmlReader.Create(stream, _readerSettings.Clone()))
             {
-                if (stream is null)
-                    throw new FileNotFoundException($"Cannot create stream for {file}"); ;
-
-                using (var xmlReader = XmlReader.Create(stream, _readerSettings.Clone()))
-                {
-                    return await XElement.LoadAsync(xmlReader, LoadOptions.PreserveWhitespace, CancellationToken.None);    
-                }
+                return await XElement.LoadAsync(xmlReader, LoadOptions.PreserveWhitespace, CancellationToken.None);
             }
+        }
+        catch (FileNotFoundException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -224,36 +221,70 @@ internal class SyncFileService : ISyncFileService
     /// <inheritdoc/>
     public async Task<Guid> LoadKeyFromFileAsync(string file)
     {
-        EnsureFileExists(file);
+        var root = await ReadRootElementAsync(file);
+        return root?.GetKey() ?? Guid.Empty;
+    }
+
+    /// <inheritdoc/>
+    public async Task<XElement> LoadRootElementAsync(string file)
+        => await ReadRootElementAsync(file)
+            ?? throw new Exception($"No root element found in {file}");
+
+    private async Task<XElement?> ReadRootElementAsync(string file)
+    {
+        var localPath = GetAbsPath(file);
 
         try
         {
-            using (var stream = OpenRead(file))
+            using (var stream = OpenReadOrThrow(localPath))
+            using (var reader = XmlReader.Create(stream, _keyReaderSettings.Clone()))
             {
-                if (stream is null)
-                    throw new FileNotFoundException($"Cannot create stream for {file}");
-
-                using (var reader = XmlReader.Create(stream, _keyReaderSettings.Clone()))
+                // move to the first (root) element and copy its attributes,
+                // we don't need to read any further into the document.
+                while (await reader.ReadAsync())
                 {
-                    // move to the first (root) element and read its Key attribute,
-                    // we don't need to read any further into the document.
-                    while (await reader.ReadAsync())
-                    {
-                        if (reader.NodeType != XmlNodeType.Element) continue;
+                    if (reader.NodeType != XmlNodeType.Element) continue;
 
-                        var key = reader.GetAttribute(global::uSync.Core.uSyncConstants.Xml.Key);
-                        return Guid.TryParse(key, out var guid) ? guid : Guid.Empty;
+                    var root = new XElement(XName.Get(reader.LocalName, reader.NamespaceURI));
+                    while (reader.MoveToNextAttribute())
+                    {
+                        if (reader.NamespaceURI == XNamespace.Xmlns.NamespaceName) continue;
+                        root.Add(new XAttribute(XName.Get(reader.LocalName, reader.NamespaceURI), reader.Value));
                     }
+                    return root;
                 }
             }
         }
+        catch (FileNotFoundException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
-            _logger.LogWarning("Error while reading key from {file} {message}", file, ex.Message);
-            throw new Exception($"Error while reading key from {file}", ex);
+            _logger.LogWarning("Error while reading root element from {file} {message}", file, ex.Message);
+            throw new Exception($"Error while reading root element from {file}", ex);
         }
 
-        return Guid.Empty;
+        return null;
+    }
+
+    /// <summary>
+    ///  open a file for reading, throwing a <see cref="FileNotFoundException"/> if it is missing.
+    /// </summary>
+    /// <remarks>
+    ///  opening the file directly (rather than checking it exists first) saves a
+    ///  file system call per read, which adds up when loading whole folders.
+    /// </remarks>
+    private static FileStream OpenReadOrThrow(string localPath)
+    {
+        try
+        {
+            return File.OpenRead(localPath);
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+        {
+            throw new FileNotFoundException("Missing File", localPath, ex);
+        }
     }
 
     /// <inheritdoc/>
@@ -604,7 +635,6 @@ internal class SyncFileService : ISyncFileService
         var nodes = new List<XElement>(filePaths.Length);
         foreach (var file in filePaths)
         {
-            if (!FileExists(file)) continue;
             var element = await LoadXElementSafeAsync(file);
             if (element != null)
                 nodes.Add(element);
@@ -623,11 +653,11 @@ internal class SyncFileService : ISyncFileService
     private async Task<XElement?> LoadXElementSafeAsync(string file)
     {
         var absPath = GetAbsPath(file);
-        if (FileExists(absPath) is false) return null;
+        if (File.Exists(absPath) is false) return null;
 
         try
         {
-            return await LoadXElementAsync(file);
+            return await LoadXElementAsync(absPath);
         }
         catch
         {

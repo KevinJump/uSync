@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -199,7 +200,43 @@ public abstract class SyncHandlerBase<TObject>
 
     /// <inheritdoc/>
     protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)
-        => await GetChildItemsAsync(parent?.Key ?? Guid.Empty);
+    {
+        // remember the id, so the lookup for children doesn't have to load the parent again to get it.
+        if (parent is not null && parent.Id > 0)
+            GetScopedIdMap()[parent.Key] = parent.Id;
+
+        return await GetChildItemsAsync(parent?.Key ?? Guid.Empty);
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    ///  entities from the entity service tell us if they have children, and handlers that
+    ///  load full items can record which ones are leaves with <see cref="RememberLeaves"/>.
+    /// </remarks>
+    protected override bool IsKnownLeaf(IEntity item)
+        => item is IEntitySlim { HasChildren: false }
+            || GetScopedLeaves().ContainsKey(item.Id);
+
+    /// <summary>
+    ///  record which of these entities have no children, so an export all
+    ///  can skip looking for their children.
+    /// </summary>
+    protected void RememberLeaves(IEnumerable<IEntitySlim> entities)
+    {
+        var leaves = GetScopedLeaves();
+        foreach (var entity in entities.Where(x => x.HasChildren is false))
+            leaves[entity.Id] = 0;
+    }
+
+    // these live in the runtime cache under the current operation's cache scope, so they
+    // are cleared when the operation ends (and are not kept when CacheFolderKeys is off).
+    private ConcurrentDictionary<Guid, int> GetScopedIdMap()
+        => runtimeCache.GetCacheItem($"{GetCacheKeyBase()}_ids", () => new ConcurrentDictionary<Guid, int>())
+            ?? [];
+
+    private ConcurrentDictionary<int, byte> GetScopedLeaves()
+        => runtimeCache.GetCacheItem($"{GetCacheKeyBase()}_leaves", () => new ConcurrentDictionary<int, byte>())
+            ?? [];
 
     /// <summary>
     ///  Get all child items beneath a given item
@@ -228,6 +265,8 @@ public abstract class SyncHandlerBase<TObject>
     /// </summary>
     private Task<IEnumerable<IEntity>> GetEntityChildrenAsync(Guid key, UmbracoObjectTypes objectType)
     {
+        var idMap = GetScopedIdMap();
+
         return uSyncTaskHelper.FromResultOf<IEnumerable<IEntity>>(() => {
 
             // logger.LogDebug("Cache miss [{key}]", cacheKey);
@@ -241,11 +280,16 @@ public abstract class SyncHandlerBase<TObject>
                 // If you ask for the type then you get more info, and there is extra db calls to 
                 // load it, so GetChildren without the object type is quicker. 
 
-                var item = entityService.Get(key);
-                if (item is null) return [];
+                if (idMap.TryGetValue(key, out var id) is false)
+                {
+                    var item = entityService.Get(key);
+                    if (item is null) return [];
+                    id = item.Id;
+                }
+
                 // but we need to know that we only get our type so we then filter.
                 var guidType = ObjectTypes.GetGuid(objectType);
-                return entityService.GetChildren(item.Id).Where(x => x.NodeObjectType == guidType);
+                return entityService.GetChildren(id).Where(x => x.NodeObjectType == guidType);
             }
         });
     }
