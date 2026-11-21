@@ -16,7 +16,7 @@ internal class MediaPickerConfigSerializer : PickerConfigurationSerializerBase<I
 
     public string Name => nameof(MediaPickerConfigSerializer);
 
-    public string[] Editors => [
+    public string[] Editors { get; } = [
         "Umbraco.MediaPicker",
         "Umbraco.MediaPicker2",
         "Umbraco.MediaPicker3"];

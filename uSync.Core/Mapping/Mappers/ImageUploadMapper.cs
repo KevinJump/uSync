@@ -25,7 +25,7 @@ public class ImageUploadMapper : ImagePathMapperBase, ISyncMapper
     { }
 
     public override string Name => "Image Upload Mapper";
-    public override string[] Editors => [Constants.PropertyEditors.Aliases.UploadField];
+    public override string[] Editors { get; } = [Constants.PropertyEditors.Aliases.UploadField];
     public override Task<string?> GetExportValueAsync(object value, string editorAlias)
     {
         return uSyncTaskHelper.FromResultOf(() =>

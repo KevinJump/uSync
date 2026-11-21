@@ -11,7 +11,7 @@ namespace uSync.Core.DataTypes.DataTypeSerializers;
 internal class ColourPickerMigratingConfigSerializer : ConfigurationSerializerBase, IConfigurationSerializer
 {
     public string Name => nameof(ColourPickerMigratingConfigSerializer);
-    public string[] Editors => [Constants.PropertyEditors.Aliases.ColorPicker];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.ColorPicker];
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
     {
         if (configuration.TryGetValue("items", out var items) is false || items is null)

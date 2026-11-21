@@ -12,7 +12,7 @@ internal class ImageCropperConfigMerger : SyncConfigMergerBase, ISyncConfigMerge
         {  "crops", (key: "alias", label: "removed") }
     };
 
-    public string[] Editors => [
+    public string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.ImageCropper
     ];
 

@@ -15,7 +15,7 @@ namespace uSync.Core.Roots.Configs;
 /// </remarks>
 internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
 {
-    public string[] Editors => [
+    public string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.BlockGrid
     ];
 

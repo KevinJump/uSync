@@ -43,6 +43,20 @@ public static class JsonTextExtensions
         WriteIndented = false,
     };
 
+    // used when writing a JsonNode back out. cached because every new JsonSerializerOptions
+    // instance builds its own metadata cache, and this is called for every json property value.
+    private static readonly JsonSerializerOptions _nodeIndentedOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    private static readonly JsonSerializerOptions _nodeFlatOptions = new()
+    {
+        WriteIndented = false,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     private static JsonNodeOptions _nodeOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -101,11 +115,7 @@ public static class JsonTextExtensions
     {
         try
         {
-            result = node.ToJsonString(new JsonSerializerOptions
-            {
-                WriteIndented = indent,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
+            result = node.ToJsonString(indent ? _nodeIndentedOptions : _nodeFlatOptions);
 
             return true;
         }

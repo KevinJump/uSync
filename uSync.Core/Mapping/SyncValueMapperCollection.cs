@@ -40,8 +40,19 @@ public class SyncValueMapperCollection
     public IEnumerable<ISyncMapper> GetSyncMappers(string editorAlias)
     {
         var mappedAlias = GetMapperAlias(editorAlias);
-        return this.Where(m => m.IsMapper(mappedAlias)).Select(WithEntityCache);
+        return _mapperCache.GetOrAdd(mappedAlias,
+            alias => [.. this.Where(m => m.IsMapper(alias)).Select(WithEntityCache)]);
     }
+
+    /// <summary>
+    ///  the mappers for each editor alias.
+    /// </summary>
+    /// <remarks>
+    ///  the collection is fixed once built, so the mappers for an alias don't change.
+    ///  this is looked up for every property value we import or export, so we only
+    ///  work it out once per alias.
+    /// </remarks>
+    private readonly ConcurrentDictionary<string, ISyncMapper[]> _mapperCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     ///  give the mapper the entity cache, so its lookups (e.g for dependencies) can use it.
@@ -72,7 +83,7 @@ public class SyncValueMapperCollection
         if (value is null) return string.Empty;
 
         var mappers = GetSyncMappers(editorAlias);
-        if (mappers.Any())
+        if (mappers.Any()) // cached array, so this doesn't re-run the mapper checks.
         {
             var mappedValue = value.ToString() ?? string.Empty;
 

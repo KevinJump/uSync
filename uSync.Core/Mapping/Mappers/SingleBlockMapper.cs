@@ -10,7 +10,7 @@ internal class SingleBlockMapper : SyncBlockMapperBase<SingleBlockValue>, ISyncM
 {
     public override string Name => "NuBlock Single Block mapper";
 
-    public override string[] Editors => [Constants.PropertyEditors.Aliases.SingleBlock];
+    public override string[] Editors { get; } = [Constants.PropertyEditors.Aliases.SingleBlock];
 
     public SingleBlockMapper(
         IEntityService entityService,
