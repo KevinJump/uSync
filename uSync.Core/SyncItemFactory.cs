@@ -1,5 +1,7 @@
 ﻿using System.Xml.Linq;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 
@@ -21,12 +23,24 @@ public class SyncItemFactory : ISyncItemFactory
     private readonly SyncSerializerCollection _syncSerializers;
 
 
+    [Obsolete("Use the constructor with ISyncKeyMap, will be removed in v20")]
     public SyncItemFactory(
         SyncEntityCache entityCache,
         SyncSerializerCollection syncSerializers,
         SyncTrackerCollection syncTrackers,
         SyncDependencyCollection syncCheckers)
+        : this(entityCache, syncSerializers, syncTrackers, syncCheckers, NullSyncKeyMap.Instance)
+    { }
+
+    [ActivatorUtilitiesConstructor]
+    public SyncItemFactory(
+        SyncEntityCache entityCache,
+        SyncSerializerCollection syncSerializers,
+        SyncTrackerCollection syncTrackers,
+        SyncDependencyCollection syncCheckers,
+        ISyncKeyMap keyMap)
     {
+        KeyMap = keyMap;
         _syncSerializers = syncSerializers;
         _syncTrackers = syncTrackers;
         _syncCheckers = syncCheckers;
@@ -34,6 +48,8 @@ public class SyncItemFactory : ISyncItemFactory
     }
 
     public SyncEntityCache EntityCache => _entityCache;
+
+    public ISyncKeyMap KeyMap { get; }
 
     public IEnumerable<ISyncSerializer<TObject>> GetSerializers<TObject>()
         => _syncSerializers.GetSerializers<TObject>();

@@ -265,6 +265,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
     public async Task<IEnumerable<uSyncAction>> ImportAllAsync(string[] folders, HandlerSettings config, uSyncImportOptions options)
     {
+        using var keyBatch = keyMap.BeginBatch();
         var cacheKey = PrepCaches();
         try
         {
@@ -478,6 +479,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </remarks>
     virtual protected async Task<IEnumerable<uSyncAction>> ImportSingleElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
+        node = await PrepareKeysAsync(node);
+        using var keyScope = SyncKeyHelper.BeginKeyMapScope(keyMap);
+
         if (!await ShouldImportAsync(node, settings))
         {
             return [uSyncAction.SetAction(true, node.GetAlias(), message: "Change blocked (based on configuration)")];
@@ -623,6 +627,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         if (IsTwoPass is false)
             return SyncAttempt<TObject>.Succeed(GetItemAlias(item), ChangeType.NoChange);
 
+        node = keyMap.Localize(node);
+        using var keyScope = SyncKeyHelper.BeginKeyMapScope(keyMap);
+
         try
         {
             return await DeserializeItemSecondPassAsync(item, node, new SyncSerializerOptions(SerializerFlags.None, config.Settings));
@@ -737,7 +744,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             var key = await syncFileService.LoadKeyFromFileAsync(file);
             if (key != Guid.Empty)
             {
-                keySet.Add(key);
+                keySet.Add(ToLocalKey(key));
             }
         }
 
@@ -758,7 +765,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         // we only need the key to find the parent, so stream it rather than parsing the whole file.
         var key = await syncFileService.LoadKeyFromFileAsync(file);
         if (key == Guid.Empty) return default;
-        return await GetFromServiceAsync(key);
+        return await GetFromServiceAsync(ToLocalKey(key));
     }
 
     /// <summary>
@@ -1434,6 +1441,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     public virtual async Task<IEnumerable<uSyncAction>> ReportElementSingleAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
+        node = await PrepareKeysAsync(node);
+        using var keyScope = SyncKeyHelper.BeginKeyMapScope(keyMap);
+
         try
         {
             if ((await ShouldImportAsync(node, settings)) is false)
@@ -1491,6 +1501,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                     {
                         action.Message = $"{action.Change}";
                     }
+
+                    AddKeyConflictWarning(action, node, change.CurrentNode);
                 }
                 actions.Add(action);
             }
@@ -1511,6 +1523,109 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")];
 
         }
+    }
+
+    #region Key mapping
+
+    private ISyncKeyMap keyMap => itemFactory.KeyMap;
+
+    /// <summary>
+    ///  the key on this site for a key read from a file.
+    /// </summary>
+    protected Guid ToLocalKey(Guid fileKey)
+        => keyMap.Enabled && keyMap.TryGetLocal(fileKey, out var localKey) ? localKey : fileKey;
+
+    /// <summary>
+    ///  scan the nodes for items that match items on this site by name/alias,
+    ///  but have a different key, and add them to the key map (KeyConflict: Map).
+    /// </summary>
+    /// <remarks>
+    ///  run over every handler before an import or report, so references to
+    ///  items that are matched later in the run are swapped too.
+    /// </remarks>
+    public virtual async Task ScanKeyConflictsAsync(IEnumerable<XElement> nodes)
+    {
+        if (!keyMap.Enabled) return;
+
+        using var batch = keyMap.BeginBatch();
+        foreach (var node in nodes)
+        {
+            if (node.IsEmptyItem() is false && IsValidNode(node))
+                await PrepareKeysAsync(node);
+        }
+    }
+
+    private bool IsValidNode(XElement node)
+    {
+        try
+        {
+            return serializer.IsValid(node);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///  swap mapped keys in the node, finding (and mapping) the item if it
+    ///  matches one on this site by name but has a different key.
+    /// </summary>
+    protected async Task<XElement> PrepareKeysAsync(XElement node)
+    {
+        if (!keyMap.Enabled) return node;
+
+        await DiscoverKeyAsync(node);
+        return keyMap.Localize(node);
+    }
+
+    /// <summary>
+    ///  work out if the item in the node is on this site with a different key.
+    /// </summary>
+    protected virtual async Task DiscoverKeyAsync(XElement node)
+    {
+        if (node.IsEmptyItem()) return;
+
+        var fileKey = node.GetKey();
+        if (fileKey == Guid.Empty) return;
+
+        var mapped = keyMap.TryGetLocal(fileKey, out _);
+
+        // item with the file's key is on this site, so it doesn't need mapping.
+        if (await serializer.FindItemAsync(fileKey) is not null)
+        {
+            if (mapped) keyMap.Remove(fileKey);
+            return;
+        }
+
+        if (mapped) return;
+
+        // swap any keys we already know (e.g. the parent) before looking by name.
+        var item = await serializer.FindItemByNameAsync(keyMap.Localize(node));
+        if (item is null) return;
+
+        var localKey = serializer.ItemKey(item);
+        if (localKey != fileKey)
+            keyMap.Add(ItemType, fileKey, localKey);
+    }
+
+    #endregion
+
+    /// <summary>
+    ///  when the item on this site has a different key to the file, and Umbraco
+    ///  won't let us change it, the import will fail, so say so in the report.
+    /// </summary>
+    private void AddKeyConflictWarning(uSyncAction action, XElement node, XElement current)
+    {
+        var fileKey = node.GetKey();
+        var localKey = current.GetKey();
+        if (!SyncKeyHelper.IsKeyConflict(fileKey, localKey)) return;
+
+        var message = uSyncKeyConflictException.BuildMessage(ItemType, node.GetAlias(), localKey, fileKey);
+        action.Message = message;
+        action.Details = [
+            uSyncChange.Warning(Core.uSyncConstants.Xml.Key, "Key conflict", message),
+            .. action.Details ?? []];
     }
 
     private static uSyncChange MakeRawChange(XElement node, XElement current)
@@ -1587,6 +1702,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     public virtual async Task HandleAsync(DeletedNotification<TObject> notification, CancellationToken cancellationToken)
     {
+        if (keyMap.Enabled)
+        {
+            foreach (var item in notification.DeletedEntities)
+                keyMap.RemoveLocal(GetItemKey(item));
+        }
+
         if (!ShouldProcessEvent()) return;
 
         foreach (var item in notification.DeletedEntities)
@@ -2481,6 +2602,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </remarks>
     protected async Task<SyncItemPreview?> BuildPreviewAsync(XElement node, HandlerSettings settings, SerializerFlags flags, SyncPreviewOptions? previewOptions = null)
     {
+        node = await PrepareKeysAsync(node);
+        using var keyScope = SyncKeyHelper.BeginKeyMapScope(keyMap);
+
         var preview = new SyncItemPreview
         {
             Key = node.GetKey(),

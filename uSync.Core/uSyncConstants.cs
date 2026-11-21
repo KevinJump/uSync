@@ -39,6 +39,11 @@ public static partial class uSyncConstants
     /// </remarks>
     internal const int SuperUserId = -1;
 
+    /// <summary>
+    ///  docs page explaining key conflicts and how to work around them.
+    /// </summary>
+    public const string KeyConflictDocsUrl = "https://docs.jumoo.co.uk/usync/uSync/reference/key-conflicts";
+
     // this is our format 'version' - 
     // it only changes when the format of the .config files change
     // we use it to prompt people to do an uptodate export.
