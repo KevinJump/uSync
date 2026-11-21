@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+
+using Microsoft.Extensions.Logging;
+
+using uSync.BackOffice.Configuration;
 
 using uSync.BackOffice.Extensions;
 using uSync.BackOffice.Models;
@@ -137,6 +143,29 @@ public partial class SyncService
         if (handlerPair == null) return [];
         var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
         return await handlerPair.Handler.ExportAllAsync(folders, handlerPair.Settings, options.Callbacks?.Update);
+    }
+
+    /// <inheritdoc/>>
+    public async Task ScanKeyConflictsAsync(string[] folders, IEnumerable<HandlerConfigPair> handlers)
+    {
+        if (_uSyncConfig.Settings.KeyConflict != SyncKeyConflictMode.Map) return;
+
+        var sw = Stopwatch.StartNew();
+
+        foreach (var handlerPair in handlers)
+        {
+            var handlerFolders = GetHandlerFolders(folders, handlerPair.Handler);
+
+            var productionFile = $"{handlerFolders.Last()}.{_uSyncConfig.Settings.DefaultExtension}";
+            IEnumerable<XElement> nodes = _syncFileService.FileExists(productionFile)
+                ? (await _syncFileService.LoadXElementAsync(productionFile)).Elements()
+                : (await handlerPair.Handler.FetchAllNodesAsync(handlerFolders)).Select(x => x.Node);
+
+            await handlerPair.Handler.ScanKeyConflictsAsync(nodes);
+        }
+
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("uSync key map: scanned {count} handlers for key conflicts in {elapsed}ms", handlers.Count(), sw.ElapsedMilliseconds);
     }
 
     /// <inheritdoc/>>

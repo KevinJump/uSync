@@ -14,6 +14,27 @@ public static class SyncKeyHelper
 {
     private static readonly Lazy<bool> _keysAreImmutable = new(ProbeKeysAreImmutable);
 
+    private static readonly AsyncLocal<ISyncKeyMap?> _mapScope = new();
+
+    /// <summary>
+    ///  while the returned scope is open, <see cref="SetKey"/> maps keys on saved
+    ///  items instead of changing them (KeyConflict: Map). does nothing when
+    ///  the key map isn't enabled.
+    /// </summary>
+    public static IDisposable BeginKeyMapScope(ISyncKeyMap keyMap)
+    {
+        if (!keyMap.Enabled) return NullScope.Instance;
+
+        var previous = _mapScope.Value;
+        _mapScope.Value = keyMap;
+        return new KeyMapScope(previous);
+    }
+
+    private sealed class KeyMapScope(ISyncKeyMap? previous) : IDisposable
+    {
+        public void Dispose() => _mapScope.Value = previous;
+    }
+
     /// <summary>
     ///  true when this version of Umbraco will not let a saved entity's key change.
     /// </summary>
@@ -28,6 +49,14 @@ public static class SyncKeyHelper
         if (item.Key == key) return;
 
         var localKey = item.Key;
+
+        // key mapping is on: leave the saved item's key alone and map the file key to it.
+        if (item.HasIdentity && _mapScope.Value is ISyncKeyMap keyMap)
+        {
+            keyMap.Add(item.GetType().Name, key, localKey);
+            return;
+        }
+
         try
         {
             item.Key = key;

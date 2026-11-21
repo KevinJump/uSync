@@ -29,6 +29,7 @@ using uSync.BackOffice.SyncHandlers.Handlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.Tracker;
 using uSync.Core;
+using uSync.Core.Serialization;
 
 namespace uSync.BackOffice;
 
@@ -63,6 +64,9 @@ public static class uSyncBackOfficeBuilderExtensions
 
         // Setup uSync core.
         builder.AdduSyncCore();
+
+        // key map (only does anything when KeyConflict is Map)
+        builder.Services.Replace(ServiceDescriptor.Singleton<ISyncKeyMap, SyncKeyMap>());
 
         // folder collection, so you can inject folders into the sync process.
         builder.WithCollectionBuilder<SyncFolderCollectionBuilder>()

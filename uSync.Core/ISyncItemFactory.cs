@@ -55,4 +55,9 @@ public interface ISyncItemFactory
     ///  an entity cache - can be used to improve lookup times on large syncs. 
     /// </summary>
     SyncEntityCache EntityCache { get; }
+
+    /// <summary>
+    ///  the key map, used when KeyConflict is set to Map.
+    /// </summary>
+    ISyncKeyMap KeyMap => NullSyncKeyMap.Instance;
 }
