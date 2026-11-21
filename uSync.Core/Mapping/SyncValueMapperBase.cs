@@ -7,6 +7,7 @@ using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
+using uSync.Core.Cache;
 using uSync.Core.Dependency;
 using uSync.Core.Serialization;
 
@@ -97,11 +98,26 @@ public abstract class SyncValueMapperBase
 
     private IEntitySlim? GetElement(GuidUdi udi)
     {
-        if (udi != null)
-            return entityService.Get(udi.Guid);
+        if (udi == null) return null;
 
-        return null;
+        // dependency checks can look up the same items many times (e.g the same media
+        // picked on lots of pages) so we go via the sync entity cache when we have it.
+        var cache = EntityCache;
+        return cache is not null
+            ? cache.GetEntity(udi.Guid)
+            : entityService.Get(udi.Guid);
     }
+
+    /// <summary>
+    ///  the uSync entity cache (cleared at the start and end of each sync run and when content or media changes).
+    /// </summary>
+    /// <remarks>
+    ///  set by the <see cref="SyncValueMapperCollection"/> when it hands out the mapper, so mappers
+    ///  don't need it in their constructors (null when a mapper is used outside the collection).
+    ///  Only use it for lookups where a briefly out of date name doesn't matter (e.g dependency
+    ///  checks), because it isn't cleared when every type of item is saved.
+    /// </remarks>
+    protected internal SyncEntityCache? EntityCache { get; internal set; }
 
     /// <summary>
     ///  helper to convert object to a string (with all the checks)
