@@ -11,7 +11,7 @@ public class ContentTypeBaseTracker<TObject> : SyncXmlTrackAndMerger<TObject>
         : base(serializers)
     { }
 
-    public override List<TrackingItem> TrackingItems =>
+    public override List<TrackingItem> TrackingItems { get; protected set; } =
     [
         TrackingItem.Single("Name", "/Info/Name"),
         TrackingItem.Single("Icon", "/Info/Icon"),

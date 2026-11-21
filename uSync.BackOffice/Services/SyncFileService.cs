@@ -311,12 +311,16 @@ internal class SyncFileService : ISyncFileService
 
         using (Stream stream = OpenWrite(localFile))
         {
-            byte[] info = new UTF8Encoding(true).GetBytes(content);
+            byte[] info = _utf8.GetBytes(content);
             await stream.WriteAsync(info);
             await stream.FlushAsync();
             stream.Dispose();
         }
     }
+
+    // GetBytes never writes the preamble, so the BOM flag the old per call encoding
+    // had made no difference to the output, this is the same encoding, just made once.
+    private static readonly UTF8Encoding _utf8 = new(true);
 
     private static readonly XmlReaderSettings _readerSettings = new()
     {
@@ -652,12 +656,11 @@ internal class SyncFileService : ISyncFileService
 
     private async Task<XElement?> LoadXElementSafeAsync(string file)
     {
-        var absPath = GetAbsPath(file);
-        if (File.Exists(absPath) is false) return null;
-
+        // LoadXElementAsync resolves the path and throws FileNotFound for a missing file,
+        // so we don't need an extra exists check (a file system call per file) first.
         try
         {
-            return await LoadXElementAsync(absPath);
+            return await LoadXElementAsync(file);
         }
         catch
         {

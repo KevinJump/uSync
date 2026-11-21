@@ -7,7 +7,7 @@ internal class SliderMigratingConfigSerializer : ConfigurationSerializerBase, IC
     private const string _enableRangeKey = "enableRange";
 
     public string Name => nameof(SliderMigratingConfigSerializer);
-    public string[] Editors => [
+    public string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.Slider,
         Constants.PropertyEditors.Aliases.RangeSlider];
 

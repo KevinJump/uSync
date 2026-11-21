@@ -11,7 +11,7 @@ public class LanguageTracker : SyncXmlTrackAndMerger<ILanguage>, ISyncTracker<IL
     {
     }
 
-    public override List<TrackingItem> TrackingItems =>
+    public override List<TrackingItem> TrackingItems { get; protected set; } =
     [
         TrackingItem.Single("IsoCode", "/IsoCode"),
         TrackingItem.Single("Mandatory", "IsMandatory"),

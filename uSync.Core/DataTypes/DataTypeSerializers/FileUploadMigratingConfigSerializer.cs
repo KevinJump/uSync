@@ -9,7 +9,7 @@ internal class FileUploadMigratingConfigSerializer : ConfigurationSerializerBase
 {
     public string Name => nameof(FileUploadMigratingConfigSerializer);
 
-    public string[] Editors => [Constants.PropertyEditors.Aliases.UploadField];
+    public string[] Editors { get; } = [Constants.PropertyEditors.Aliases.UploadField];
 
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
     {

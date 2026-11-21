@@ -1374,6 +1374,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return exclude;
     }
 
+    private static readonly ConcurrentDictionary<string, Regex> _excludedPropertyPatterns = new();
+
     private Regex? GetExcludedPropertiesPattern(SyncSerializerOptions options)
     {
         string pattern = options.GetSetting<string>(uSyncConstants.DefaultSettings.DoNotSerializePattern, uSyncConstants.DefaultSettings.DoNotSerializePattern_Default);
@@ -1384,7 +1386,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         try
         {
-            return new Regex(pattern);
+            // the pattern comes from config, so it is the same for every item we serialize,
+            // building it once saves re-parsing the pattern for each content item.
+            return _excludedPropertyPatterns.GetOrAdd(pattern, p => new Regex(p));
         }
         catch (ArgumentException ex)
         {

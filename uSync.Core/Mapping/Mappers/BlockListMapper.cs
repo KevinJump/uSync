@@ -10,7 +10,7 @@ internal class BlockListMapper : SyncBlockMapperBase<BlockListValue>, ISyncMappe
 {
     public override string Name => "NuBlock List mapper";
 
-    public override string[] Editors => [Constants.PropertyEditors.Aliases.BlockList];
+    public override string[] Editors { get; } = [Constants.PropertyEditors.Aliases.BlockList];
 
     public BlockListMapper(
         IEntityService entityService,

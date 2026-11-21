@@ -25,7 +25,7 @@ internal class MultiNodeTreePickerMigratingConfigSerializer : ConfigurationSeria
 
     public string Name => nameof(MultiNodeTreePickerMigratingConfigSerializer);
 
-    public string[] Editors => [
+    public string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.MultiNodeTreePicker
     ];
 

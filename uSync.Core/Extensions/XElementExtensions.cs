@@ -147,9 +147,11 @@ public static class XElementExtensions
     ///  Get the value of the XML Node or return a default value
     /// </summary>
     public static string ValueOrDefault([AllowNull] this XElement? node, string defaultValue)
-        => string.IsNullOrEmpty(node?.Value)
-            ? defaultValue
-            : node.Value;
+    {
+        // Value is rebuilt from the child text nodes on each call, so only read it once.
+        var value = node?.Value;
+        return string.IsNullOrEmpty(value) ? defaultValue : value;
+    }
 
     /// <summary>
     ///  Get the value of the XML Node or return a default value
@@ -309,6 +311,61 @@ public static class XElementExtensions
 
         return val;
     }
+
+    /// <summary>
+    ///  deep copy a node, dropping whitespace only text nodes.
+    /// </summary>
+    /// <remarks>
+    ///  this gives the same result as XElement.Parse(node.ToString()) (which drops
+    ///  insignificant whitespace when it reparses), without serializing the whole
+    ///  tree to a string and parsing it back again.
+    /// </remarks>
+    internal static XElement CloneWithoutWhitespace(this XElement node)
+    {
+        var clone = new XElement(node);
+
+        List<XText>? whitespace = null;
+        foreach (var text in clone.DescendantNodes().OfType<XText>())
+        {
+            if (text is XCData || text.Value.Length == 0) continue;
+            if (IsXmlWhitespace(text.Value))
+                (whitespace ??= []).Add(text);
+        }
+
+        if (whitespace is null) return clone;
+
+        foreach (var text in whitespace)
+        {
+            // when the whitespace is the only thing in the element, the parser
+            // keeps it as an open/close pair (<a></a>) not a self closing one (<a />)
+            if (text.Parent is not null && text.PreviousNode is null && text.NextNode is null)
+                text.Value = string.Empty;
+            else
+                text.Remove();
+        }
+
+        return clone;
+    }
+
+    private static bool IsXmlWhitespace(string value)
+    {
+        foreach (var c in value)
+        {
+            if (c is not (' ' or '\t' or '\r' or '\n')) return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    ///  are the two nodes the same xml.
+    /// </summary>
+    /// <remarks>
+    ///  DeepEquals is a cheap, allocation free walk of the two trees, when it says they
+    ///  match the serialized strings would match too. When it doesn't we fall back to the
+    ///  string compare, so nodes that only differ in ways the string doesn't show still match.
+    /// </remarks>
+    internal static bool IsSameXml(this XElement a, XElement b)
+        => XNode.DeepEquals(a, b) || a.ToString() == b.ToString();
 
     public static void AddIfNotNull(this XContainer container, XElement? element)
     {
