@@ -114,7 +114,7 @@ public abstract class SyncContainerSerializerBase<TObject>
                             if (logger.IsEnabled(LogLevel.Debug))
                                 logger.LogDebug("Folder Found: Key Different");
 
-                            container.Key = folderKey;
+                            SyncKeyHelper.SetKey(container, folderKey, container.Name ?? folder.Value);
                             await SaveContainerAsync(treeItem.Key, container);
                         }
                     }

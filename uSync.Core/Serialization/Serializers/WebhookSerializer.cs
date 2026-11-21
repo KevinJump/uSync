@@ -84,7 +84,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
         if (item.Key != key)
         {
             details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
-            item.Key = key;
+            SyncKeyHelper.SetKey(item, key, url);
         }
 
         if (item.Url != url)
