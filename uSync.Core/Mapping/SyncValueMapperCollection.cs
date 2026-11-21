@@ -40,7 +40,18 @@ public class SyncValueMapperCollection
     public IEnumerable<ISyncMapper> GetSyncMappers(string editorAlias)
     {
         var mappedAlias = GetMapperAlias(editorAlias);
-        return this.Where(m => m.IsMapper(mappedAlias));
+        return this.Where(m => m.IsMapper(mappedAlias)).Select(WithEntityCache);
+    }
+
+    /// <summary>
+    ///  give the mapper the entity cache, so its lookups (e.g for dependencies) can use it.
+    /// </summary>
+    private ISyncMapper WithEntityCache(ISyncMapper mapper)
+    {
+        if (mapper is SyncValueMapperBase mapperBase)
+            mapperBase.EntityCache ??= EntityCache;
+
+        return mapper;
     }
 
     /// <summary>
