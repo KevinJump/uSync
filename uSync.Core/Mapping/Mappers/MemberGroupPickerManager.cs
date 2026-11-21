@@ -97,7 +97,9 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
         {
             if (string.IsNullOrWhiteSpace(item.ToString())) continue;
 
-            var group = entityService.Get(item, Umbraco.Cms.Core.Models.UmbracoObjectTypes.MemberGroup);
+            var group = EntityCache is { } cache
+                ? cache.GetEntity(item, Umbraco.Cms.Core.Models.UmbracoObjectTypes.MemberGroup)
+                : entityService.Get(item, Umbraco.Cms.Core.Models.UmbracoObjectTypes.MemberGroup);
             if (group is not null)
             {
                 dependencies.Add(new uSyncDependency

@@ -1207,7 +1207,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             }
 
             callback?.Invoke("Validating Report", 2, 3);
-            var validationActions = await ReportMissingParentsAsync([.. actions]);
+            var validationActions = await ReportMissingParentsAsync([.. actions], items);
             actions.AddRange(ReportDeleteCheck(uSyncConfig.GetWorkingFolder(), validationActions));
 
             callback?.Invoke($"Done ({this.ItemType})", 3, 3);
@@ -1317,14 +1317,23 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  This method checks for the parent of an item in the wider list of items being 
     ///  imported.
     /// </remarks>
-    private async Task<List<uSyncAction>> ReportMissingParentsAsync(uSyncAction[] actions)
+    private async Task<List<uSyncAction>> ReportMissingParentsAsync(uSyncAction[] actions, IReadOnlyList<OrderedNodeInfo> items)
     {
+        // the report has already loaded (and merged) every node, so we look up the parent
+        // keys there, rather than reading the files from disk again.
+        Dictionary<Guid, Guid>? parentKeys = null;
+
         for (int i = 0; i < actions.Length; i++)
         {
             if (actions[i].Change != ChangeType.ParentMissing || actions[i].FileName is null) continue;
 
-            var node = await syncFileService.LoadXElementAsync(actions[i].FileName!);
-            var guid = node.GetParentKey();
+            parentKeys ??= GetParentKeys(items);
+
+            if (parentKeys.TryGetValue(actions[i].Key, out var guid) is false)
+            {
+                var node = await syncFileService.LoadXElementAsync(actions[i].FileName!);
+                guid = node.GetParentKey();
+            }
 
             if (guid != Guid.Empty)
             {
@@ -1343,6 +1352,18 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
 
         return [.. actions];
+    }
+
+    private static Dictionary<Guid, Guid> GetParentKeys(IReadOnlyList<OrderedNodeInfo> items)
+    {
+        var parentKeys = new Dictionary<Guid, Guid>();
+        foreach (var item in items)
+        {
+            if (item.Node.IsEmptyItem()) continue;
+            var key = item.Node.GetKey();
+            if (key != Guid.Empty) parentKeys.TryAdd(key, item.Node.GetParentKey());
+        }
+        return parentKeys;
     }
 
     /// <summary>
