@@ -54,8 +54,8 @@ public class SyncRootMergerHelper
 
     public static (XElement combined, XElement differences) CompareNodes(List<XElement> nodes, IList<TrackingItem> trackedNodes)
     {
-        var differences = XElement.Parse(nodes[^1].ToString());
-        var combined = XElement.Parse(nodes[^1].ToString());
+        var differences = nodes[^1].CloneWithoutWhitespace();
+        var combined = nodes[^1].CloneWithoutWhitespace();
 
         // latest is a blank one, that is a delete so should 
         // be marked as one.
@@ -64,7 +64,7 @@ public class SyncRootMergerHelper
 
         foreach (var node in nodes[..^1])
         {
-            if (node.ToString() == differences.ToString())
+            if (node.IsSameXml(differences))
                 return (combined, BlankNode(differences));
 
             (combined, differences) = GetTrackedNodeDifferences(node, combined, trackedNodes);
@@ -74,7 +74,7 @@ public class SyncRootMergerHelper
 
     private static (XElement combined, XElement differences) GetTrackedNodeDifferences(XElement source, XElement target, IList<TrackingItem> trackedNodes)
     {
-        if (source.ToString() == target.ToString())
+        if (source.IsSameXml(target))
             return (source, BlankNode(target));
 
         var (combined, differences) = GetChanges(source, target, trackedNodes);
@@ -132,7 +132,7 @@ public class SyncRootMergerHelper
             }
         }
 
-        return (XElement.Parse(source.ToString()), target);
+        return (source.CloneWithoutWhitespace(), target);
     }
 
     private static XElement? GetSingleChange(TrackingItem item, XElement source, XElement target)
@@ -167,6 +167,9 @@ public class SyncRootMergerHelper
     /// </remarks>
     private static bool XMLMatches(XElement a, XElement b)
     {
+        // most of the time they are the same, and the walk tells us that without the reparse.
+        if (XNode.DeepEquals(a, b)) return true;
+
         try
         {
             return XElement.Parse(a.ToString()).ToString() == XElement.Parse(b.ToString()).ToString();
@@ -208,7 +211,7 @@ public class SyncRootMergerHelper
                 continue;
             }
 
-            if (sourceElement.ToString() == targetElement.ToString())
+            if (sourceElement.IsSameXml(targetElement))
             {
                 var removal = FindByKey(differenceCollection, element, item.Keys, key);
                 removal?.Remove();
@@ -258,8 +261,8 @@ public class SyncRootMergerHelper
         if (sourceCollection == null || targetCollection == null)
             return (source, target);
 
-        var combined = XElement.Parse(source.ToString());
-        var differences = XElement.Parse(target.ToString());
+        var combined = source.CloneWithoutWhitespace();
+        var differences = target.CloneWithoutWhitespace();
 
         foreach (var sourceElement in sourceCollection)
         {
@@ -354,9 +357,8 @@ public class SyncRootMergerHelper
 
     private static XElement BlankNode(XElement source)
     {
-        var blank = XElement.Parse(source.ToString());
-        blank.RemoveNodes();
-        return blank;
+        // same as cloning and removing the children, without copying the children first.
+        return new XElement(source.Name, source.Attributes());
     }
 
     /// <summary>

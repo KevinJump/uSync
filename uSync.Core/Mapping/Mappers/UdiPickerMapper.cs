@@ -29,7 +29,7 @@ public class UdiPickerMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "Content Picker Mapper";
 
-    public override string[] Editors => [
+    public override string[] Editors { get; } = [
         Constants.PropertyEditors.Aliases.ContentPicker,
         // Constants.PropertyEditors.Aliases.MediaPicker,
         Constants.PropertyEditors.Aliases.MultiNodeTreePicker,

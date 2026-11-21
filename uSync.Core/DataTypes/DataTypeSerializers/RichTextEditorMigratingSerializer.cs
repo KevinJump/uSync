@@ -41,7 +41,7 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
 
     public string Name => nameof(RichTextEditorMigratingSerializer);
 
-    public string[] Editors => [
+    public string[] Editors { get; } = [
         "Umbraco.TinyMCE",
         Constants.PropertyEditors.Aliases.RichText
     ];

@@ -108,7 +108,10 @@ public static class StringExtensions
         if (length <= 0 || length > 26)
             length = 26;
 
-        var bytes = guid.ToByteArray(); // a Guid is 128 bits ie 16 bytes
+        // a Guid is 128 bits ie 16 bytes, written to the stack rather than a new array.
+        // (TryWriteBytes uses the same byte order as ToByteArray)
+        Span<byte> bytes = stackalloc byte[16];
+        guid.TryWriteBytes(bytes);
 
         // this could be optimized by making it unsafe,
         // and fixing the table + bytes + chars (see Convert.ToBase64CharArray)

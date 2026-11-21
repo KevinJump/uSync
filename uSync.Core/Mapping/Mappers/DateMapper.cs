@@ -24,7 +24,7 @@ public class DateTimeMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "Custom DateTimeMapper";
 
-    public override string[] Editors => [Constants.PropertyEditors.Aliases.DateTime];
+    public override string[] Editors { get; } = [Constants.PropertyEditors.Aliases.DateTime];
 
     public override Task<string?> GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options)
         => uSyncTaskHelper.FromResultOf(() => GetFormattedDateTime(value));
