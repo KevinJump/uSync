@@ -18,7 +18,7 @@
   </ItemGroup>
   <!-- jumoo libraries -->
   <ItemGroup>
-    <PackageVersion Include="Jumoo.Json" Version="18.0.3" />
+    <PackageVersion Include="Jumoo.Json" Version="18.0.4" />
   </ItemGroup>
   <!-- source link -->
   <ItemGroup>
