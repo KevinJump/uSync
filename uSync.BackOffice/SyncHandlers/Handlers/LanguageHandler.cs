@@ -116,6 +116,13 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
     protected override string GetItemName(ILanguage item) => item.IsoCode;
 
     /// <inheritdoc/>
+    /// <remarks>
+    ///  the key in a language file is made from the iso code, not the key on the site,
+    ///  and languages are found by iso code, so they never need mapping.
+    /// </remarks>
+    protected override bool CanMapKeys => false;
+
+    /// <inheritdoc/>
     protected override async Task CleanUpAsync(ILanguage item, string newFile, string folder)
     {
         await base.CleanUpAsync(item, newFile, folder);
