@@ -150,6 +150,35 @@ public class KeyMapImportTests : UmbracoIntegrationTest
         Assert.That(keyMap.TryGetLocal(fileKey, out _), Is.False);
     }
 
+    [Test]
+    public async Task Languages_AreNotMapped_AndReportNoChange()
+    {
+        var language = (await GetRequiredService<ILanguageService>().GetAllAsync()).First();
+
+        var handler = GetRequiredService<SyncHandlerCollection>().OfType<LanguageHandler>().Single();
+        var config = handler.DefaultConfig.Clone();
+        var folders = new[] { $"{_root}/{Guid.NewGuid():N}/" };
+        var fileService = GetRequiredService<ISyncFileService>();
+
+        var file = (await handler.ExportAsync(language, folders, config)).Single(x => x.Success).FileName!;
+        var node = await fileService.LoadXElementAsync(file);
+
+        // the language file key is made from the iso code, so it never matches the site key.
+        var fileKey = node.GetKey();
+        Assert.That(fileKey, Is.Not.EqualTo(language.Key));
+
+        // a mapping left over from before languages were left out is cleared by the scan.
+        var keyMap = GetRequiredService<ISyncKeyMap>();
+        keyMap.Add("Language", fileKey, language.Key);
+
+        await handler.ScanKeyConflictsAsync([node]);
+
+        Assert.That(keyMap.TryGetLocal(fileKey, out _), Is.False, "languages are not added to the key map");
+
+        var report = (await handler.ReportElementAsync(node, file, config, new uSyncImportOptions())).Single();
+        Assert.That(report.Change, Is.EqualTo(ChangeType.NoChange), report.Message);
+    }
+
     private static XElement SwapKey(XElement node, Guid from, Guid to)
         => XElement.Parse(node.ToString(SaveOptions.DisableFormatting).Replace(from.ToString(), to.ToString()), LoadOptions.PreserveWhitespace);
 }

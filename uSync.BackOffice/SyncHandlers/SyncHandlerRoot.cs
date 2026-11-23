@@ -1516,6 +1516,16 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         => keyMap.Enabled && keyMap.TryGetLocal(fileKey, out var localKey) ? localKey : fileKey;
 
     /// <summary>
+    ///  can items from this handler be added to the key map (KeyConflict: Map)?
+    /// </summary>
+    /// <remarks>
+    ///  false for items whose key in the file isn't the item's key on the site
+    ///  (e.g. languages, which are written with a key made from the iso code
+    ///  and found by iso code), mapping those would make them differ every time.
+    /// </remarks>
+    protected virtual bool CanMapKeys => true;
+
+    /// <summary>
     ///  scan the nodes for items that match items on this site by name/alias,
     ///  but have a different key, and add them to the key map (KeyConflict: Map).
     /// </summary>
@@ -1554,6 +1564,15 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected async Task<XElement> PrepareKeysAsync(XElement node)
     {
         if (!keyMap.Enabled) return node;
+
+        if (!CanMapKeys)
+        {
+            // clear anything mapped before this handler opted out.
+            var fileKey = node.GetKey();
+            if (fileKey != Guid.Empty && keyMap.TryGetLocal(fileKey, out _))
+                keyMap.Remove(fileKey);
+            return node;
+        }
 
         await DiscoverKeyAsync(node);
         return keyMap.Localize(node);
