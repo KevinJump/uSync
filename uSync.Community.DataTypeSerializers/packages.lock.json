@@ -373,18 +373,10 @@
         "resolved": "10.8.0",
         "contentHash": "tXmzwQeWgiycaLOtvSFnz0TPkJxXTyZrkwSVPTr83FgSiMj3BD/8eIbvrpGi5rzc2AgfKyegKo1ntJlJFey1Zg=="
       },
-      "Microsoft.Extensions.FileProviders.Abstractions": {
-        "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "e3NvNYCuKZ42qlNCryuSmo+xxlhBZeS2Sh5sIPCn+wRSHc0F9N8oAC+r0ki1Yh/KMfw4H6KLh4p9u4TGWye7fw=="
-      },
       "Microsoft.Extensions.FileProviders.Embedded": {
         "type": "Transitive",
         "resolved": "11.0.0",
-        "contentHash": "oEAGGta0lOG28Puez9be7pcsf+138MrEqN7UNlC/S/HKVj7L0iZtUyfS1hpAKnFmqwmAUgAzyU0CU7cXrlyAiQ==",
-        "dependencies": {
-          "Microsoft.Extensions.FileProviders.Abstractions": "11.0.0"
-        }
+        "contentHash": "oEAGGta0lOG28Puez9be7pcsf+138MrEqN7UNlC/S/HKVj7L0iZtUyfS1hpAKnFmqwmAUgAzyU0CU7cXrlyAiQ=="
       },
       "Microsoft.Extensions.FileProviders.Physical": {
         "type": "Transitive",
@@ -1260,16 +1252,16 @@
       "usync.core": {
         "type": "Project",
         "dependencies": {
-          "Jumoo.Json": "[19.0.0-rc1, )",
+          "Jumoo.Json": "[19.0.0-rc2, )",
           "Umbraco.Cms.Api.Management": "[19.0.0-rc1, )",
           "Umbraco.Cms.Web.Website": "[19.0.0-rc1, )"
         }
       },
       "Jumoo.Json": {
         "type": "CentralTransitive",
-        "requested": "[19.0.0-rc1, )",
-        "resolved": "19.0.0-rc1",
-        "contentHash": "X42hxLv4LJp25FtuZuW6ZrkaQpt2/xurBrwahnZrVaa9MmjdUefScdXtCrMBTqwHn+R5aMBXTrxmS3B2hgl0QQ==",
+        "requested": "[19.0.0-rc2, )",
+        "resolved": "19.0.0-rc2",
+        "contentHash": "MUUZByuCsj6Vwey9nXnrESjBRzkL9wIYSz6P5c+5UNzU/PdAhL4rwie6VDZxVMrp8nO278COyOdNvNXbXHOVRg==",
         "dependencies": {
           "Umbraco.Cms.Web.Common": "19.0.0-rc1"
         }
