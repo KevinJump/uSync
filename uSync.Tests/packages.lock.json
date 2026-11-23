@@ -2696,7 +2696,7 @@
       "usync.core": {
         "type": "Project",
         "dependencies": {
-          "Jumoo.Json": "[18.0.3, )",
+          "Jumoo.Json": "[18.0.4, )",
           "Umbraco.Cms.Api.Management": "[18.1.0, )",
           "Umbraco.Cms.Web.Website": "[18.1.0, )"
         }
@@ -2710,9 +2710,9 @@
       },
       "Jumoo.Json": {
         "type": "CentralTransitive",
-        "requested": "[18.0.3, )",
-        "resolved": "18.0.3",
-        "contentHash": "Z0KYeQ1+VJWgZQitCQBgTzeofVMxqD/TEECYyaZQPJ5fOV5Mod/NmC1ZXEzME2Upg46nanbuLwUpo5TE1W5AHA==",
+        "requested": "[18.0.4, )",
+        "resolved": "18.0.4",
+        "contentHash": "j8EwTIBrdVZvXzkzC96j1gaD+0/s458RGz9M4AQObkPgUYrsiXOC39zHpN6m5fJaQTuRL+xfUqTRIG1wdhDVMA==",
         "dependencies": {
           "Umbraco.Cms.Web.Common": "18.0.0"
         }
