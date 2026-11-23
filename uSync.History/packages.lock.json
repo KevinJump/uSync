@@ -1447,7 +1447,8 @@
         "type": "Project",
         "dependencies": {
           "uSync.Community.Contrib": "[12.0.0, )",
-          "uSync.Core": "[17.0.0, )"
+          "uSync.Core": "[17.0.0, )",
+          "uSync.Files": "[17.0.0, )"
         }
       },
       "usync.backoffice.management.api": {
@@ -1469,6 +1470,9 @@
           "Umbraco.Cms.Api.Management": "[17.3.0, )",
           "Umbraco.Cms.Web.Website": "[17.3.0, )"
         }
+      },
+      "usync.files": {
+        "type": "Project"
       },
       "Umbraco.Cms.Api.Management": {
         "type": "CentralTransitive",

@@ -123,7 +123,8 @@ dotnet build $sln_name -c $env -p:Version=$fullVersion -p:ContinuousIntegrationB
 dotnet run -c $env --project ..\uSync.SchemaGenerator\uSync.SchemaGenerator.csproj --no-build
 
 ""; "##### Packaging"; "----------------------------------" ; ""
-$projects = "uSync.Core", 
+$projects = "uSync.Files",
+    "uSync.Core",
     "uSync.AutoTemplates",
     "uSync.Community.Contrib",
     "uSync.Community.DataTypeSerializers",

@@ -29,6 +29,7 @@ env:
   out_folder: ./build-out/
   solution_name: ./uSync.slnx
   test_project: ./uSync.Tests/uSync.Tests.csproj
+  files_test_project: ./uSync.Files.Tests/uSync.Files.Tests.csproj
   client_folder: ./uSync.Backoffice.Management.Client/usync-assets
   history_client_folder: ./uSync.History/history-client
   nuget_source: https://api.nuget.org/v3/index.json
@@ -151,12 +152,15 @@ jobs:
       # a PR, so this is the only gate the release actually goes through - worth
       # running even though dotnet-build.yml already covers every merged PR.
       - name: test
-        run: dotnet test ${{ env.test_project }} -c ${{ env.config }} --no-build
+        run: |
+          dotnet test ${{ env.test_project }} -c ${{ env.config }} --no-build
+          dotnet test ${{ env.files_test_project }} -c ${{ env.config }} --no-build
 
       - name: pack
         run: |
           set -euo pipefail
           projects=(
+            uSync.Files
             uSync.Core
             uSync.AutoTemplates
             uSync.BackOffice

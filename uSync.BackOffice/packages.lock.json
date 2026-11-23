@@ -1485,6 +1485,9 @@
           "Umbraco.Cms.Web.Website": "[17.3.0, )"
         }
       },
+      "usync.files": {
+        "type": "Project"
+      },
       "Umbraco.Cms.Api.Management": {
         "type": "CentralTransitive",
         "requested": "[17.3.0, )",
