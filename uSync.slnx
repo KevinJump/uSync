@@ -28,6 +28,8 @@
   <Project Path="uSync.Extend/uSync.Extend.csproj" Id="7004bc54-4d76-45d4-aa26-3f1a415c5b8c">
     <Build Solution="Debug|*" Project="false" />
   </Project>
+  <Project Path="uSync.Files/uSync.Files.csproj" />
+  <Project Path="uSync.Files.Tests/uSync.Files.Tests.csproj" />
   <Project Path="uSync.History/uSync.History.csproj" />
   <Project Path="uSync.Tests/uSync.Tests.csproj" />
   <Project Path="uSync/uSync.csproj" />
