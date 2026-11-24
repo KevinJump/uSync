@@ -21,6 +21,11 @@ public class ApiComposer : IComposer
         // collection either way, so the helper they use always needs to be there.
         builder.Services.AddSingleton<ISyncPreviewMappingHelper, SyncPreviewMappingHelper>();
 
+        // without the back office uSync isn't added (uSyncBackOfficeComposer),
+        // so the management services have nothing to call.
+        if (builder.IsUmbracoBackOfficeEnabled() is false)
+            return;
+
         builder.AddSyncOpenApi();
         builder.Services.AddSingleton<ISyncManagementCache, uSyncManagementCache>();
         builder.Services.AddSingleton<ISyncManagementService, uSyncManagementService>();
