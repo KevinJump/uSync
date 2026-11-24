@@ -9,6 +9,17 @@ re-export), see [`changes/format.md`](changes/format.md).
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 History is backfilled from the v18 release history starting at `v18.0.0`.
 
+## [18.3.3] - 2026-11-24
+
+### Fixed
+
+- **Sites without the back office start again.** On a server that runs
+  Umbraco with `AddCore()` and no `AddBackOffice()`, uSync still registered
+  its management API services. They depend on services uSync skips when there
+  is no back office, so startup failed when service-provider validation was on
+  (`ValidateOnBuild`, for example under `WebApplicationFactory`). They are now
+  skipped too. (#1295, #1296)
+
 ## [18.3.1] - 2026-11-07
 
 ### Changed
