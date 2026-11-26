@@ -113,6 +113,23 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
     protected override void MoveToRecycleBin(IMedia item) => _mediaService.MoveToRecycleBin(item);
     protected override void SetTrashed(IMedia item) => ((ContentBase)item).Trashed = true;
     protected override void MoveItem(IMedia item, int parentId) => _mediaService.Move(item, parentId);
+
+    protected override bool TryMoveItem(IMedia item, int parentId, int userId)
+    {
+        try
+        {
+            var result = _mediaService.Move(item, parentId, userId);
+            if (result.Success) return true;
+
+            logger.LogWarning("Failed to move {name} to {parentId} [{result}]", item.Name, parentId, result.Result?.Result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            logger.LogWarning(ex, "Failed to move {name} to {parentId}", item.Name, parentId);
+        }
+
+        return false;
+    }
     protected override IMedia? GetByKey(Guid id) => _mediaService.GetById(id);
 
     protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IMedia item, SyncSerializerOptions options)
