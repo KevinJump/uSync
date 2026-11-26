@@ -95,6 +95,83 @@ First beta of uSync for **Umbraco 19**, built against Umbraco 19.0.0-beta1 on
   obsolete. It works on 19.0.0-beta1 and will be moved over in a later
   release. (#1162)
 
+## [18.3.3] - 2026-11-24
+
+### Fixed
+
+- **Sites without the back office start again.** On a server that runs
+  Umbraco with `AddCore()` and no `AddBackOffice()`, uSync still registered
+  its management API services. They depend on services uSync skips when there
+  is no back office, so startup failed when service-provider validation was on
+  (`ValidateOnBuild`, for example under `WebApplicationFactory`). They are now
+  skipped too. (#1295, #1296)
+
+## [18.3.2] - 2026-11-23
+
+### Added
+
+- **Key conflicts can be mapped.** From Umbraco 18 a saved item's key can't
+  change, so an item that matches by name but has a different key in the
+  uSync files can't be updated. Set `uSync:Settings:KeyConflict` to `Map` and
+  uSync keeps a per-site map from file keys to the site's own keys, and swaps
+  references to them as files are imported. The map is never exported. The
+  default (`Set`) behaves as before. A new "uSync - Key map" health check lists
+  the mappings and can clear them. (#1277, #1289)
+
+- **Startup import status.** The startup import records its state, times and
+  counts, and a new `GET usync/api/v1/StartupStatus` endpoint returns them, so
+  a deployment pipeline can check the import after a deploy. See
+  `docs/startup-import-status.md`. (#1263)
+
+- **Keep `usync.once` when the startup import has errors.** With the new
+  `KeepOnceFileOnErrors` setting on, a startup import that reports errors
+  keeps the once file and runs again at the next startup. It's off by
+  default. Startup imports with errors now log one warning listing the failed
+  items. (#1262)
+
+- **History retention.** `HistoryMaxAgeDays` and `HistoryMaxEntries` limit
+  how much uSync.History keeps. Both default to `0` (no limit). (#1252)
+
+- **Import failed webhook.** A new `uSyncImportFailed` webhook event fires
+  when an import has errors. The import and export completed payloads gain
+  `server`, `summary` counts and a `failures` list; `actions` is unchanged.
+  (#1266)
+
+- **Results view filters.** The results header shows a count per change type,
+  can filter to errors only, and has a search box. (#1264)
+
+- **Time Machine in the add-ons view**, labelled "timeline". (#1265)
+
+### Changed
+
+- **Key conflicts are reported clearly.** When Umbraco won't change an item's
+  key, the import error names the item and both keys instead of Umbraco's bare
+  "Cannot change the Key" message, and the report puts a key-conflict warning
+  first. (#1276)
+
+- **Faster imports, exports and reports.** Fewer disk reads, database calls and
+  allocations across import, export, report and preview. (#1269, #1270, #1271,
+  #1273, #1283, #1284)
+
+### Fixed
+
+- **Webhook payloads serialize.** uSync webhook events could throw while
+  serializing their payload. Item events now send `key`, `alias`, `itemType`
+  and `change`; completed events no longer serialize the raw exception, but
+  keep `exception.message`. (#1255)
+
+- **Content schedules on non-UTC servers.** Schedule dates are compared
+  against UTC, so release and expiry dates are handled correctly whatever the
+  server's time zone. The file format is unchanged. (#1251)
+
+- **`KeepTemplates` keeps similarly named templates.** A site-only template
+  whose alias was part of a file template's alias (`home` and `homePage`) was
+  dropped. Aliases now have to match exactly. (#1254)
+
+- **Deleting a dictionary item deletes its children on import.** Delete
+  markers are now written for every descendant, so the next import no longer
+  re-creates the children at the dictionary root. (#1253)
+
 ## [18.3.1] - 2026-11-07
 
 ### Changed

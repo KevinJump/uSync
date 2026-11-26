@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+		uSync folder checks, with no Umbraco, HTTP or command line dependencies
+		(BCL + System.Xml.Linq only), shared by the uSync health checks and the
+		uSync command line (files-verify). Keep it that way: no package references
+		other than build-time ones.
+	-->
+
+	<PropertyGroup>
+		<TargetFrameworks>net11.0</TargetFrameworks>
+
+		<PackageId>uSync.Files</PackageId>
+
+		<Description>
+			Offline checks for a uSync folder (merge conflicts, invalid xml, key and alias clashes, broken references), with no Umbraco dependencies.
+		</Description>
+
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="uSync.Files.Tests" />
+	</ItemGroup>
+
+</Project>
