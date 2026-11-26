@@ -36,6 +36,7 @@ env:
   out_folder: ./build-out/
   solution_name: ./uSync.slnx
   test_project: ./uSync.Tests/uSync.Tests.csproj
+  files_test_project: ./uSync.Files.Tests/uSync.Files.Tests.csproj
   schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
 jobs:
@@ -116,7 +117,9 @@ jobs:
         run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} --no-restore -p:ContinuousIntegrationBuild=true
 
       - name: test
-        run: dotnet test ${{ env.test_project }} -c ${{ env.config }} --no-build
+        run: |
+          dotnet test ${{ env.test_project }} -c ${{ env.config }} --no-build
+          dotnet test ${{ env.files_test_project }} -c ${{ env.config }} --no-build
 
       - name: Generate AppSettings Schema
         run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }} --no-build

@@ -1448,14 +1448,6 @@
           "Polly": "8.5.0"
         }
       },
-      "NUnit": {
-        "type": "Transitive",
-        "resolved": "3.14.0",
-        "contentHash": "R7iPwD7kbOaP3o2zldWJbWeMQAvDKD0uld27QvA3PAALl1unl7x0v2J7eGiJOYjimV/BuGT4VJmr45RjS7z4LA==",
-        "dependencies": {
-          "NETStandard.Library": "2.0.0"
-        }
-      },
       "OpenIddict": {
         "type": "Transitive",
         "resolved": "7.6.0",
@@ -2677,7 +2669,8 @@
         "type": "Project",
         "dependencies": {
           "uSync.Community.Contrib": "[12.0.0, )",
-          "uSync.Core": "[18.0.0, )"
+          "uSync.Core": "[18.0.0, )",
+          "uSync.Files": "[18.0.0, )"
         }
       },
       "usync.backoffice.management.api": {
@@ -2701,6 +2694,9 @@
           "Umbraco.Cms.Web.Website": "[18.1.0, )"
         }
       },
+      "usync.files": {
+        "type": "Project"
+      },
       "usync.history": {
         "type": "Project",
         "dependencies": {
@@ -2715,6 +2711,15 @@
         "contentHash": "j8EwTIBrdVZvXzkzC96j1gaD+0/s458RGz9M4AQObkPgUYrsiXOC39zHpN6m5fJaQTuRL+xfUqTRIG1wdhDVMA==",
         "dependencies": {
           "Umbraco.Cms.Web.Common": "18.0.0"
+        }
+      },
+      "NUnit": {
+        "type": "CentralTransitive",
+        "requested": "[3.14.0, )",
+        "resolved": "3.14.0",
+        "contentHash": "R7iPwD7kbOaP3o2zldWJbWeMQAvDKD0uld27QvA3PAALl1unl7x0v2J7eGiJOYjimV/BuGT4VJmr45RjS7z4LA==",
+        "dependencies": {
+          "NETStandard.Library": "2.0.0"
         }
       },
       "Umbraco.Cms": {

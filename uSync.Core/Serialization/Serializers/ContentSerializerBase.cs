@@ -428,6 +428,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         var (parentId, nodePath, nodeLevel) = await GetParentPathAndLevelAsync(item, info);
 
+        // On an existing item that we are going to save, we don't set Path or Level ourselves:
+        // with Path, Level and UpdateDate all dirty, Umbraco treats the save as a descendant
+        // of a bulk move and skips saving property values (#1300). Instead we move the item
+        // with the service (which also updates the descendants), or set the ParentId and let
+        // the repository work out the path and level when the item is saved.
+        var setPathAndLevel = item.HasIdentity is false || options.DoNotSave;
+
         if (item.ParentId != parentId)
         {
             changes.AddUpdate(uSyncConstants.Xml.Parent, item.ParentId, parentId);
@@ -435,10 +442,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (logger.IsEnabled(LogLevel.Trace))
                 logger.LogTrace("{Id} Setting Parent {ParentId}", item.Id, parentId);
 
-            item.ParentId = parentId;
+            // trashed items are moved by the trashed state handling, not here.
+            var canMove = setPathAndLevel is false && item.Trashed is false && parentId != RecycleBinId;
+            if (canMove is false || TryMoveItem(item, parentId, options.UserId) is false)
+                item.ParentId = parentId;
         }
 
-        if (item.Trashed is false)
+        if (item.Trashed is false && setPathAndLevel)
         {
             // the following are calculated (not in the file
             // because they might change without this node being saved).
@@ -757,6 +767,17 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected virtual void MoveToRecycleBin(TObject item) { }
     protected virtual void SetTrashed(TObject item) { }
     protected virtual void MoveItem(TObject item, int parentId) { }
+
+    /// <summary>
+    ///  Move an existing item to a new parent using the service, so its descendants move too.
+    /// </summary>
+    /// <remarks>
+    ///  Called before the properties are deserialized, so the move's save only carries the
+    ///  parent change and the later save of the properties is a normal save.
+    /// </remarks>
+    /// <returns>true if the item was moved, false if the caller should just set the ParentId.</returns>
+    protected virtual bool TryMoveItem(TObject item, int parentId, int userId) => false;
+
     protected virtual TObject? GetByKey(Guid id) => default;
 
     protected async Task<uSyncChange?> DeserializeTrashed(XElement node, TObject item, string relationAlias)
