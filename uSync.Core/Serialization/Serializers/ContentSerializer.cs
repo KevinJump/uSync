@@ -429,6 +429,23 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     protected override void MoveToRecycleBin(IContent item) => contentService.MoveToRecycleBin(item);
     protected override void SetTrashed(IContent item) => ((ContentBase)item).Trashed = true;
     protected override void MoveItem(IContent item, int parentId) => contentService.Move(item, parentId);
+
+    protected override bool TryMoveItem(IContent item, int parentId, int userId)
+    {
+        try
+        {
+            var result = contentService.Move(item, parentId, userId);
+            if (result.Success) return true;
+
+            logger.LogWarning("Failed to move {name} to {parentId} [{result}]", item.Name, parentId, result.Result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            logger.LogWarning(ex, "Failed to move {name} to {parentId}", item.Name, parentId);
+        }
+
+        return false;
+    }
     protected override IContent? GetByKey(Guid id) => contentService.GetById(id);
 
     [Obsolete("Use DoSaveOrPublishAsync will be removed in v18")]
