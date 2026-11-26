@@ -1274,11 +1274,6 @@
           "System.Security.Cryptography.Pkcs": "9.0.22"
         }
       },
-      "NUnit": {
-        "type": "Transitive",
-        "resolved": "3.14.0",
-        "contentHash": "R7iPwD7kbOaP3o2zldWJbWeMQAvDKD0uld27QvA3PAALl1unl7x0v2J7eGiJOYjimV/BuGT4VJmr45RjS7z4LA=="
-      },
       "OpenIddict": {
         "type": "Transitive",
         "resolved": "7.7.2",
@@ -2530,7 +2525,8 @@
         "type": "Project",
         "dependencies": {
           "uSync.Community.Contrib": "[12.0.0, )",
-          "uSync.Core": "[19.0.0, )"
+          "uSync.Core": "[19.0.0, )",
+          "uSync.Files": "[19.0.0, )"
         }
       },
       "usync.backoffice.management.api": {
@@ -2554,6 +2550,9 @@
           "Umbraco.Cms.Web.Website": "[19.0.0-rc1, )"
         }
       },
+      "usync.files": {
+        "type": "Project"
+      },
       "usync.history": {
         "type": "Project",
         "dependencies": {
@@ -2569,6 +2568,12 @@
         "dependencies": {
           "Umbraco.Cms.Web.Common": "19.0.0-rc1"
         }
+      },
+      "NUnit": {
+        "type": "CentralTransitive",
+        "requested": "[3.14.0, )",
+        "resolved": "3.14.0",
+        "contentHash": "R7iPwD7kbOaP3o2zldWJbWeMQAvDKD0uld27QvA3PAALl1unl7x0v2J7eGiJOYjimV/BuGT4VJmr45RjS7z4LA=="
       },
       "Umbraco.Cms": {
         "type": "CentralTransitive",
