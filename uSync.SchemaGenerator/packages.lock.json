@@ -1456,7 +1456,8 @@
         "type": "Project",
         "dependencies": {
           "uSync.Community.Contrib": "[12.0.0, )",
-          "uSync.Core": "[18.0.0, )"
+          "uSync.Core": "[18.0.0, )",
+          "uSync.Files": "[18.0.0, )"
         }
       },
       "usync.community.contrib": {
@@ -1472,6 +1473,9 @@
           "Umbraco.Cms.Api.Management": "[18.1.0, )",
           "Umbraco.Cms.Web.Website": "[18.1.0, )"
         }
+      },
+      "usync.files": {
+        "type": "Project"
       },
       "Jumoo.Json": {
         "type": "CentralTransitive",

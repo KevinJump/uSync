@@ -1468,6 +1468,9 @@
           "Umbraco.Cms.Web.Website": "[18.1.0, )"
         }
       },
+      "usync.files": {
+        "type": "Project"
+      },
       "Jumoo.Json": {
         "type": "CentralTransitive",
         "requested": "[18.0.4, )",
