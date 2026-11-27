@@ -29,7 +29,7 @@ env:
   out_folder: ./build-out/
   solution_name: ./uSync.slnx
   test_project: ./uSync.Tests/uSync.Tests.csproj
-  files_test_project: ./uSync.Files.Tests/uSync.Files.Tests.csproj
+  files_test_project: ./uSync.FolderChecks.Tests/uSync.FolderChecks.Tests.csproj
   client_folder: ./uSync.Backoffice.Management.Client/usync-assets
   history_client_folder: ./uSync.History/history-client
   nuget_source: https://api.nuget.org/v3/index.json
@@ -160,7 +160,7 @@ jobs:
         run: |
           set -euo pipefail
           projects=(
-            uSync.Files
+            uSync.FolderChecks
             uSync.Core
             uSync.AutoTemplates
             uSync.BackOffice

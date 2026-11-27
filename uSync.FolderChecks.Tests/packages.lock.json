@@ -120,7 +120,7 @@
           "Microsoft.NETCore.Platforms": "1.1.0"
         }
       },
-      "usync.files": {
+      "usync.folderchecks": {
         "type": "Project"
       }
     }

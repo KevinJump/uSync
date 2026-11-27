@@ -9,7 +9,7 @@ using Umbraco.Cms.Core.HealthChecks;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
-using uSync.Files;
+using uSync.FolderChecks;
 
 namespace uSync.BackOffice.HealthChecks;
 
@@ -17,7 +17,7 @@ namespace uSync.BackOffice.HealthChecks;
 ///  Checks the integrity of the uSync folder, for clashes, missing files etc...
 /// </summary>
 /// <remarks>
-///  the checks themselves live in uSync.Files, so the uSync command line
+///  the checks themselves live in uSync.FolderChecks, so the uSync command line
 ///  (files-verify) finds the same problems in a pipeline.
 /// </remarks>
 [HealthCheck("018EFC64-51BB-479B-AD09-73F538A1421A", "uSync - Folder Clash check",

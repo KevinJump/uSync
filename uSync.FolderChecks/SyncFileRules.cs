@@ -1,4 +1,4 @@
-namespace uSync.Files;
+namespace uSync.FolderChecks;
 
 public enum SyncFileSeverity
 {
