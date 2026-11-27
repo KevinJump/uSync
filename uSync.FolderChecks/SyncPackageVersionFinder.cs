@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace uSync.Files;
+namespace uSync.FolderChecks;
 
 /// <summary>
 ///  finds the version of uSync a site uses, from the .csproj near the uSync folder.

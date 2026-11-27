@@ -26,7 +26,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\uSync.Community.Contrib\uSync.Community.Contrib.csproj" />
 		<ProjectReference Include="..\uSync.Core\uSync.Core.csproj" />
-		<ProjectReference Include="..\uSync.Files\uSync.Files.csproj" />
+		<ProjectReference Include="..\uSync.FolderChecks\uSync.FolderChecks.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

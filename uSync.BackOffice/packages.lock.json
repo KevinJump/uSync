@@ -1186,7 +1186,7 @@
           "Umbraco.Cms.Web.Website": "[19.0.0-rc1, )"
         }
       },
-      "usync.files": {
+      "usync.folderchecks": {
         "type": "Project"
       },
       "Jumoo.Json": {

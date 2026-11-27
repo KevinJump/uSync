@@ -104,7 +104,7 @@
           "Microsoft.TestPlatform.ObjectModel": "18.11.0"
         }
       },
-      "usync.files": {
+      "usync.folderchecks": {
         "type": "Project"
       }
     }
