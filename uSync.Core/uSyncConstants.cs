@@ -27,6 +27,17 @@ public static partial class uSyncConstants
         public const string ItemType = "itemType";
         public const string Template = "Template";
 
+        /// <summary>
+        ///  on a content or media delete, where the item was in the recycle bin.
+        /// </summary>
+        /// <remarks>
+        ///  <see cref="RecycleBinMove"/> - the item is in the bin (ExportTrashedAsDelete).
+        ///  <see cref="RecycleBinDelete"/> - the item was deleted from the bin, so it is gone.
+        /// </remarks>
+        public const string RecycleBin = "RecycleBin";
+        public const string RecycleBinMove = "Move";
+        public const string RecycleBinDelete = "Delete";
+
     }
 
     /// <summary>
@@ -109,6 +120,14 @@ public static partial class uSyncConstants
 
         public const string AllowCreateOnlyDeletes = "CreateOnlyDeletes";
         public const bool AllowCreateOnlyDeletes_Default = false; 
+
+        // deletes of content and media move the item to the recycle bin, not delete it outright.
+        public const string MoveToRecycleBin = "MoveToRecycleBin";
+        public const bool MoveToRecycleBin_Default = false;
+
+        // content and media in the recycle bin are exported as a delete, not as the item.
+        public const string ExportTrashedAsDelete = "ExportTrashedAsDelete";
+        public const bool ExportTrashedAsDelete_Default = false;
 
         // new properties only (so existing properties are left)
         public const string NewPropertiesOnly = "NewPropertiesOnly";

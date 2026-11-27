@@ -94,6 +94,7 @@ public class ContentSerializer : PublishableContentBaseSerializer<IContent>, ISy
 
     // trashed helpers. 
     protected override void MoveToRecycleBin(IContent item) => contentService.MoveToRecycleBin(item);
+    protected override bool TryMoveToRecycleBin(IContent item) => contentService.MoveToRecycleBin(item).Success;
     protected override void SetTrashed(IContent item) => ((ContentBase)item).Trashed = true;
     protected override void MoveItem(IContent item, int parentId) => contentService.Move(item, parentId);
 
