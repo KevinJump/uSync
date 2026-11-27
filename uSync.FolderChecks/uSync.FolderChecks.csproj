@@ -10,7 +10,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net11.0</TargetFrameworks>
 
-		<PackageId>uSync.Files</PackageId>
+		<PackageId>uSync.FolderChecks</PackageId>
 
 		<Description>
 			Offline checks for a uSync folder (merge conflicts, invalid xml, key and alias clashes, broken references), with no Umbraco dependencies.
@@ -31,7 +31,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<InternalsVisibleTo Include="uSync.Files.Tests" />
+		<InternalsVisibleTo Include="uSync.FolderChecks.Tests" />
 	</ItemGroup>
 
 </Project>

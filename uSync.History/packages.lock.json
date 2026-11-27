@@ -1148,7 +1148,7 @@
         "dependencies": {
           "uSync.Community.Contrib": "[12.0.0, )",
           "uSync.Core": "[19.0.0, )",
-          "uSync.Files": "[19.0.0, )"
+          "uSync.FolderChecks": "[19.0.0, )"
         }
       },
       "usync.backoffice.management.api": {
@@ -1172,7 +1172,7 @@
           "Umbraco.Cms.Web.Website": "[19.0.0-rc1, )"
         }
       },
-      "usync.files": {
+      "usync.folderchecks": {
         "type": "Project"
       },
       "Jumoo.Json": {

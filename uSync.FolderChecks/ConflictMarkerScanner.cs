@@ -1,4 +1,4 @@
-namespace uSync.Files;
+namespace uSync.FolderChecks;
 
 /// <summary>
 ///  finds git merge conflict markers in raw file text.

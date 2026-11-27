@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace uSync.Files;
+namespace uSync.FolderChecks;
 
 /// <summary>
 ///  works out where the uSync folder is, the same way the site does.

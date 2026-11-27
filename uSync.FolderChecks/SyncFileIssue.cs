@@ -1,4 +1,4 @@
-namespace uSync.Files;
+namespace uSync.FolderChecks;
 
 /// <summary>
 ///  a problem found in a uSync folder.

@@ -1,7 +1,7 @@
 using System.Xml;
 using System.Xml.Linq;
 
-namespace uSync.Files;
+namespace uSync.FolderChecks;
 
 /// <summary>
 ///  a uSync .config file that loaded as XML.

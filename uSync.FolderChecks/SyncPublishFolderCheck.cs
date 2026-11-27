@@ -1,4 +1,4 @@
-namespace uSync.Files;
+namespace uSync.FolderChecks;
 
 /// <summary>
 ///  checks a publish (deploy) output has the uSync folder in it.
