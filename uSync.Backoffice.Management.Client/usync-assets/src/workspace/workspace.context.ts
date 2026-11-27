@@ -26,6 +26,7 @@ import {
 	UmbWorkspaceContext,
 } from '@umbraco-cms/backoffice/workspace';
 import { UMB_MODAL_MANAGER_CONTEXT } from '@umbraco-cms/backoffice/modal';
+import { UMB_NOTIFICATION_CONTEXT } from '@umbraco-cms/backoffice/notification';
 import { USYNC_IMPORT_MODAL } from './dialogs';
 
 /**
@@ -345,9 +346,10 @@ export class uSyncWorkspaceContext
 		} while (!complete);
 
 		if (lastResponse?.message) {
-			// the run couldn't be started (e.g. one is already in progress) -
-			// nothing happened, so don't report a completed run.
-			console.warn('[uSync]', lastResponse.message);
+			// the run couldn't be started (e.g. one is already in progress),
+			// or it failed (e.g. two files share a key) - so don't report a
+			// completed run.
+			this.#showError(options.action, lastResponse.message);
 			this.#working.setValue(false);
 			this.#completed.setValue(false);
 			this.#inBackground.setValue(false);
@@ -476,7 +478,10 @@ export class uSyncWorkspaceContext
 		this.#stopPolling();
 
 		if (!success) {
-			console.warn('[uSync]', message ?? 'The background run did not complete successfully.');
+			this.#showError(
+				undefined,
+				message ?? 'The background run did not complete successfully.',
+			);
 		}
 
 		this.#results.setValue(actions);
@@ -489,6 +494,17 @@ export class uSyncWorkspaceContext
 			this.#pendingDownload = false;
 			this.downloadFile();
 		}
+	}
+
+	async #showError(action: string | undefined, message: string) {
+		console.warn('[uSync]', message);
+		const notifications = await this.getContext(UMB_NOTIFICATION_CONTEXT);
+		notifications?.peek('danger', {
+			data: {
+				headline: action ? `uSync ${action} failed` : 'uSync failed',
+				message: message,
+			},
+		});
 	}
 
 	/**
