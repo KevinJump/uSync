@@ -224,9 +224,8 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     ///  with ExportTrashedAsDelete on, an item in the recycle bin is exported as a delete.
     /// </summary>
     /// <remarks>
-    ///  the delete carries the itemType, so it can be imported from somewhere the handler
-    ///  isn't worked out from the folder (e.g a sync pack). the export rules (ExportTrashed,
-    ///  RulesOnExport) are checked against the full item first, as they are for the item itself.
+    ///  the export rules (ExportTrashed, RulesOnExport) are checked against the full item
+    ///  first, as they are for the item itself.
     /// </remarks>
     protected override async Task<SyncAttempt<XElement>> Export_DoExportAsync(TObject item, string filename, string[] folders, HandlerSettings config)
     {
@@ -242,6 +241,18 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         if (await ShouldExportAsync(full.Item, config) is false)
             return SyncAttempt<XElement>.Succeed(Path.GetFileName(filename), ChangeType.NoChange, "Not Exported (Based on configuration)");
 
+        return await ExportAsDeleteAsync(item, filename);
+    }
+
+    /// <summary>
+    ///  write an empty delete node for the item to disk.
+    /// </summary>
+    /// <remarks>
+    ///  the delete carries the itemType, so it can be imported from somewhere the handler
+    ///  isn't worked out from the folder (e.g a sync pack).
+    /// </remarks>
+    private async Task<SyncAttempt<XElement>> ExportAsDeleteAsync(TObject item, string filename)
+    {
         var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Delete, string.Empty);
         if (attempt.Success && attempt.Item is not null)
         {
