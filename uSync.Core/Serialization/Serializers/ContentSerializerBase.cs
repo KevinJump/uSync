@@ -1028,12 +1028,74 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             return path;
         }
     }
+
+    /// <summary>
+    ///  can deletes of this item type go to the recycle bin? (blueprints can't)
+    /// </summary>
+    protected virtual bool CanMoveToRecycleBin => true;
+
+    /// <summary>
+    ///  with the MoveToRecycleBin setting on, a delete moves the item to the recycle bin.
+    /// </summary>
+    /// <remarks>
+    ///  a delete of an item that was in the recycle bin on the source (RecycleBin="Delete")
+    ///  is always a real delete, so emptying the bin on one site empties it on the other.
+    /// </remarks>
+    protected override async Task<SyncAttempt<TObject>> ProcessDeleteAsync(XElement node, Guid key, string alias, SyncSerializerOptions options)
+    {
+        if (CanMoveToRecycleBin is false
+            || IsDeleteFromRecycleBin(node)
+            || options.GetSetting(uSyncConstants.DefaultSettings.MoveToRecycleBin, uSyncConstants.DefaultSettings.MoveToRecycleBin_Default) is false)
+            return await base.ProcessDeleteAsync(node, key, alias, options);
+
+        var item = await FindItemAsync(key);
+        if (item is null || item.Trashed)
+            return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
+
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Moving {alias} to the recycle bin", alias);
+
+        // clear any old restore relation first, as HandleTrashedState does (stops an error).
+        if (string.IsNullOrWhiteSpace(relationAlias) is false)
+            CleanRelations(item, relationAlias);
+
+        if (TryMoveToRecycleBin(item) is false)
+            return SyncAttempt<TObject>.Fail(alias, ChangeType.Fail, "Failed to move the item to the recycle bin");
+
+        return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete, "Moved to the recycle bin");
+    }
+
+    /// <summary>
+    ///  move an item to the recycle bin, returning false when the move fails or is cancelled.
+    /// </summary>
+    /// <remarks>
+    ///  calls <see cref="MoveToRecycleBin(TObject)"/> by default, which can't report a failure.
+    /// </remarks>
+    protected virtual bool TryMoveToRecycleBin(TObject item)
+    {
+        MoveToRecycleBin(item);
+        return true;
+    }
+
+    private static bool IsDeleteFromRecycleBin(XElement node)
+        => uSyncConstants.Xml.RecycleBinDelete.Equals(
+            node.Attribute(uSyncConstants.Xml.RecycleBin)?.Value, StringComparison.OrdinalIgnoreCase);
+
     public override async Task<SyncAttempt<XElement>> SerializeEmptyAsync(TObject item, SyncActionType change, string alias)
     {
         var attempt = await base.SerializeEmptyAsync(item, change, alias);
         if (attempt.Success && attempt.Item is not null)
         {
             attempt.Item.Add(new XAttribute(uSyncConstants.Xml.Level, GetLevel(item)));
+
+            // a delete of an item in the recycle bin is a delete from the bin, (e.g emptying it).
+            // it carries the itemType, so it can be imported from somewhere the handler
+            // isn't worked out from the folder (e.g a sync pack).
+            if (change == SyncActionType.Delete && item.Trashed)
+            {
+                attempt.Item.SetAttributeValue(uSyncConstants.Xml.RecycleBin, uSyncConstants.Xml.RecycleBinDelete);
+                attempt.Item.SetAttributeValue(uSyncConstants.Xml.ItemType, ItemType);
+            }
         }
         return attempt;
     }
