@@ -116,6 +116,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
     }
 
     protected override void MoveToRecycleBin(IMedia item) => _mediaService.MoveToRecycleBin(item);
+    protected override bool TryMoveToRecycleBin(IMedia item) => _mediaService.MoveToRecycleBin(item).Success;
     protected override void SetTrashed(IMedia item) => ((ContentBase)item).Trashed = true;
     protected override void MoveItem(IMedia item, int parentId) => _mediaService.Move(item, parentId);
 

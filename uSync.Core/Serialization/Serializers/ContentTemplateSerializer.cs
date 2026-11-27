@@ -286,6 +286,9 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         return Task.CompletedTask;
     }
 
+    // blueprints don't have a recycle bin.
+    protected override bool CanMoveToRecycleBin => false;
+
     public override Task DeleteItemAsync(IContent item)
     {
         contentService.DeleteBlueprint(item);

@@ -1,6 +1,6 @@
-using uSync.Files;
+using uSync.FolderChecks;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 internal static class Fixtures
 {

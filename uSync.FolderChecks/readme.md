@@ -1,4 +1,4 @@
-## uSync.Files
+## uSync.FolderChecks
 
 Checks a uSync folder on disk for problems that break (or quietly spoil) an import, without a site or a database:
 

@@ -94,8 +94,8 @@ public class SyncFolderIntegrityChecksTests
         var results = await Run();
 
         Assert.That(results[0].ResultType, Is.EqualTo(StatusResultType.Error));
-        Assert.That(results[0].Message, Does.Contain("share the same keys"));
-        Assert.That(results[0].Description, Does.Contain("ContentTypes/article_copy.config"));
+        Assert.That(results[0].Message, Does.StartWith("There are 2 item(s) that share a key with another item"));
+        Assert.That(results[0].Message, Does.Contain("ContentTypes/article_copy.config"));
     }
 
     [Test]
@@ -119,7 +119,7 @@ public class SyncFolderIntegrityChecksTests
         var results = await Run();
 
         Assert.That(results[1].ResultType, Is.EqualTo(StatusResultType.Error));
-        Assert.That(results[1].Description, Does.Contain("ContentTypes/broken.config"));
+        Assert.That(results[1].Message, Does.Contain("ContentTypes/broken.config"));
     }
 
     [Test]
@@ -132,7 +132,7 @@ public class SyncFolderIntegrityChecksTests
 
         var conflicts = results[2];
         Assert.That(conflicts.ResultType, Is.EqualTo(StatusResultType.Error));
-        Assert.That(conflicts.Description, Does.Contain("DataTypes/blocks.config:3"));
+        Assert.That(conflicts.Message, Does.Contain("DataTypes/blocks.config:3"));
         Assert.That(results[1].ResultType, Is.EqualTo(StatusResultType.Success), "still valid xml");
     }
 

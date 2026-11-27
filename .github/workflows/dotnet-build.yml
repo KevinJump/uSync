@@ -36,7 +36,7 @@ env:
   out_folder: ./build-out/
   solution_name: ./uSync.slnx
   test_project: ./uSync.Tests/uSync.Tests.csproj
-  files_test_project: ./uSync.Files.Tests/uSync.Files.Tests.csproj
+  files_test_project: ./uSync.FolderChecks.Tests/uSync.FolderChecks.Tests.csproj
   schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
 jobs:
