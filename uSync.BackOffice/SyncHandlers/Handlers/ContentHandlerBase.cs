@@ -249,13 +249,15 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     /// </summary>
     /// <remarks>
     ///  the delete carries the itemType, so it can be imported from somewhere the handler
-    ///  isn't worked out from the folder (e.g a sync pack).
+    ///  isn't worked out from the folder (e.g a sync pack). it is marked RecycleBin="Move",
+    ///  as the item is still in the bin (not deleted from it).
     /// </remarks>
     private async Task<SyncAttempt<XElement>> ExportAsDeleteAsync(TObject item, string filename)
     {
         var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Delete, string.Empty);
         if (attempt.Success && attempt.Item is not null)
         {
+            attempt.Item.SetAttributeValue(Core.uSyncConstants.Xml.RecycleBin, Core.uSyncConstants.Xml.RecycleBinMove);
             attempt.Item.Add(new XAttribute(Core.uSyncConstants.Xml.ItemType, serializer.ItemType));
             await syncFileService.SaveXElementAsync(attempt.Item, filename);
         }

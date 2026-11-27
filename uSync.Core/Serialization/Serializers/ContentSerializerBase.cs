@@ -1037,11 +1037,16 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     /// <summary>
     ///  with the MoveToRecycleBin setting on, a delete moves the item to the recycle bin.
     /// </summary>
-    protected override async Task<SyncAttempt<TObject>> ProcessDeleteAsync(Guid key, string alias, SyncSerializerOptions options)
+    /// <remarks>
+    ///  a delete of an item that was in the recycle bin on the source (RecycleBin="Delete")
+    ///  is always a real delete, so emptying the bin on one site empties it on the other.
+    /// </remarks>
+    protected override async Task<SyncAttempt<TObject>> ProcessDeleteAsync(XElement node, Guid key, string alias, SyncSerializerOptions options)
     {
         if (CanMoveToRecycleBin is false
+            || IsDeleteFromRecycleBin(node)
             || options.GetSetting(uSyncConstants.DefaultSettings.MoveToRecycleBin, uSyncConstants.DefaultSettings.MoveToRecycleBin_Default) is false)
-            return await base.ProcessDeleteAsync(key, alias, options);
+            return await base.ProcessDeleteAsync(node, key, alias, options);
 
         var item = await FindItemAsync(key);
         if (item is null || item.Trashed)
@@ -1072,12 +1077,20 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return true;
     }
 
+    private static bool IsDeleteFromRecycleBin(XElement node)
+        => uSyncConstants.Xml.RecycleBinDelete.Equals(
+            node.Attribute(uSyncConstants.Xml.RecycleBin)?.Value, StringComparison.OrdinalIgnoreCase);
+
     public override async Task<SyncAttempt<XElement>> SerializeEmptyAsync(TObject item, SyncActionType change, string alias)
     {
         var attempt = await base.SerializeEmptyAsync(item, change, alias);
         if (attempt.Success && attempt.Item is not null)
         {
             attempt.Item.Add(new XAttribute(uSyncConstants.Xml.Level, GetLevel(item)));
+
+            // a delete of an item in the recycle bin is a delete from the bin, (e.g emptying it).
+            if (change == SyncActionType.Delete && item.Trashed)
+                attempt.Item.SetAttributeValue(uSyncConstants.Xml.RecycleBin, uSyncConstants.Xml.RecycleBinDelete);
         }
         return attempt;
     }

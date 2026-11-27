@@ -21,6 +21,17 @@ public static partial class uSyncConstants
 
         public const string Template = "Template";
 
+        /// <summary>
+        ///  on a content or media delete, where the item was in the recycle bin.
+        /// </summary>
+        /// <remarks>
+        ///  <see cref="RecycleBinMove"/> - the item is in the bin (ExportTrashedAsDelete).
+        ///  <see cref="RecycleBinDelete"/> - the item was deleted from the bin, so it is gone.
+        /// </remarks>
+        public const string RecycleBin = "RecycleBin";
+        public const string RecycleBinMove = "Move";
+        public const string RecycleBinDelete = "Delete";
+
     }
 
     /// <summary>

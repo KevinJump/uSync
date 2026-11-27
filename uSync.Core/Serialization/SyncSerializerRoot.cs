@@ -168,7 +168,7 @@ public abstract class SyncSerializerRoot<TObject>
         {
             case SyncActionType.Delete:
                 if (options.DeleteItems())
-                    return await ProcessDeleteAsync(key, alias, options);
+                    return await ProcessDeleteAsync(node, key, alias, options);
 
                 return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
             case SyncActionType.Rename:
@@ -183,12 +183,12 @@ public abstract class SyncSerializerRoot<TObject>
     }
 
     /// <summary>
-    ///  process a delete, with the handler's settings to hand.
+    ///  process a delete, with the delete node and the handler's settings to hand.
     /// </summary>
     /// <remarks>
-    ///  override this when a delete depends on a setting, it calls the flags version by default.
+    ///  override this when a delete depends on a setting or on the node, it calls the flags version by default.
     /// </remarks>
-    protected virtual Task<SyncAttempt<TObject>> ProcessDeleteAsync(Guid key, string alias, SyncSerializerOptions options)
+    protected virtual Task<SyncAttempt<TObject>> ProcessDeleteAsync(XElement node, Guid key, string alias, SyncSerializerOptions options)
         => ProcessDeleteAsync(key, alias, options.Flags);
 
     protected virtual async Task<SyncAttempt<TObject>> ProcessDeleteAsync(Guid key, string alias, SerializerFlags flags)

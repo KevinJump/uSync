@@ -100,10 +100,12 @@ public class TrashedItemDeleteTests : UmbracoIntegrationTest
         return media;
     }
 
-    private static XElement DeleteNode(Guid key, string itemType)
+    private static XElement DeleteNode(Guid key, string itemType, string? recycleBin = null)
     {
         var node = XElementExtensions.MakeEmpty(key, SyncActionType.Delete, "item");
         node.Add(new XAttribute(CoreConstants.Xml.ItemType, itemType));
+        if (recycleBin is not null)
+            node.Add(new XAttribute(CoreConstants.Xml.RecycleBin, recycleBin));
         return node;
     }
 
@@ -160,6 +162,51 @@ public class TrashedItemDeleteTests : UmbracoIntegrationTest
     }
 
     [Test]
+    public async Task DeleteFromTheBin_WithMoveToRecycleBin_DeletesOutright()
+    {
+        var media = CreateMedia();
+        MediaService.MoveToRecycleBin(media);
+
+        var node = DeleteNode(media.Key, "Media", CoreConstants.Xml.RecycleBinDelete);
+        var attempt = await MediaSerializer.DeserializeAsync(node, Options(true));
+
+        Assert.That(attempt.Change, Is.EqualTo(ChangeType.Delete));
+        Assert.That(MediaService.GetById(media.Key), Is.Null);
+    }
+
+    [Test]
+    public async Task MoveDelete_OfAnItemAlreadyInTheBin_IsNoChange()
+    {
+        var content = CreateContent();
+        ContentService.MoveToRecycleBin(content);
+
+        var node = DeleteNode(content.Key, "Content", CoreConstants.Xml.RecycleBinMove);
+        var attempt = await ContentSerializer.DeserializeAsync(node, Options(true));
+
+        Assert.That(attempt.Change, Is.EqualTo(ChangeType.NoChange));
+        Assert.That(ContentService.GetById(content.Key)?.Trashed, Is.True);
+    }
+
+    [Test]
+    public async Task SerializeEmpty_DeleteOfABinnedItem_IsMarkedAsFromTheBin()
+    {
+        var content = CreateContent();
+        ContentService.MoveToRecycleBin(content);
+        content = ContentService.GetById(content.Key)!;
+
+        var trashed = await ContentSerializer.SerializeEmptyAsync(content, SyncActionType.Delete, string.Empty);
+        var other = ContentService.Create("other", -1, content.ContentType.Alias);
+        ContentService.Save(other);
+        var live = await ContentSerializer.SerializeEmptyAsync(other, SyncActionType.Delete, string.Empty);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(trashed.Item?.Attribute(CoreConstants.Xml.RecycleBin)?.Value, Is.EqualTo(CoreConstants.Xml.RecycleBinDelete));
+            Assert.That(live.Item?.Attribute(CoreConstants.Xml.RecycleBin), Is.Null);
+        });
+    }
+
+    [Test]
     public async Task Export_TrashedContent_WithExportTrashedAsDelete_IsADelete()
     {
         var content = CreateContent();
@@ -179,6 +226,7 @@ public class TrashedItemDeleteTests : UmbracoIntegrationTest
             Assert.That(node.GetEmptyAction(), Is.EqualTo(SyncActionType.Delete));
             Assert.That(node.GetKey(), Is.EqualTo(content.Key));
             Assert.That(node.GetItemType(), Is.EqualTo("Content"));
+            Assert.That(node.Attribute(CoreConstants.Xml.RecycleBin)?.Value, Is.EqualTo(CoreConstants.Xml.RecycleBinMove));
         });
     }
 
