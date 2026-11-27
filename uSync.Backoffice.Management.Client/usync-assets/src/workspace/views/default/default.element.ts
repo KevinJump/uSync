@@ -134,6 +134,12 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 					this._disabled = true;
 				} else {
 					this._disabled = false;
+
+					// stopped without completing (it failed, or couldn't start),
+					// so stop the buttons spinning.
+					if (this._buttonState === 'waiting') {
+						this._buttonState = undefined;
+					}
 				}
 			});
 

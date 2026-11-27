@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Membership;
@@ -35,6 +36,7 @@ internal class uSyncManagementService : ISyncManagementService
 
     private readonly ISyncTrackerService _syncTrackerService;
     private readonly ISyncStartupStatusService _startupStatusService;
+    private readonly ILogger<uSyncManagementService> _logger;
 
     public uSyncManagementService(
         ISyncActionService syncActionService,
@@ -45,7 +47,8 @@ internal class uSyncManagementService : ISyncManagementService
         ISyncHandlerFactory handlerFactory,
         ILongRunningOperationService longRunningOperationService,
         ISyncTrackerService syncTrackerService,
-        ISyncStartupStatusService startupStatusService)
+        ISyncStartupStatusService startupStatusService,
+        ILogger<uSyncManagementService> logger)
     {
         _syncActionService = syncActionService;
         _configService = configService;
@@ -56,6 +59,7 @@ internal class uSyncManagementService : ISyncManagementService
         _longRunningOperationService = longRunningOperationService;
         _syncTrackerService = syncTrackerService;
         _startupStatusService = startupStatusService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -194,7 +198,23 @@ internal class uSyncManagementService : ISyncManagementService
             return await PerformBackgroundActionAsync(actionRequest, user);
         }
 
-        return await PerformActionInternalAsync(string.IsNullOrWhiteSpace(actionRequest.RequestId), actionRequest, user);
+        try
+        {
+            return await PerformActionInternalAsync(string.IsNullOrWhiteSpace(actionRequest.RequestId), actionRequest, user);
+        }
+        catch (Exception ex)
+        {
+            // return the reason, rather than a 500 the backoffice can only report
+            // as "a fatal server error" (e.g. two files in the folder share a key).
+            _logger.LogError(ex, "uSync {action} failed", actionRequest.Action);
+            return new PerformActionResponse
+            {
+                RequestId = actionRequest.RequestId ?? string.Empty,
+                Complete = true,
+                InBackground = false,
+                Message = ex.Message
+            };
+        }
     }
 
 
@@ -263,15 +283,35 @@ internal class uSyncManagementService : ISyncManagementService
         // its gone wrong by a bit.
         var count = 0;
 
-        do
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            do
+            {
+                cancellationToken.ThrowIfCancellationRequested();
 
-            result = await PerformActionInternalAsync(count == 0, request, user, operationId);
-            request.RequestId = result.RequestId;
-            request.StepNumber++;
-            count++;
-        } while (result.Complete is false && count < 100);
+                result = await PerformActionInternalAsync(count == 0, request, user, operationId);
+                request.RequestId = result.RequestId;
+                request.StepNumber++;
+                count++;
+            } while (result.Complete is false && count < 100);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // keep the reason, so the status poll can report it, then let the
+            // operation fail as before.
+            var progress = await _syncManagementCache.GetProgressForOperationAsync(operationId);
+            await _syncManagementCache.SaveProgressAsync(new SyncManagementProgress
+            {
+                RequestId = progress?.RequestId ?? GetRequestId(request),
+                OperationId = operationId,
+                Action = progress?.Action ?? request.Action,
+                Status = progress?.Status ?? [],
+                Actions = progress?.Actions ?? [],
+                Complete = true,
+                Message = ex.Message
+            });
+            throw;
+        }
     }
 
     public async Task<SyncOperationStatusResponse> GetOperationStatusAsync(Guid operationId)
@@ -318,7 +358,9 @@ internal class uSyncManagementService : ISyncManagementService
 
         var message = operationStatus switch
         {
-            LongRunningOperationStatus.Failed => "The sync process failed, check the server logs for details.",
+            LongRunningOperationStatus.Failed => progress?.Complete is true && string.IsNullOrWhiteSpace(progress.Message) is false
+                ? progress.Message
+                : "The sync process failed, check the server logs for details.",
             LongRunningOperationStatus.Stale => "The sync process did not report progress in time and is considered stale.",
             _ => progress?.Message
         };
