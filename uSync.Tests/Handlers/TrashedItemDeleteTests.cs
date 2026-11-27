@@ -183,6 +183,40 @@ public class TrashedItemDeleteTests : UmbracoIntegrationTest
     }
 
     [Test]
+    public async Task Export_TrashedContent_WithExportTrashedOff_WritesNoDelete()
+    {
+        var content = CreateContent();
+        ContentService.MoveToRecycleBin(content);
+        content = ContentService.GetById(content.Key)!;
+
+        var config = Handler.DefaultConfig.Clone();
+        config.Settings[CoreConstants.DefaultSettings.ExportTrashedAsDelete] = "true";
+        config.Settings["ExportTrashed"] = "false";
+
+        var actions = (await Handler.ExportAsync(content, [$"{_root}/{Guid.NewGuid():N}/"], config)).ToList();
+
+        Assert.That(actions.Any(x => x.Change > ChangeType.NoChange), Is.False);
+        Assert.That(actions.Where(x => x.FileName is not null)
+            .Any(x => GetRequiredService<ISyncFileService>().FileExists(x.FileName!)), Is.False);
+    }
+
+    [Test]
+    public async Task BlueprintDelete_WithMoveToRecycleBin_DeletesOutright()
+    {
+        var content = CreateContent();
+        var blueprint = ContentService.CreateBlueprintFromContent(content, "blueprint");
+        ContentService.SaveBlueprint(blueprint, null);
+
+        var serializer = GetRequiredService<SyncSerializerCollection>().GetSerializer<IContent>("contentTemplateSerializer");
+        Assert.That(serializer, Is.Not.Null);
+
+        var attempt = await serializer!.DeserializeAsync(DeleteNode(blueprint.Key, "Content"), Options(true));
+
+        Assert.That(attempt.Change, Is.EqualTo(ChangeType.Delete));
+        Assert.That(ContentService.GetBlueprintById(blueprint.Key), Is.Null);
+    }
+
+    [Test]
     public async Task Export_TrashedContent_ByDefault_IsTheItem()
     {
         var content = CreateContent();

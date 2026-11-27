@@ -1050,8 +1050,26 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (logger.IsEnabled(LogLevel.Debug))
             logger.LogDebug("Moving {alias} to the recycle bin", alias);
 
-        MoveToRecycleBin(item);
+        // clear any old restore relation first, as HandleTrashedState does (stops an error).
+        if (string.IsNullOrWhiteSpace(relationAlias) is false)
+            CleanRelations(item, relationAlias);
+
+        if (TryMoveToRecycleBin(item) is false)
+            return SyncAttempt<TObject>.Fail(alias, ChangeType.Fail, "Failed to move the item to the recycle bin");
+
         return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete, "Moved to the recycle bin");
+    }
+
+    /// <summary>
+    ///  move an item to the recycle bin, returning false when the move fails or is cancelled.
+    /// </summary>
+    /// <remarks>
+    ///  calls <see cref="MoveToRecycleBin(TObject)"/> by default, which can't report a failure.
+    /// </remarks>
+    protected virtual bool TryMoveToRecycleBin(TObject item)
+    {
+        MoveToRecycleBin(item);
+        return true;
     }
 
     public override async Task<SyncAttempt<XElement>> SerializeEmptyAsync(TObject item, SyncActionType change, string alias)

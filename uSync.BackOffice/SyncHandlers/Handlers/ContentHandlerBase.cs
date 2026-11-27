@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -224,13 +225,22 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     /// </summary>
     /// <remarks>
     ///  the delete carries the itemType, so it can be imported from somewhere the handler
-    ///  isn't worked out from the folder (e.g a sync pack).
+    ///  isn't worked out from the folder (e.g a sync pack). the export rules (ExportTrashed,
+    ///  RulesOnExport) are checked against the full item first, as they are for the item itself.
     /// </remarks>
     protected override async Task<SyncAttempt<XElement>> Export_DoExportAsync(TObject item, string filename, string[] folders, HandlerSettings config)
     {
         if (item.Trashed is false
             || config.GetSetting(Core.uSyncConstants.DefaultSettings.ExportTrashedAsDelete, Core.uSyncConstants.DefaultSettings.ExportTrashedAsDelete_Default) is false)
             return await base.Export_DoExportAsync(item, filename, folders, config);
+
+        // the empty delete node has no path or doctype, so the rules run on the full item.
+        var full = await SerializeItemAsync(item, new SyncSerializerOptions(config.Settings));
+        if (full.Success is false || full.Item is null)
+            return full;
+
+        if (await ShouldExportAsync(full.Item, config) is false)
+            return SyncAttempt<XElement>.Succeed(Path.GetFileName(filename), ChangeType.NoChange, "Not Exported (Based on configuration)");
 
         var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Delete, string.Empty);
         if (attempt.Success && attempt.Item is not null)
