@@ -85,8 +85,8 @@ public class SyncFolderIntegrityChecks : HealthCheck
         return
         [
             GetStatus(result, SyncFileRules.DuplicateKey,
-                count => $"There are {count} clash(es) where files share the same keys",
-                "<p>There are multiple clashes where items of the same type share the same keys.</p>",
+                count => $"There are {count} item(s) that share a key with another item",
+                "<p>Items of the same type share the same key, so only one of them can be imported.</p>",
                 "<p>To fix this perform a clean export from the uSync dashboard</p>",
                 "No Id clashes found"),
 
@@ -136,9 +136,10 @@ public class SyncFolderIntegrityChecks : HealthCheck
             return $"<li>[{WebUtility.HtmlEncode(location)}] {WebUtility.HtmlEncode(x.Message)}</li>";
         });
 
-        return new HealthCheckStatus(failMessage(issues.Count))
+        // the details go in the message, the management API doesn't return the description,
+        // and the backoffice renders the message as html.
+        return new HealthCheckStatus($"{failMessage(issues.Count)}{intro}<ul>{string.Join("", items)}</ul>{fix}")
         {
-            Description = $"{intro}<ul>{string.Join("", items)}</ul>{fix}",
             ResultType = rule.Severity == SyncFileSeverity.Error ? StatusResultType.Error : StatusResultType.Warning
         };
     }
