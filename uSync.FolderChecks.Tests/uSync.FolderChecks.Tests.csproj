@@ -14,7 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\uSync.Files\uSync.Files.csproj" />
+		<ProjectReference Include="..\uSync.FolderChecks\uSync.FolderChecks.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

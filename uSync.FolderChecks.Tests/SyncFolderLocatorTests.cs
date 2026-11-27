@@ -1,6 +1,6 @@
-using uSync.Files;
+using uSync.FolderChecks;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 /// <summary>
 ///  folder discovery and the publish folder check, called directly

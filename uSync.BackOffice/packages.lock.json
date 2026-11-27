@@ -1485,7 +1485,7 @@
           "Umbraco.Cms.Web.Website": "[17.3.0, )"
         }
       },
-      "usync.files": {
+      "usync.folderchecks": {
         "type": "Project"
       },
       "Umbraco.Cms.Api.Management": {

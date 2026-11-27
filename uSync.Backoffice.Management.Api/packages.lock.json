@@ -1507,7 +1507,7 @@
         "dependencies": {
           "uSync.Community.Contrib": "[12.0.0, )",
           "uSync.Core": "[17.0.0, )",
-          "uSync.Files": "[17.0.0, )"
+          "uSync.FolderChecks": "[17.0.0, )"
         }
       },
       "usync.community.contrib": {
@@ -1523,7 +1523,7 @@
           "Umbraco.Cms.Web.Website": "[17.3.0, )"
         }
       },
-      "usync.files": {
+      "usync.folderchecks": {
         "type": "Project"
       },
       "Umbraco.Cms.Core": {
