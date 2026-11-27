@@ -258,7 +258,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         if (attempt.Success && attempt.Item is not null)
         {
             attempt.Item.SetAttributeValue(Core.uSyncConstants.Xml.RecycleBin, Core.uSyncConstants.Xml.RecycleBinMove);
-            attempt.Item.Add(new XAttribute(Core.uSyncConstants.Xml.ItemType, serializer.ItemType));
+            attempt.Item.SetAttributeValue(Core.uSyncConstants.Xml.ItemType, serializer.ItemType);
             await syncFileService.SaveXElementAsync(attempt.Item, filename);
         }
 

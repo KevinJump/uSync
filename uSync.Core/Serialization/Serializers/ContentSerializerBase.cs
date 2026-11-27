@@ -1089,8 +1089,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             attempt.Item.Add(new XAttribute(uSyncConstants.Xml.Level, GetLevel(item)));
 
             // a delete of an item in the recycle bin is a delete from the bin, (e.g emptying it).
+            // it carries the itemType, so it can be imported from somewhere the handler
+            // isn't worked out from the folder (e.g a sync pack).
             if (change == SyncActionType.Delete && item.Trashed)
+            {
                 attempt.Item.SetAttributeValue(uSyncConstants.Xml.RecycleBin, uSyncConstants.Xml.RecycleBinDelete);
+                attempt.Item.SetAttributeValue(uSyncConstants.Xml.ItemType, ItemType);
+            }
         }
         return attempt;
     }

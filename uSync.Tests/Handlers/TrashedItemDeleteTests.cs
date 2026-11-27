@@ -202,6 +202,7 @@ public class TrashedItemDeleteTests : UmbracoIntegrationTest
         Assert.Multiple(() =>
         {
             Assert.That(trashed.Item?.Attribute(CoreConstants.Xml.RecycleBin)?.Value, Is.EqualTo(CoreConstants.Xml.RecycleBinDelete));
+            Assert.That(trashed.Item?.GetItemType(), Is.EqualTo("Content"));
             Assert.That(live.Item?.Attribute(CoreConstants.Xml.RecycleBin), Is.Null);
         });
     }
