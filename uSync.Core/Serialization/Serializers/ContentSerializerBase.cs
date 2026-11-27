@@ -1028,6 +1028,32 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             return path;
         }
     }
+
+    /// <summary>
+    ///  can deletes of this item type go to the recycle bin? (blueprints can't)
+    /// </summary>
+    protected virtual bool CanMoveToRecycleBin => true;
+
+    /// <summary>
+    ///  with the MoveToRecycleBin setting on, a delete moves the item to the recycle bin.
+    /// </summary>
+    protected override async Task<SyncAttempt<TObject>> ProcessDeleteAsync(Guid key, string alias, SyncSerializerOptions options)
+    {
+        if (CanMoveToRecycleBin is false
+            || options.GetSetting(uSyncConstants.DefaultSettings.MoveToRecycleBin, uSyncConstants.DefaultSettings.MoveToRecycleBin_Default) is false)
+            return await base.ProcessDeleteAsync(key, alias, options);
+
+        var item = await FindItemAsync(key);
+        if (item is null || item.Trashed)
+            return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
+
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Moving {alias} to the recycle bin", alias);
+
+        MoveToRecycleBin(item);
+        return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete, "Moved to the recycle bin");
+    }
+
     public override async Task<SyncAttempt<XElement>> SerializeEmptyAsync(TObject item, SyncActionType change, string alias)
     {
         var attempt = await base.SerializeEmptyAsync(item, change, alias);

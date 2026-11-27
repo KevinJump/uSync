@@ -16,6 +16,7 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
+using uSync.Core.Models;
 using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers;
@@ -217,6 +218,29 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         return true;
     }
 
+
+    /// <summary>
+    ///  with ExportTrashedAsDelete on, an item in the recycle bin is exported as a delete.
+    /// </summary>
+    /// <remarks>
+    ///  the delete carries the itemType, so it can be imported from somewhere the handler
+    ///  isn't worked out from the folder (e.g a sync pack).
+    /// </remarks>
+    protected override async Task<SyncAttempt<XElement>> Export_DoExportAsync(TObject item, string filename, string[] folders, HandlerSettings config)
+    {
+        if (item.Trashed is false
+            || config.GetSetting(Core.uSyncConstants.DefaultSettings.ExportTrashedAsDelete, Core.uSyncConstants.DefaultSettings.ExportTrashedAsDelete_Default) is false)
+            return await base.Export_DoExportAsync(item, filename, folders, config);
+
+        var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Delete, string.Empty);
+        if (attempt.Success && attempt.Item is not null)
+        {
+            attempt.Item.Add(new XAttribute(Core.uSyncConstants.Xml.ItemType, serializer.ItemType));
+            await syncFileService.SaveXElementAsync(attempt.Item, filename);
+        }
+
+        return attempt;
+    }
 
     /// <summary>
     ///  Should we save this value to disk?

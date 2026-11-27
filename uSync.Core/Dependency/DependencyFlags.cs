@@ -69,5 +69,15 @@ public enum DependencyFlags
     /// <summary>
     ///  dependencies should be checked against published values.
     /// </summary>
-    PublishedDependencies = 4096 // dependencies should be checked against published values.
+    PublishedDependencies = 4096, // dependencies should be checked against published values.
+
+    /// <summary>
+    ///  include items that are in the recycle bin.
+    /// </summary>
+    /// <remarks>
+    ///  set for the item being synced, not for what it depends on, so a binned item that
+    ///  something live links to isn't picked up along the way. Checkers decide what to
+    ///  do with a binned item when it is set.
+    /// </remarks>
+    IncludeTrashed = 8192
 }

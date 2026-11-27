@@ -102,6 +102,14 @@ public static partial class uSyncConstants
         public const string AllowCreateOnlyDeletes = "CreateOnlyDeletes";
         public const bool AllowCreateOnlyDeletes_Default = false; 
 
+        // deletes of content and media move the item to the recycle bin, not delete it outright.
+        public const string MoveToRecycleBin = "MoveToRecycleBin";
+        public const bool MoveToRecycleBin_Default = false;
+
+        // content and media in the recycle bin are exported as a delete, not as the item.
+        public const string ExportTrashedAsDelete = "ExportTrashedAsDelete";
+        public const bool ExportTrashedAsDelete_Default = false;
+
         // new properties only (so existing properties are left)
         public const string NewPropertiesOnly = "NewPropertiesOnly";
         public const bool NewPropertiesOnly_Default = false;
